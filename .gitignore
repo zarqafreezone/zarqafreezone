@@ -10,3 +10,8 @@ public/uploads/
 # البيئة
 .env
 .DS_Store
+
+# ملفات مساعدة/بحثية لا تُرفع للمستودع
+image-search/
+uploads/
+*.zip

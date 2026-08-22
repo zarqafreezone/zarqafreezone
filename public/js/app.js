@@ -605,3 +605,33 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
   setInterval(refreshChatBadge, 6000);
   document.addEventListener("pointerdown", initAudio, { once:true });
 })();
+
+/* =========================================================================
+   PWA: تسجيل Service Worker + زر التثبيت
+   ========================================================================= */
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); deferredPrompt = e;
+  let ib = document.getElementById("installBtn");
+  if(!ib){
+    ib = document.createElement("button");
+    ib.id = "installBtn";
+    ib.className = "install-fab";
+    ib.onclick = async () => {
+      ib.style.display = "none";
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if(outcome === "accepted") notify(LANG==="en"?"Installed ✓":"تم التثبيت ✓");
+      deferredPrompt = null;
+    };
+    document.body.appendChild(ib);
+  }
+  ib.innerHTML = "⬇️ " + (LANG==="en"?"Install app":"تثبيت التطبيق");
+  ib.style.display = "";
+});
+window.addEventListener("appinstalled", () => {
+  const ib = document.getElementById("installBtn"); if(ib) ib.style.display = "none";
+});
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+}

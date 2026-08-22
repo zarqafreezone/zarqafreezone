@@ -1,0 +1,22 @@
+{
+  "name": "المنطقة الحرة الزرقاء — Zarqa Free Zone",
+  "short_name": "المنطقة الحرة",
+  "description": "منصة إعلانات بلا جمارك تربط التجار حول العالم — المنطقة الحرة الزرقاء، الأردن.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["shopping", "business", "productivity"],
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
