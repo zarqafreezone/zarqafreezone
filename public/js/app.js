@@ -606,6 +606,7 @@ function paintBadge(){ const el=document.getElementById("chatBadge"); if(el){ el
    ربط الأحداث
    ========================================================================= */
 document.getElementById("fabAdd").addEventListener("click",()=>go("add"));
+document.querySelectorAll(".bottom-nav [data-route]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.route)));
 document.getElementById("topSearch").addEventListener("keydown",e=>{ if(e.key==="Enter"){const q=e.target.value.trim(); if(q) go("browse",{q});} });
 overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); } });
 
