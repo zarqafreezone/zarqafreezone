@@ -30,7 +30,7 @@ const DEFAULT_BANNERS = [
 const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".woff2":"font/woff2" };
 
 /* ---------- قاعدة البيانات (MongoDB Atlas دائمة + db.json احتياطي محلي) ---------- */
-let mongoClient=null, stateCol=null, chatCol=null;
+let mongoClient=null, stateCol=null, chatCol=null, MONGO_ERR="";
 function freshSeed(){ return { users:SEED_USERS.map(u=>({...u,token:"",favorites:[]})), listings:SEED_LISTINGS.slice(), banners:DEFAULT_BANNERS.slice(), payments:[], revenue:0, meta:{created:Date.now()} }; }
 function loadDBFile(){ try { return JSON.parse(fs.readFileSync(DB_FILE)); } catch { const db=freshSeed(); try{fs.writeFileSync(DB_FILE,JSON.stringify(db));}catch{} return db; } }
 async function connectMongo(){
@@ -43,7 +43,7 @@ async function connectMongo(){
     chatCol  = ddb.collection("chat");
     console.log("📦 متصل بـ MongoDB Atlas ✓");
     return true;
-  }catch(e){ console.error("⚠️ فشل اتصال MongoDB (سأستخدم db.json محلياً):", e.message); stateCol=null; chatCol=null; return false; }
+  }catch(e){ MONGO_ERR=e.message; console.error("⚠️ فشل اتصال MongoDB (سأستخدم db.json محلياً):", e.message); stateCol=null; chatCol=null; return false; }
 }
 function saveDB(db){
   if(db) DB=db;
@@ -137,7 +137,7 @@ const server = http.createServer(async (req,res)=>{
 
   /* ----- إعدادات/صحة ----- */
   if(p==="/api/config") return send(res,200,{stripePK:STRIPE_PK, demo:!STRIPE_PK});
-  if(p==="/api/health") return send(res,200,{ok:true, time:new Date().toISOString(), db: stateCol?"mongodb":"file", listings: DB?DB.listings.length:0, users: DB?DB.users.length:0});
+  if(p==="/api/health") return send(res,200,{ok:true, time:new Date().toISOString(), db: stateCol?"mongodb":"file", mongoUriSet: !!MONGO_URI, mongoError: MONGO_ERR||null, listings: DB?DB.listings.length:0, users: DB?DB.users.length:0});
 
   /* ----- الدفع ----- */
   if(p==="/api/create-payment-intent" && M==="POST"){
