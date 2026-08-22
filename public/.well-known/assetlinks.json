@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.onrender.zarqafreezone.twa",
+    "sha256_cert_fingerprints": ["79:C4:38:CF:36:E4:32:D0:0A:91:CB:D0:EE:DF:D6:60:AF:BE:EC:32:C6:50:8B:F0:45:79:82:9D:DD:FE:B5:C4"]
+  }
+}]
