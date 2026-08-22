@@ -44,6 +44,7 @@ input,select,textarea{font-family:inherit;font-size:15px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--blue-d);white-space:nowrap}
 .logo .mark{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
   background:linear-gradient(135deg,var(--blue-l),var(--blue-d));color:#fff;font-size:20px}
+.logo .mark img{width:100%;height:100%;display:block;border-radius:inherit}
 .top-search{flex:1;max-width:440px;position:relative}
 .top-search input{width:100%;padding:11px 44px 11px 14px;border:1.5px solid var(--line);border-radius:11px;background:var(--bg)}
 .top-search input:focus{outline:none;border-color:var(--blue);background:#fff}
@@ -266,13 +267,6 @@ input,select,textarea{font-family:inherit;font-size:15px}
 @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-100%)}}
 @keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.1)}}
 
-/* ===== المعرض ===== */
-.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.g-item{position:relative;border-radius:14px;overflow:hidden;height:170px;box-shadow:var(--shadow)}
-.g-item img{width:100%;height:100%;object-fit:cover;transition:.4s}
-.g-item:hover img{transform:scale(1.06)}
-.g-cap{position:absolute;bottom:0;inset-inline:0;background:linear-gradient(transparent,rgba(15,23,42,.85));color:#fff;font-size:13px;font-weight:700;padding:18px 12px 10px}
-
 /* ===== تخطيط التصفّح (رئيسي + جانب) ===== */
 .browse-layout{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
 .browse-side{position:sticky;top:78px;display:flex;flex-direction:column;gap:14px}
@@ -311,8 +305,8 @@ input,select,textarea{font-family:inherit;font-size:15px}
 .pay-badges b{color:#635bff}
 
 /* استجابة */
-@media(max-width:980px){.browse-layout{grid-template-columns:1fr}.gallery-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:720px){.foot-grid{grid-template-columns:1fr}.gallery-grid{grid-template-columns:repeat(2,1fr)}.browse-side{position:static;flex-direction:row}.ad-square{flex:1;height:200px}.side-card{flex:1}}
+@media(max-width:980px){.browse-layout{grid-template-columns:1fr}}
+@media(max-width:720px){.foot-grid{grid-template-columns:1fr}.browse-side{position:static;flex-direction:row}.ad-square{flex:1;height:200px}.side-card{flex:1}}
 
 /* ===== المحادثات المباشرة ===== */
 .chat-btn{position:relative}
