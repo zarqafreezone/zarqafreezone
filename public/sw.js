@@ -5,7 +5,7 @@
    - الملفات الثابتة (css/js/icons): stale-while-revalidate
    - الـAPI والرفعات: شبكة فقط (دائماً أحدث البيانات)
    ========================================================================= */
-const CACHE = "zfz-v6";
+const CACHE = "zfz-v7";
 const SHELL = [
   "/",
   "/index.html",
@@ -15,10 +15,13 @@ const SHELL = [
   "/js/store.js",
   "/js/data.js",
   "/js/i18n.js",
-  "/images/logo.svg",
-  "/images/icon.svg",
+  "/images/logo.jpg",
   "/images/icon-192.png",
   "/images/icon-512.png",
+  "/images/icon-192-maskable.png",
+  "/images/icon-512-maskable.png",
+  "/images/apple-touch-icon.png",
+  "/images/favicon.ico",
   "/images/zone.jpg"
 ];
 

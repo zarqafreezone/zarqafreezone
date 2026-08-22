@@ -11,7 +11,8 @@
 <link rel="stylesheet" href="css/styles.css">
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/svg+xml" href="images/logo.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="images/icon-512.png">
 <link rel="icon" href="images/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,10 +22,21 @@
 </head>
 <body>
 
+<!-- ===== الشاشة الافتتاحية ===== -->
+<div class="splash" id="splash">
+  <div class="splash-inner">
+    <img class="splash-logo" src="images/logo.jpg" alt="المنطقة الحرة الزرقاء">
+    <div class="splash-name" id="splashName">المنطقة الحرة الزرقاء</div>
+    <div class="splash-sub">Zarqa Free Zone</div>
+    <div class="splash-spin"></div>
+  </div>
+</div>
+<script>setTimeout(function(){var s=document.getElementById('splash');if(s){s.classList.add('hide');setTimeout(function(){if(s&&s.parentNode)s.remove();},700);}},4000);</script>
+
 <!-- ===== الشريط العلوي ===== -->
 <header class="topbar">
   <div class="wrap">
-    <a class="logo" id="logoLink"><span class="mark"><img src="images/logo.svg" alt="Z"></span> <span id="brandText1">المنطقة الحرة</span> <span id="brandText2" style="color:var(--teal)">الزرقاء</span></a>
+    <a class="logo" id="logoLink"><span class="mark"><img src="images/logo.jpg" alt="Zarqa Free Zone"></span> <span id="brandText1">المنطقة الحرة</span> <span id="brandText2" style="color:var(--teal)">الزرقاء</span></a>
     <div class="top-search">
       <span class="ic">🔍</span>
       <input id="topSearch" placeholder="ابحث...">
@@ -41,7 +53,7 @@
   <div class="wrap">
     <div class="foot-grid">
       <div>
-        <div class="logo" style="margin-bottom:8px"><span class="mark"><img src="images/logo.svg" alt="Z"></span> <span id="footBrand">المنطقة الحرة الزرقاء</span></div>
+        <div class="logo" style="margin-bottom:8px"><span class="mark"><img src="images/logo.jpg" alt="Zarqa Free Zone"></span> <span id="footBrand">المنطقة الحرة الزرقاء</span></div>
         <p class="muted foot-desc" id="footDesc">منصة إعلانات بلا جمارك تربط التجار حول العالم. المنطقة الحرة الزرقاء — الأردن.</p>
       </div>
       <div class="foot-links" id="footLinks"></div>

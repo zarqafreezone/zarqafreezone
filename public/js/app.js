@@ -614,10 +614,12 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
 (async function init(){
   try{ await store.bootstrap(); }catch(e){}
   render();
+  hideSplash();
   refreshChatBadge();
   setInterval(refreshChatBadge, 6000);
   document.addEventListener("pointerdown", initAudio, { once:true });
 })();
+function hideSplash(){ const sp=document.getElementById("splash"); if(!sp) return; setTimeout(()=>{ sp.classList.add("hide"); setTimeout(()=>sp.remove(),600); }, 650); }
 
 /* =========================================================================
    PWA: تسجيل Service Worker + زر التثبيت
