@@ -10,7 +10,7 @@
   --radius:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;overflow-x:clip;max-width:100%}
+html{scroll-behavior:smooth}
 body{
   font-family:"Cairo","Tajawal","Segoe UI",Tahoma,sans-serif;
   background:var(--bg);color:var(--ink);direction:rtl;line-height:1.6;
@@ -268,8 +268,8 @@ input,select,textarea{font-family:inherit;font-size:15px}
 /* ===== البنرات المدفوعة المتحركة ===== */
 .ad-banner{display:block;position:relative;overflow:hidden;border-radius:16px;margin:18px 0;cursor:pointer;box-shadow:var(--shadow)}
 .ad-label{position:absolute;top:6px;inset-inline-start:8px;background:rgba(0,0,0,.45);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px;letter-spacing:.5px;z-index:2}
-.ad-long{height:64px;background:linear-gradient(120deg,#7c2d12,#b45309,#7c2d12);background-size:200% 200%;animation:gradMove 4s ease infinite}
-.ad-long .ad-marquee{display:flex;height:100%;align-items:center;white-space:nowrap}
+.ad-long{height:64px;overflow:hidden;background:linear-gradient(120deg,#7c2d12,#b45309,#7c2d12);background-size:200% 200%;animation:gradMove 4s ease infinite}
+.ad-long .ad-marquee{display:flex;height:100%;align-items:center;white-space:nowrap;overflow:hidden;max-width:100%}
 .ad-long .ad-marquee span{font-weight:800;color:#fff;font-size:18px;padding-inline-start:100%;animation:marquee 14s linear infinite}
 .ad-square{height:250px;background:linear-gradient(135deg,#831843,#be185d,#831843);background-size:200% 200%;animation:gradMove 5s ease infinite;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
 .ad-square .ad-pulse{font-size:48px;animation:bounce 1.4s ease-in-out infinite}
@@ -371,7 +371,7 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
    (لا تؤثر على عرض الكمبيوتر، تُفعَّل للجوال فقط)
    ========================================================================= */
 /* السماح للعناصر المرنة/الشبكية بالنقصان والتفاف النص بدل توسيع العرض */
-.detail-info,.list-card .body,.list-card .body .meta,.ci-main,.wrap,.info-card{min-width:0}
+.detail-info,.detail-grid,.detail-grid>*,.list-card .body,.list-card .body .meta,.ci-main,.wrap,.info-card{min-width:0}
 /* التفاف أي نص طويل (عنوان، سعر، وصف، موقع) بدل تجاوز الحافة */
 .info-card h1,.info-card .price,.desc,
 .list-card .body .t,.list-card .body .p,.list-card .body .meta .loc,
