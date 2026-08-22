@@ -179,10 +179,6 @@ function viewHome(){
     <section class="section"><div class="wrap"><div class="sec-head"><h2>${t("main_sections")}</h2></div>
       <div class="cat-grid">${CATEGORIES.map(c=>{const n=allListings().filter(l=>l.section===c.id).length;
         return `<div class="cat-card" onclick="go('section',{section:'${c.id}'})"><span class="count">${n} ${t("ads_label")}</span><div class="ico">${c.icon}</div><h3>${tData(c.name)}</h3><p>${c.subs.length} ${t("sub_count")}</p></div>`;}).join("")}</div></div></section>
-    <section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("gallery_title")}</h2></div>
-      <p class="muted" style="margin-bottom:14px">${t("gallery_desc")}</p>
-      <div class="gallery-grid">${["zone.jpg","projects.jpg","truck1.jpg","truck2.jpg","warehouse1.jpg","warehouse2.jpg"].map((f,i)=>`
-        <div class="g-item"><img src="images/${f}" alt="Zarqa Free Zone" loading="lazy"><span class="g-cap">${["🚛 الشاحنات والبضائع","🏗️ مشروعات استراتيجية","🚚 لوجستيات ونقل","📦 تخليص وشحن","🏭 مستودعات","🏪 معارض تجارية"][i]}</span></div>`).join("")}</div></div></section>
     ${featured.length?`<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("featured")}</h2><a onclick="go('browse',{featured:'1'})">${t("view_all")}</a></div><div class="list-grid">${listCardsHTML(featured)}</div></div></section>`:""}
     <section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("latest")}</h2><a onclick="go('browse',{sort:'newest'})">${t("view_all")}</a></div><div class="list-grid">${listCardsHTML(latest)}</div></div></section>
     <section class="section" style="padding-top:0"><div class="wrap"><div class="rating-legend"><h3>${t("rating_title")}</h3>
