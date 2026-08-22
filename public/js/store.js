@@ -68,7 +68,7 @@ const store = {
   async createListing(data){
     let img="";
     if(data.file){ try{ const url=await this.uploadImage(data.file); img=url; }catch(e){} }
-    const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,location:data.location,desc:data.desc,img};
+    const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,zone:data.zone||"inside",location:data.location,desc:data.desc,img};
     const d=await jpost("/api/listings", body);
     if(d.listing){ state.listings.unshift(d.listing); }
     return d.listing;

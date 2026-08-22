@@ -112,6 +112,15 @@ const STR = {
   publish_free:     { ar:"🚀 نشر الإعلان (مجاني)", en:"🚀 Publish (Free)" },
   req:              { ar:"*", en:"*" },
 
+  zone_label:       { ar:"📍 موقع العرض", en:"📍 Offer location" },
+  zone_pick:        { ar:"هل العرض داخل المنطقة الحرة أم خارجها؟", en:"Is the offer inside or outside the Free Zone?" },
+  zone_inside:      { ar:"داخل المنطقة الحرة", en:"Inside Free Zone" },
+  zone_outside:     { ar:"خارج المنطقة الحرة", en:"Outside Free Zone" },
+  zone_badge_in:    { ar:"داخل", en:"Inside" },
+  zone_badge_out:   { ar:"خارج", en:"Outside" },
+  offer_address:    { ar:"عنوان العرض", en:"Offer address" },
+  offer_address_ph: { ar:"حدد مكان العرض: المدينة، المنطقة، أو المعبر الحدودي...", en:"Specify: city, area, or border crossing..." },
+
   acc_login_title:  { ar:"سجّل الدخول لمتابعة حسابك", en:"Login to access your account" },
   acc_login_desc:   { ar:"ادخل برقم الجوال من أي دولة", en:"Sign in with your phone from any country" },
   my_listings:      { ar:"📋 إعلاناتي", en:"📋 My listings" },

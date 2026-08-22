@@ -264,7 +264,7 @@ function listCardsHTML(list){
       <button class="fav ${isFav(l.id)?'on':''}" onclick="event.stopPropagation();favToggle('${l.id}')">${isFav(l.id)?'❤️':'🤍'}</button>
       ${free?`<span class="free-tag">⏱️ ${t("free_tag")} • ${daysLeft(l)}${t("day")}</span>`:`<span class="paid-tag">👑 ${t("paid_tag")}</span>`}
       </div><div class="body"><div class="t">${esc(l.title)}</div><div class="p">${esc(fmtPrice(l))}</div>
-      <div class="meta"><span class="loc">📍 ${esc(l.location)}</span><span>${relDate(l.date)}</span></div></div></div>`;}).join("");
+      <div class="meta"><span class="loc">${l.zone==='outside'?'🔴':'🟢'} ${esc(l.location)}</span><span>${relDate(l.date)}</span></div></div></div>`;}).join("");
 }
 async function favToggle(id){
   if(!currentUser()){ notify(LANG==="en"?"Login to save favorites":"سجّل الدخول لحفظ المفضلة"); openAuth(); return; }
@@ -288,7 +288,7 @@ function viewDetail(id){
         <span class="pill" style="background:${l.deal==='sell'?'#dcfce7':'#dbeafe'};color:${l.deal==='sell'?'#16a34a':'#1d4ed8'}">${locDeal(l)}</span>
         ${free?`<span class="pill" style="background:#fef3c7;color:#92400e">⏱️ ${t("free_tag")} • ${t("free_remaining")} ${daysLeft(l)} ${t("day_word")}</span>`:`<span class="pill" style="background:#e2e8f0;color:#475569">👑 ${t("paid_tag")}</span>`}
       </div><h1>${esc(l.title)}</h1><div class="price">${esc(fmtPrice(l))}</div>
-      <div class="tags"><span class="pill">${sec.icon} ${tData(sec.name)}</span>${sub?`<span class="pill">${sub.icon} ${tData(sub.name)}</span>`:""}${l.type?`<span class="pill">🏷️ ${tData(l.type)}</span>`:""}${l.brand?`<span class="pill">🏢 ${tData(l.brand)}</span>`:""}${l.model?`<span class="pill">🔢 ${esc(l.model)}</span>`:""}</div></div>
+      <div class="tags"><span class="pill">${sec.icon} ${tData(sec.name)}</span>${sub?`<span class="pill">${sub.icon} ${tData(sub.name)}</span>`:""}${l.zone==='outside'?`<span class="pill" style="background:#dbeafe;color:#1d4ed8">🌐 ${t("zone_outside")}</span>`:`<span class="pill" style="background:#d1fae5;color:#047857">📍 ${t("zone_inside")}</span>`}${l.type?`<span class="pill">🏷️ ${tData(l.type)}</span>`:""}${l.brand?`<span class="pill">🏢 ${tData(l.brand)}</span>`:""}${l.model?`<span class="pill">🔢 ${esc(l.model)}</span>`:""}</div></div>
       <div class="info-card"><h3 style="margin-bottom:8px">${t("description")}</h3><p class="desc">${esc(l.desc||t("no_desc"))}</p>
         <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:14px"><span>📍 ${esc(l.location)}</span><span>🕒 ${relDate(l.date)}</span></div></div>
       ${owner.name?`<div class="info-card"><h3 style="margin-bottom:12px">${t("publisher")}</h3>
@@ -310,8 +310,8 @@ function contactOwner(phone){
 /* =========================================================================
    7) إضافة إعلان
    ========================================================================= */
-let addForm={deal:"sell",section:"",sub:""};
-function viewAdd(){ if(!currentUser()){notify(LANG==="en"?"Login to add":"سجّل الدخول لإضافة إعلان");openAuth();return;} addForm={deal:"sell",section:"",sub:""};drawAdd(); }
+let addForm={deal:"sell",section:"",sub:"",zone:"inside"};
+function viewAdd(){ if(!currentUser()){notify(LANG==="en"?"Login to add":"سجّل الدخول لإضافة إعلان");openAuth();return;} addForm={deal:"sell",section:"",sub:"",zone:"inside"};drawAdd(); }
 function drawAdd(){
   const sec=findSection(addForm.section), sub=addForm.sub?findSub(addForm.section,addForm.sub):null;
   app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">${t("back")}</span>
@@ -326,11 +326,21 @@ function drawAdd(){
         <div class="field"><label>${t("f_section")} <span class="req">${t("req")}</span></label><select onchange="setSection(this.value)"><option value="">${t("f_choose_section")}</option>${CATEGORIES.map(c=>`<option value="${c.id}" ${c.id===addForm.section?'selected':''}>${c.icon} ${tData(c.name)}</option>`).join("")}</select></div>
         <div class="field"><label>${t("f_sub")} <span class="req">${t("req")}</span></label><select onchange="addForm.sub=this.value;drawAdd()" ${!sec?'disabled':''}><option value="">${sec?t("f_choose_sub"):t("f_section_first")}</option>${sec?sec.subs.map(s=>`<option value="${s.id}" ${s.id===addForm.sub?'selected':''}>${s.icon} ${tData(s.name)}</option>`).join(""):""}</select></div>
       </div>
+      ${sec?`<div class="field full"><label>${t("zone_label")} <span class="req">${t("req")}</span></label>
+        <p class="muted" style="font-size:12px;margin-bottom:8px">${t("zone_pick")}</p>
+        <div class="deal-toggle" style="background:#f1f5f9">
+          <button type="button" class="${addForm.zone==='inside'?'active':''}" onclick="setZone('inside')" style="${addForm.zone==='inside'?'background:var(--teal)':'color:var(--muted)'}">${t("zone_inside")}</button>
+          <button type="button" class="${addForm.zone==='outside'?'active':''}" onclick="setZone('outside')" style="${addForm.zone==='outside'?'background:var(--purple)':'color:var(--muted)'}">${t("zone_outside")}</button>
+        </div></div>`:""}
       ${sub?`<div class="form-grid"><div class="field"><label>${t("f_type")}</label><select id="fType"><option value="">${t("f_pick")}</option>${sub.types.map(ty=>`<option value="${esc(ty)}">${tData(ty)}</option>`).join("")}</select></div>
         <div class="field"><label>${t("f_brand")}</label><select id="fBrand" ${!sub.brands.length?'disabled':''}><option value="">${sub.brands.length?t("f_pick"):t("not_avail")}</option>${sub.brands.map(b=>`<option value="${esc(b)}">${tData(b)}</option>`).join("")}</select></div></div>`:""}
       <div class="field full"><label>${t("f_title")} <span class="req">${t("req")}</span></label><input id="fTitle" placeholder="${t("f_title_ph")}"></div>
-      <div class="form-grid"><div class="field"><label>${addForm.deal==='buy'?t("f_budget"):t("f_price")}</label><input id="fPrice" type="number" min="0" placeholder="0"></div>
-        <div class="field"><label>${t("f_location")}</label><input id="fLoc" placeholder="${t("f_location_ph")}"></div></div>
+      ${addForm.zone==='outside'
+        ? `<div class="form-grid"><div class="field"><label>${addForm.deal==='buy'?t("f_budget"):t("f_price")}</label><input id="fPrice" type="number" min="0" placeholder="0"></div>
+             <div class="field"><label>${t("offer_address")} <span class="req">${t("req")}</span></label><input id="fLoc" placeholder="${t("offer_address_ph")}"></div></div>`
+        : `<div class="field"><label>${addForm.deal==='buy'?t("f_budget"):t("f_price")}</label><input id="fPrice" type="number" min="0" placeholder="0"></div>
+             <input type="hidden" id="fLoc" value="${t("zone_inside")}">`
+      }
       <div class="field full"><label>${t("f_model")}</label><input id="fModel" placeholder="${t("f_model_ph")}"></div>
       <div class="field full"><label>${t("f_desc")}</label><textarea id="fDesc" placeholder="${t("f_desc_ph")}"></textarea></div>
       <div class="field full"><label>${t("f_image")}</label><input id="fImg" type="file" accept="image/*"></div>
@@ -339,18 +349,20 @@ function drawAdd(){
 }
 function setDeal(d){addForm.deal=d;drawAdd();}
 function setSection(id){addForm.section=id;addForm.sub="";drawAdd();}
+function setZone(z){addForm.zone=z;drawAdd();}
 async function submitListing(){
   const title=document.getElementById("fTitle").value.trim();
   if(!addForm.section){notify(t("f_choose_section"));return;}
   if(!addForm.sub){notify(t("f_choose_sub"));return;}
   if(!title){notify(t("f_title"));return;}
+  if(addForm.zone==="outside"&&!document.getElementById("fLoc").value.trim()){notify(t("offer_address"));return;}
   const btn=document.getElementById("publishBtn"); btn.disabled=true; btn.textContent=LANG==="en"?"Publishing…":"جارٍ النشر…";
   const imgEl=document.getElementById("fImg"), file=imgEl&&imgEl.files&&imgEl.files[0];
   try{
     const l=await store.createListing({deal:addForm.deal,section:addForm.section,sub:addForm.sub,
       type:document.getElementById("fType")?.value||"",brand:document.getElementById("fBrand")?.value||"",
       model:document.getElementById("fModel").value.trim(),title,price:document.getElementById("fPrice").value,
-      location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),file});
+      zone:addForm.zone,location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),file});
     notify(LANG==="en"?"Published ✓ (free 3 months)":"تم نشر إعلانك بنجاح ✓ (مجاني 3 أشهر)");
     go("detail",{id:l.id});
   }catch(e){ btn.disabled=false; btn.textContent=t("publish_free"); notify(LANG==="en"?"Failed to publish":"تعذّر النشر"); }

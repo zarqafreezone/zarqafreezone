@@ -209,7 +209,7 @@ const server = http.createServer(async (req,res)=>{
   if(p==="/api/listings" && M==="POST"){
     const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
     const b=await readBody(req);
-    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", location:b.location||"", images:b.img?1:0, img:b.img||"", user:u.id, date:new Date().toISOString().slice(0,10), featured:false, desc:(b.desc||"").slice(0,2000) };
+    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", zone:b.zone||"inside", location:b.location||"", images:b.img?1:0, img:b.img||"", user:u.id, date:new Date().toISOString().slice(0,10), featured:false, desc:(b.desc||"").slice(0,2000) };
     DB.listings.unshift(l); saveDB(DB);
     return send(res,200,{listing:withOwner(l)});
   }
