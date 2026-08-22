@@ -1,0 +1,9 @@
+{
+  "name": "zarqa-free-zone",
+  "version": "2.0.0",
+  "description": "منصة إعلانات المنطقة الحرة الزرقاء — Zarqa Free Zone classifieds",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "author": "شبكة نشوان للتسويق — Nashwan Marketing Network",
+  "license": "MIT"
+}
