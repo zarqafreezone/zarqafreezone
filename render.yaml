@@ -1,0 +1,20 @@
+# إعدادات النشر على Render (Blueprint)
+# عند ربط المستودع بـ Render سيُنشئ الخدمة تلقائياً بهذه الإعدادات
+services:
+  - type: web
+    name: zarqa-free-zone
+    runtime: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "node server.js"
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: ADMIN_PASSWORD
+        sync: false          # ستُدخلها يدوياً في لوحة Render
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false

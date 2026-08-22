@@ -4,6 +4,7 @@
   "description": "منصة إعلانات المنطقة الحرة الزرقاء — Zarqa Free Zone classifieds",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
   "author": "شبكة نشوان للتسويق — Nashwan Marketing Network",
   "license": "MIT"
 }

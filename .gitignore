@@ -1,0 +1,12 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# البيانات التي تُنشأ وقت التشغيل (كل بيئة تنشئ نسختها)
+db.json
+chat.json
+public/uploads/
+
+# البيئة
+.env
+.DS_Store
