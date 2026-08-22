@@ -11,6 +11,7 @@ function setLang(l){
   document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
   if (window.render) render();
   if (window.renderTopbarLang) renderTopbarLang();
+  if (typeof pendingAuth !== "undefined" && pendingAuth && pendingAuth.stage && window.drawAuth) drawAuth();
 }
 
 /* نصوص الواجهة */
@@ -292,10 +293,85 @@ const DICT = {
   "آبل":"Apple","هواوي":"Huawei","شاومي":"Xiaomi","ديل":"Dell","إتش بي HP":"HP","لينوفو":"Lenovo","سوني":"Sony",
   // دول
   "🇯🇴 الأردن":"🇯🇴 Jordan","🇵🇸 فلسطين":"🇵🇸 Palestine","🇸🇾 سوريا":"🇸🇾 Syria","🇱🇧 لبنان":"🇱🇧 Lebanon","🇮🇶 العراق":"🇮🇶 Iraq","🇸🇦 السعودية":"🇸🇦 Saudi Arabia","🇦🇪 الإمارات":"🇦🇪 UAE","🇰🇼 الكويت":"🇰🇼 Kuwait","🇶🇦 قطر":"🇶🇦 Qatar","🇧🇭 البحرين":"🇧🇭 Bahrain","🇴🇲 عُمان":"🇴🇲 Oman","🇪🇬 مصر":"🇪🇬 Egypt","🇹🇷 تركيا":"🇹🇷 Turkey","🇺🇸 أمريكا":"🇺🇸 USA","🇬🇧 بريطانيا":"🇬🇧 UK","🇩🇪 ألمانيا":"🇩🇪 Germany",
+
+  // ===== أنواع وماركات جديدة — مركبات =====
+  "كهربائية (EV)":"Electric (EV)","سيدان تنفيذية":"Executive Sedan",
+  "سوبارو":"Subaru","BMW":"BMW","جيب":"Jeep","دودج":"Dodge","جي إم سي":"GMC","كاديلاك":"Cadillac","أكورا":"Acura","لاند روفر":"Land Rover","جاكوار":"Jaguar","بيجو":"Peugeot","ستروين":"Citroën","فيات":"Fiat","سكودا":"Škoda","سيات":"SEAT",
+  "MG":"MG","هافال Haval":"Haval","تشانغان Changan":"Changan","جيتور Jetour":"Jetour","GAC":"GAC","هونغ تشي Hongqi":"Hongqi","زيكر Zeekr":"Zeekr","شاوبنغ Xpeng":"Xpeng","نيو Nio":"Nio","لوسيد Lucid":"Lucid",
+  "رولز رويس":"Rolls-Royce","بنتلي":"Bentley","لامبورغيني":"Lamborghini","فيراري":"Ferrari","مازيراتي":"Maserati","أستون مارتن":"Aston Martin","جينيسيس Genesis":"Genesis","تاتا":"Tata","ماهيندرا":"Mahindra","سانغ يونغ":"SsangYong","داسيا":"Dacia","لادا":"Lada",
+  "شاحنة حاويات":"Container Truck","شاحنة سحب وإنقاذ":"Tow & Recovery Truck","دايو":"Daewoo","تاترا":"Tatra","ماك MAC":"Mack","بيتربيلت":"Peterbilt",
+  // حافلات
+  "حافلات وميكروباصات":"Buses & Minibuses","حافلة ركاب كبيرة":"Large Passenger Bus","حافلة متوسطة (كوستر)":"Medium Bus (Coaster)","ميكروباص":"Minibus","حافلة سياحية فاخرة":"Luxury Tourist Bus","حافلة مدرسية":"School Bus","ميني باص":"Mini Bus",
+  "تويوتا (كوستر)":"Toyota (Coaster)","سترا":"Setra","Temsa":"Temsa",
+  // آليات إضافية + زراعية
+  "حفارة مصغرة (ميني)":"Mini Excavator","جرافة زراعية":"Agricultural Tractor","آلة تمهيد (موتر جريدر)":"Motor Grader","كوبيلكو":"Kobelco","بوب كات Bobcat":"Bobcat",
+  "مركبات وآليات زراعية":"Agricultural Vehicles & Machinery","جرار زراعي":"Farm Tractor","حصادة":"Harvester","آلة حرث":"Plowing Machine","رشاشة زراعية":"Crop Sprayer","بالير (حاطبة)":"Baler","مركبة أعمل (UTV)":"Utility Vehicle (UTV)",
+  "جون دير":"John Deere","ماساي فيرغسون":"Massey Ferguson","نيوهولاند":"New Holland","كوبوتا":"Kubota","فالترا":"Valtra","CLS":"CLS",
+  // دراجات + قوارب + كرفانات + مقطورات
+  "دراجات نارية وهوائية":"Motorcycles & Bicycles","دراجة بضائع":"Delivery Bike","أبريليا":"Aprilia","تريمف":"Triumph","رويال إنفيلد":"Royal Enfield",
+  "قوارب ويخوت":"Boats & Yachts","يخت فاخر":"Luxury Yacht","قارب صيد":"Fishing Boat","قارب سريع (زورق)":"Speedboat","قارب تجديف/كاياك":"Kayak / Rowing","جل باوت (قارب مطاطي)":"Inflatable Boat","سفينة تجارية":"Commercial Vessel",
+  "كرفانات ومركبات إسكان":"RVs & Camper Vehicles","كرفان متحرك (Motorhome)":"Motorhome","مقطورة إسكان (Caravan)":"Caravan","كرفان مخيم":"Campervan","مقطورة سفر":"Travel Trailer",
+  "مقطورات وتيلر":"Trailers & Semi-Trailers","مقطورة صغيرة":"Small Trailer","تيلر ثقيل (semi-trailer)":"Semi-Trailer","مقطورة سيارات":"Car Trailer","مقطورة صهريج":"Tanker Trailer","مقطورة بضائع مسطحة":"Flatbed Trailer","مقطورة قلابة":"Dump Trailer",
+  "شميتز":"Schmitz","كوغيل":"Kögel","كراون":"Krone",
+  "أنظمة تعليق هوائي":"Air Suspension","NGK":"NGK","Denso":"Denso","Mann-Filter":"Mann-Filter","Continental":"Continental",
+  "أنظمة صوت وترفيه":"Audio & Entertainment","نوافذ وأفلام حرارية":"Windows & Heat Films","أغطية وأرضيات":"Covers & Floor Mats",
+  "مروحية":"Helicopter","مركبة قتالية/مدرعة":"Combat / Armored Vehicle","غواصة/بحرية":"Submarine / Marine","سكوتر هوائي":"E-Scooter",
+  // ===== أنواع وماركات جديدة — بضائع =====
+  "آلة قهوة":"Coffee Machine","بلاك آند ديكر":"Black & Decker","فيليبس":"Philips","كنوود":"Kenwood","براون":"Braun","ملحقات وكابلات":"Accessories & Cables","إضاءة منزلية":"Home Lighting",
+  "أوبو":"Oppo","ريلمي":"Realme","أسوس":"Asus","إيسر":"Acer","مايكروسوفت":"Microsoft","جي بي إل JBL":"JBL",
+  "ملابس داخلية وبيت":"Underwear & Loungewear","عبايات و جلابيات":"Abayas & Jellabiyas",
+  "بهارات وتوابل":"Spices & Seasonings","حبوب وقطاني":"Grains & Legumes","لحوم ودواجن مبردة":"Chilled Meat & Poultry","قهوة وشاي":"Coffee & Tea",
+  "إسمنت وبلوك":"Cement & Blocks","عزل ومواد لاصقة":"Insulation & Adhesives",
+  "أدوات تجميل":"Makeup Tools","عناية بالأطفال":"Baby Care",
+  "مجوهرات وساعات":"Jewelry & Watches","مصوغات ذهب":"Gold Jewelry","مجوهرات فضة":"Silver Jewelry","مجوهرات وألماس":"Diamond Jewelry","ساعات فاخرة":"Luxury Watches","ساعات عادية":"Watches","إكسسوارات معدنية":"Metal Accessories",
+  "حفاضات":"Diapers","حليب وغذاء أطفال":"Baby Milk & Food","عربات وكراسي أطفال":"Strollers & Baby Seats","ألعاب تعليمية":"Educational Toys","ملابس أطفال رضع":"Infant Clothing","مستلزمات سلامة":"Safety Products",
+  "ألعاب وترفيه":"Toys & Entertainment","ألعاب أطفال":"Kids' Toys","ألعاب تحكم وريموت":"RC & Remote Toys","ألعاب لوحية":"Board Games","دراجات أطفال":"Kids' Bikes","بلياردو وطاولة":"Billiards & Table Games",
+  "رياضة ولياقة":"Sports & Fitness","أجهزة لياقة بدنية":"Fitness Equipment","كرة قدم وكرة طائرة":"Football & Volleyball","دراجات رياضية":"Sports Bikes","مستلزمات تخييم":"Camping Gear","أسلحة صيد ورمي":"Hunting & Shooting","ملابس ومعدات رياضية":"Sportswear & Gear",
+  "آلات موسيقية":"Musical Instruments","جيتار":"Guitar","بيانو وكيبورد":"Piano & Keyboard","إيقاع ودرامز":"Percussion & Drums","وترية (كمان)":"Strings (Violin)","نفخية":"Wind Instruments","معدات صوت ومكسر":"Audio & Mixing Gear",
+  "حدائق وزراعة":"Garden & Agriculture","أدوات حدائق":"Garden Tools","بذور وشتلات":"Seeds & Seedlings","أسمدة ومبيدات":"Fertilizers & Pesticides","أنظمة ري":"Irrigation Systems","أحواض ونباتات زينة":"Pots & Ornamental Plants","معدات تشذيب":"Pruning Equipment",
+  "طاقة ومولدات":"Energy & Generators","ألواح طاقة شمسية":"Solar Panels","بطاريات وإنفرتر":"Batteries & Inverters","مولدات كهرباء":"Power Generators","شاحنات وأجهزة شحن":"Chargers & Charging Devices",
+  "مستلزمات طبية":"Medical Supplies","أجهزة قياس":"Measuring Devices","كراسي متحركة":"Wheelchairs","أجهزة سمع ونظارات":"Hearing Aids & Glasses","مستلزمات إسعاف":"First Aid Supplies","تأهيل وعلاج طبيعي":"Rehabilitation & Physiotherapy",
+  "مواد خام وصناعية":"Raw & Industrial Materials","بلاستيك ومطاط":"Plastic & Rubber","معادن خام":"Raw Metals","مواد كيميائية":"Chemicals","آلات ومعدات مصنع":"Factory Machinery","تعبئة وتغليف":"Packaging",
+  "قرطاسية ومكتب":"Stationery & Office","إلكترونيات مكتبية":"Office Electronics","مستلزمات طباعة":"Printing Supplies",
+  "حيوانات ومستلزماتها":"Pets & Supplies","حيوانات أليفة":"Pets","أعلاف وغذاء":"Feed & Food","مستلزمات عناية":"Care Supplies","أقفاص وبيوت":"Cages & Houses",
+  "تبغ ونارجيلة":"Tobacco & Shisha","سجائر":"Cigarettes","نارجيلة ومعسّل":"Shisha & Molasses","إلكترونية (vape)":"Electronic (Vape)","مستلزمات تدخين":"Smoking Accessories",
+  // ===== أنواع جديدة — خدمات =====
+  "حسابات تجارية":"Commercial Accounts","حسابات تخزين":"Storage Accounts","تأمين شحن وبضائع":"Freight & Cargo Insurance","خدمات تأمينية":"Insurance Services",
+  "عقارات ووساطة":"Real Estate & Brokerage","شقق سكنية":"Residential Apartments","فلل وبيوت":"Villas & Houses","محلات تجارية":"Commercial Shops","إيجار ووساطة":"Rent & Brokerage","إدارة أملاك":"Property Management",
+  "فحص معاينات قبل الشراء":"Pre-Purchase Inspection","منافذ بيع":"Sales Outlets","سلاسل توريد":"Supply Chains","صيانة تبريد":"Cooling Maintenance","توزيع وجملة":"Distribution & Wholesale","مخبز وحلويات":"Bakery & Sweets","نُزل وشاليهات":"Lodges & Chalets",
+  "تعليم وتدريب":"Education & Training","دورات تدريبية":"Training Courses","مركز تعليم لغات":"Language Center","تدريب مهني":"Vocational Training","دروس خصوصية":"Private Tutoring","تدريب قيادة":"Driving Training",
+  "عيادات":"Clinics","مختبرات وأشعة":"Labs & X-ray","طب أسنان":"Dentistry","علاج طبيعي":"Physiotherapy","خدمات تمريض":"Nursing Services",
+  "استشارات قانونية":"Legal Consulting","محاماة وقضايا":"Law & Litigation","تحكيم وتسوية":"Arbitration & Settlement","توثيق وعقود":"Notary & Contracts",
+  "تقنية وبرمجة":"IT & Programming","تصميم وبرمجة مواقع":"Web Design & Development","تطبيقات جوال":"Mobile Apps","دعم تقني وصيانة حاسب":"Tech Support & PC Repair","شبكات وأنظمة":"Networks & Systems","تسويق رقمي":"Digital Marketing",
+  "تنظيف ومكافحة حشرات":"Cleaning & Pest Control","تنظيف منازل ومكاتب":"Home & Office Cleaning","تنظيف سجاد وكنب":"Carpet & Sofa Cleaning","مكافحة حشرات":"Pest Control","تنظيف خزانات":"Tank Cleaning",
+  "تنظيم مناسبات":"Event Planning","تنظيم أفراح":"Wedding Planning","قاعات مؤتمرات":"Conference Halls","ديكور وتنسيق":"Decor & Coordination","فرق فنية ودي جي":"Bands & DJs",
+  "نقل وليموزين":"Transport & Limousine","تاكسي وليموزين":"Taxi & Limousine","نقل موظفين":"Staff Transport","توصيل وطرود":"Delivery & Parcels","نقل مدرسي":"School Transport",
+  "حراسة وأمن":"Guarding & Security","شركات حراسة":"Security Companies","أنظمة مراقبة وكاميرات":"Surveillance & Cameras","إنذار وأمان":"Alarm & Safety",
+  "سياحة وسفر":"Tourism & Travel","وكالات سفر":"Travel Agencies","حجوزات طيران":"Flight Booking","جولات سياحية":"Tour Packages","تأشيرات":"Visas",
+  "توظيف وموارد بشرية":"Recruitment & HR","توظيف وإعلان وظائف":"Recruitment & Job Ads","استقدام عمالة":"Labor Recruitment","مقابلات وتوظيف":"Interviews & Hiring","استشارات موارد بشرية":"HR Consulting",
+  "صالونات وتجميل":"Salons & Beauty","صالونات رجالي":"Men's Salons","صالونات نسائية":"Women's Salons","تجميل وعناية":"Beauty & Care","سبا ومساج":"Spa & Massage",
+  "مقاولات وبناء":"Contracting & Construction","مقاولات عامة":"General Contracting","مقاولات كهرباء":"Electrical Contracting","مقاولات سباكة":"Plumbing Contracting","ديكور ودهانات":"Decor & Painting","صيانة مباني":"Building Maintenance",
+  "طباعة ودعاية":"Printing & Advertising","طباعة ومستنسخات":"Printing & Copiers","لافتات وإعلانات":"Signs & Ads","هدايا دعائية":"Promotional Gifts","تصميم جرافيك":"Graphic Design",
+  "محطات وقود وغاز":"Fuel & Gas Stations","محطة وقود":"Fuel Station","بيع غاز":"Gas Sales","زيوت ومواد تشحيم":"Oils & Lubricants",
+  "استشارات إدارية ومالية":"Management & Financial Consulting","استشارات إدارية":"Management Consulting","استشارات مالية ومحاسبة":"Financial & Accounting","دراسات جدوى":"Feasibility Studies","تدقيق وضرائب":"Audit & Taxes",
 };
 
 function t(key){ const s = STR[key]; return s ? (s[LANG] || s.ar) : key; }
 function tData(ar){ if(!ar) return ""; return LANG === "en" ? (DICT[ar] || ar) : ar; }
+
+/* مساعدات عرض الدول ثنائية اللغة */
+function countryName(c){ if(!c) return ""; return (LANG === "en" && c.en) ? c.en : c.name; }
+function showCountry(ar){
+  if(!ar) return "";
+  const find = (v) => (typeof COUNTRY_CODES !== "undefined") ? COUNTRY_CODES.find(x => x.name === v) : null;
+  let c = find(ar);
+  if(!c){
+    const stripped = ar.replace(/^[\p{Emoji}\p{Extended_Pictographic}\uFE0F\u200d\s]+/u, "").trim();
+    if(stripped && stripped !== ar) c = find(stripped);
+  }
+  if(!c) return ar;
+  return c.flag + " " + countryName(c);
+}
 
 document.documentElement.lang = LANG;
 document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";

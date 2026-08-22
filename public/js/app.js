@@ -99,7 +99,7 @@ function closeAuth(){ overlay.classList.remove("show"); overlay.innerHTML=""; pe
 function drawAuth(){
   const o=pendingAuth;
   if(o.stage==="phone"){
-    const opts=COUNTRY_CODES.map(c=>`<option value="${c.code}" data-d="${c.digits}">${c.flag} ${tData(c.name)} ${c.code}</option>`).join("");
+    const opts=COUNTRY_CODES.map(c=>`<option value="${c.code}" data-d="${c.digits}">${c.flag} ${countryName(c)} ${c.code}</option>`).join("");
     overlay.innerHTML=`<div class="modal modal-wrap">
       <button class="modal-close" onclick="closeAuth()">×</button>
       <h2>${t("auth_welcome")}</h2><p class="muted">${t("auth_desc")}</p>
@@ -133,7 +133,7 @@ async function verifyOtp(){
   if(code!=="1234"){ notify(LANG==="en"?"Wrong code (try 1234)":"الرمز غير صحيح (جرّب 1234)"); return; }
   const o=pendingAuth; const c=COUNTRY_CODES.find(x=>x.code===o.cc);
   try{
-    await store.login(o.name||"", o.full, c?c.flag+" "+tData(c.name):"");
+    await store.login(o.name||"", o.full, c?c.name:"");
     closeAuth(); notify(LANG==="en"?"Logged in ✓":"تم تسجيل الدخول بنجاح ✓"); go("account"); refreshChatBadge();
   }catch(e){ notify(LANG==="en"?"Login failed":"تعذّر تسجيل الدخول"); }
 }
@@ -295,7 +295,7 @@ function viewDetail(id){
         <div class="seller"><span class="avatar">${esc(userInitials(owner.name))}</span><div style="flex:1"><div class="nm">${esc(owner.name)}</div>
           <div class="stars">${starsHTML(owner.stars||0)} <span class="muted" style="font-size:12px">(${owner.deals||0} ${t("deals_count")})</span></div>
           ${owner.verified?`<div class="verified">${t("verified")}</div>`:""}</div></div>
-        <p class="muted" style="font-size:13px;margin-top:10px">🌐 ${esc(tData(owner.country))}</p>
+        <p class="muted" style="font-size:13px;margin-top:10px">🌐 ${esc(showCountry(owner.country))}</p>
         <div class="detail-cta">
           <button class="btn btn-primary" style="flex:1" onclick="openChatFromListing('${esc(owner.phone)}','${esc(owner.name).replace(/'/g,"")}')">${t("chat_now")}</button>
           <button class="btn btn-ghost" onclick="contactOwner('${esc(owner.phone)}')">${t("call_seller")}</button>
@@ -378,7 +378,7 @@ function viewAccount(){
   app.innerHTML=`<section class="section"><div class="wrap">
     <div class="profile-head"><span class="avatar">${esc(userInitials(u.name))}</span>
       <div style="flex:1"><h2>${esc(u.name)} ${u.verified?`<span style="font-size:14px;opacity:.8">${t("verified")}</span>`:""}</h2>
-        <div class="ph">${esc(tData(u.country))} • ${esc(u.phone)}</div>
+        <div class="ph">${esc(showCountry(u.country))} • ${esc(u.phone)}</div>
         <div class="stars" style="margin-top:6px">${starsHTML(u.stars)} <span style="font-size:13px;opacity:.85">${u.deals} ${t("deals_count")}</span></div></div>
       <button class="btn btn-ghost" onclick="doLogout()">${t("logout")}</button></div>
     <div class="stat-row"><div class="stat-box"><b>${mine.length}</b><span>${t("my_ads")}</span></div><div class="stat-box"><b>${freeCount}</b><span>${t("my_free")}</span></div><div class="stat-box"><b>${u.stars||0}/5</b><span>${t("my_rating")}</span></div><div class="stat-box"><b>${u.deals}</b><span>${t("my_deals")}</span></div></div>
@@ -451,7 +451,7 @@ function adminListings(){
 }
 function adminUsers(){
   return `<div class="admin-table">${state.users.map(u=>`
-    <div class="admin-row"><div class="ar-main"><b>${esc(u.name)} ${u.verified?'✔':''}</b><span class="muted">${esc(tData(u.country))} • ${esc(u.phone)}</span><span class="muted" style="font-size:12px">${u.deals} ${t("deals_count")}</span></div>
+    <div class="admin-row"><div class="ar-main"><b>${esc(u.name)} ${u.verified?'✔':''}</b><span class="muted">${esc(showCountry(u.country))} • ${esc(u.phone)}</span><span class="muted" style="font-size:12px">${u.deals} ${t("deals_count")}</span></div>
       <div class="ar-actions"><div class="star-input">${[1,2,3,4,5].map(n=>`<span class="${n<=u.stars?'on':''}" onclick="doSetStars('${u.id}',${n})">★</span>`).join("")}</div>
         <button class="btn btn-ghost btn-sm" onclick="doToggleVerified('${u.id}')">${u.verified?t("admin_inactive"):t("admin_active")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelUser('${u.id}')">🗑</button></div></div>`).join("")}</div>`;
 }
