@@ -8,6 +8,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { MongoClient } = require("mongodb");
 const DATA = require("./public/js/data.js");
 
 const PORT = process.env.PORT || 8000;
@@ -16,6 +17,7 @@ const DB_FILE = path.join(__dirname, "db.json");
 const STRIPE_PK = process.env.STRIPE_PUBLISHABLE_KEY || "";
 const STRIPE_SK = process.env.STRIPE_SECRET_KEY || "";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const MONGO_URI = process.env.MONGODB_URI || "";
 let ADMIN_SESSION = "";
 
 const SEED_USERS = DATA.SEED_USERS;
@@ -27,15 +29,46 @@ const DEFAULT_BANNERS = [
 
 const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".woff2":"font/woff2" };
 
-/* ---------- قاعدة البيانات ---------- */
-function loadDB(){
-  try { return JSON.parse(fs.readFileSync(DB_FILE)); }
-  catch { const db = { users:SEED_USERS.map(u=>({...u,token:"",favorites:[]})), listings:SEED_LISTINGS.slice(), banners:DEFAULT_BANNERS.slice(), payments:[], revenue:0, meta:{created:Date.now()} }; saveDB(db); return db; }
+/* ---------- قاعدة البيانات (MongoDB Atlas دائمة + db.json احتياطي محلي) ---------- */
+let mongoClient=null, stateCol=null, chatCol=null;
+function freshSeed(){ return { users:SEED_USERS.map(u=>({...u,token:"",favorites:[]})), listings:SEED_LISTINGS.slice(), banners:DEFAULT_BANNERS.slice(), payments:[], revenue:0, meta:{created:Date.now()} }; }
+function loadDBFile(){ try { return JSON.parse(fs.readFileSync(DB_FILE)); } catch { const db=freshSeed(); try{fs.writeFileSync(DB_FILE,JSON.stringify(db));}catch{} return db; } }
+async function connectMongo(){
+  if(!MONGO_URI) return false;
+  try{
+    mongoClient = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS:8000 });
+    await mongoClient.connect();
+    const ddb = mongoClient.db("zarqafreezone");
+    stateCol = ddb.collection("state");
+    chatCol  = ddb.collection("chat");
+    console.log("📦 متصل بـ MongoDB Atlas ✓");
+    return true;
+  }catch(e){ console.error("⚠️ فشل اتصال MongoDB (سأستخدم db.json محلياً):", e.message); stateCol=null; chatCol=null; return false; }
 }
-function saveDB(db){ try { fs.writeFileSync(DB_FILE, JSON.stringify(db)); } catch {} }
-let DB = loadDB();
-// ضمان وجود البنية
-DB.users = DB.users||[]; DB.listings = DB.listings||[]; DB.banners = DB.banners||DEFAULT_BANNERS.slice(); DB.payments = DB.payments||[]; DB.revenue = DB.revenue||0;
+function saveDB(db){
+  if(db) DB=db;
+  try { fs.writeFileSync(DB_FILE, JSON.stringify(DB)); } catch {}
+  if(stateCol) stateCol.updateOne({_id:"main"}, {$set:{data:DB, updatedAt:new Date()}}, {upsert:true}).catch(()=>{});
+}
+let DB = null;   // يُملأ في initDB() قبل بدء الاستماع
+let CHAT = {messages:[]};
+async function initDB(){
+  const ok = await connectMongo();
+  if(ok && stateCol){
+    const doc = await stateCol.findOne({_id:"main"});
+    if(doc && doc.data && Array.isArray(doc.data.users)){ DB = doc.data; console.log("📥 DB محمّلة من MongoDB"); }
+    else { DB = freshSeed(); saveDB(DB); console.log("🌱 تمت زرع بيانات أولية في MongoDB"); }
+  } else {
+    DB = loadDBFile(); console.log("📄 DB من ملف db.json (محلي)");
+  }
+  DB.users=DB.users||[]; DB.listings=DB.listings||[]; DB.banners=DB.banners||DEFAULT_BANNERS.slice(); DB.payments=DB.payments||[]; DB.revenue=DB.revenue||0;
+  // تحميل المحادثات
+  if(chatCol){
+    const cdoc = await chatCol.findOne({_id:"main"});
+    CHAT = (cdoc && cdoc.data && Array.isArray(cdoc.data.messages)) ? cdoc.data : {messages:[]};
+    console.log("📥 المحادثات:", CHAT.messages.length, "رسالة (MongoDB)");
+  } else { CHAT = loadChatFile(); }
+}
 
 function pubUser(u){ return u ? {id:u.id,name:u.name,phone:u.phone,country:u.country,joined:u.joined,verified:u.verified,stars:u.stars,deals:u.deals,bio:u.bio} : null; }
 function withOwner(l){ return Object.assign({}, l, { owner: pubUser(DB.users.find(u=>u.id===l.user)) }); }
@@ -78,8 +111,9 @@ async function createStripeIntent(amount, plan){
 /* ---------- المحادثات ---------- */
 const CHAT_FILE = path.join(__dirname, "chat.json");
 const SEED_PHONES = ["+962790000001","+964770000002","+963940000003","+90530000004"];
-function loadChat(){ try { return JSON.parse(fs.readFileSync(CHAT_FILE)); } catch { return {messages:[]}; } }
-function saveChat(c){ try { fs.writeFileSync(CHAT_FILE, JSON.stringify(c)); } catch {} }
+function loadChatFile(){ try { return JSON.parse(fs.readFileSync(CHAT_FILE)); } catch { return {messages:[]}; } }
+function loadChat(){ return CHAT; }
+function saveChat(c){ if(c) CHAT=c; try { fs.writeFileSync(CHAT_FILE, JSON.stringify(CHAT)); } catch {} if(chatCol) chatCol.updateOne({_id:"main"}, {$set:{data:CHAT, updatedAt:new Date()}}, {upsert:true}).catch(()=>{}); }
 function autoReply(lang){
   const R = {
     ar:["مرحباً 👋 شكراً لرسالتك! كيف يمكنني مساعدتك بخصوص الإعلان؟","أهلاً وسهلاً، المنتج متوفر ويمكنك زيارته في المنطقة الحرة. هل تريد التفاصيل؟","تمام، السعر قابل للتفاوض البسيط. متى يناسبك المعاينة؟"],
@@ -261,4 +295,7 @@ const server = http.createServer(async (req,res)=>{
   });
 });
 
-server.listen(PORT,"0.0.0.0",()=>console.log(`🛃 Zarqa Free Zone — http://0.0.0.0:${PORT} | DB: ${DB.listings.length} listings, ${DB.users.length} users`));
+(async ()=>{
+  await initDB();
+  server.listen(PORT,"0.0.0.0",()=>console.log(`🛃 Zarqa Free Zone — http://0.0.0.0:${PORT} | DB: ${DB.listings.length} listings, ${DB.users.length} users${stateCol?" | MongoDB ✓":""}`));
+})();

@@ -15,3 +15,6 @@ public/uploads/
 image-search/
 uploads/
 *.zip
+
+# npm cache
+.npm/
