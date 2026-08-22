@@ -31,7 +31,7 @@ const DEFAULT_BANNERS = [
 const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".woff2":"font/woff2" };
 
 /* ---------- قاعدة البيانات (MongoDB Atlas دائمة + db.json احتياطي محلي) ---------- */
-let mongoClient=null, stateCol=null, chatCol=null, MONGO_ERR="";
+let mongoClient=null, stateCol=null, chatCol=null, imgCol=null, MONGO_ERR="";
 function freshSeed(){ return { users:SEED_USERS.map(u=>({...u,token:"",favorites:[]})), listings:SEED_LISTINGS.slice(), banners:DEFAULT_BANNERS.slice(), payments:[], revenue:0, meta:{created:Date.now()} }; }
 function loadDBFile(){ try { return JSON.parse(fs.readFileSync(DB_FILE)); } catch { const db=freshSeed(); try{fs.writeFileSync(DB_FILE,JSON.stringify(db));}catch{} return db; } }
 async function connectMongo(){
@@ -42,6 +42,7 @@ async function connectMongo(){
     const ddb = mongoClient.db("zarqafreezone");
     stateCol = ddb.collection("state");
     chatCol  = ddb.collection("chat");
+    imgCol   = ddb.collection("images");
     console.log("📦 متصل بـ MongoDB Atlas ✓");
     return true;
   }catch(e){ MONGO_ERR=e.message; console.error("⚠️ فشل اتصال MongoDB (سأستخدم db.json محلياً):", e.message); stateCol=null; chatCol=null; return false; }
@@ -96,8 +97,9 @@ function saveDataURI(dataURI, id){
     const m = String(dataURI).match(/^data:image\/(\w+);base64,(.*)$/);
     if(!m || m[2].length>4*1024*1024) return null;
     const ext = m[1]==="jpeg"?"jpg":m[1];
-    fs.writeFileSync(path.join(UPLOAD_DIR, id+"."+ext), Buffer.from(m[2],"base64"));
-    return "/uploads/"+id+"."+ext;
+    try { fs.writeFileSync(path.join(UPLOAD_DIR, id+"."+ext), Buffer.from(m[2],"base64")); } catch {}
+    if(imgCol){ imgCol.updateOne({_id:id}, {$set:{data:dataURI, ext, updatedAt:new Date()}}, {upsert:true}).catch(()=>{}); }
+    return "/api/img/"+id;
   }catch(e){ return null; }
 }
 
@@ -180,6 +182,14 @@ const server = http.createServer(async (req,res)=>{
     const b=await readBody(req);
     const saved = saveDataURI(b.data, "img"+Date.now());
     return saved? send(res,200,{url:saved}) : send(res,400,{error:"invalid_image"});
+  }
+  if(m(/^\/api\/img\/([^/]+)$/)){
+    if(M!=="GET") return send(res,405,{error:"method"});
+    const id=p.split("/")[3];
+    try{ const fn = fs.existsSync(UPLOAD_DIR) ? fs.readdirSync(UPLOAD_DIR).find(x=>x.startsWith(id+".")) : null;
+      if(fn){ const data=fs.readFileSync(path.join(UPLOAD_DIR,fn)); return send(res,200,data, MIME[path.extname(fn).toLowerCase()]||"image/jpeg"); } }catch{}
+    if(imgCol){ try{ const doc=await imgCol.findOne({_id:id}); if(doc&&doc.data){ const mm=String(doc.data).match(/^data:image\/(\w+)/); const ct=mm?("image/"+(mm[1]==="jpeg"?"jpeg":mm[1])):"image/jpeg"; const b64=String(doc.data).split(",")[1]||""; return send(res,200,Buffer.from(b64,"base64"),ct); } }catch{} }
+    return send(res,404,"Not Found","text/plain");
   }
 
   /* ----- الإعلانات ----- */
