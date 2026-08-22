@@ -137,7 +137,7 @@ const server = http.createServer(async (req,res)=>{
 
   /* ----- إعدادات/صحة ----- */
   if(p==="/api/config") return send(res,200,{stripePK:STRIPE_PK, demo:!STRIPE_PK});
-  if(p==="/api/health") return send(res,200,{ok:true, time:new Date().toISOString()});
+  if(p==="/api/health") return send(res,200,{ok:true, time:new Date().toISOString(), db: stateCol?"mongodb":"file", listings: DB?DB.listings.length:0, users: DB?DB.users.length:0});
 
   /* ----- الدفع ----- */
   if(p==="/api/create-payment-intent" && M==="POST"){
