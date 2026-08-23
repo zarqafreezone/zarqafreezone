@@ -245,6 +245,10 @@ const STR = {
   install_pc_t:     { ar:"كمبيوتر", en:"Desktop" },
   install_pc_s:     { ar:"اضغط أيقونة التثبيت ⊕ بجانب شريط العنوان، أو من قائمة المتصفح ⋮ اختر «تثبيت التطبيق».", en:"Click the install icon ⊕ next to the address bar, or from the browser menu ⋮ choose 'Install app'." },
   got_it:           { ar:"حسناً", en:"Got it" },
+  install_now:      { ar:"⚡ تثبيت فوري الآن", en:"⚡ Install instantly" },
+  apk_download:     { ar:"⬇️ تحميل تطبيق أندرويد (APK)", en:"⬇️ Download Android App (APK)" },
+  apk_short:        { ar:"🤖 تحميل أندرويد APK", en:"🤖 Android APK" },
+  apk_hint:         { ar:"ملف تثبيت لأجهزة أندرويد — فعّل «تثبيت من مصادر غير معروفة» إن طُلب منك.", en:"Android installer — enable 'Install from unknown sources' if prompted." },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */

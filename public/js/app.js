@@ -87,9 +87,10 @@ function updateStaticUI(){
   document.getElementById("navAcc").querySelector(".lbl").textContent = t("nav_account");
   document.getElementById("logoLink").onclick = ()=>go("home");
   document.getElementById("footLinks").innerHTML =
-    [["home",t("nav_home")],["categories",t("nav_cats")],["add","＋ "+t("add_listing")],["admin",t("nav_admin")]]
+    [["home",t("nav_home")],["categories",t("nav_cats")],["add",t("add_listing")],["admin",t("nav_admin")]]
     .map(([r,lbl])=>`<a onclick="go('${r}')">${lbl}</a>`).join("") +
-    (pwaStandalone()?'':`<a onclick="installApp()">${t("install_app")}</a>`);
+    (pwaStandalone()?'':`<a onclick="installApp()">${t("install_app")}</a>`) +
+    (window.__APK_READY?`<a href="${APK_URL}" download>${t("apk_short")}</a>`:'');
 }
 
 /* =========================================================================
@@ -619,6 +620,7 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
   render();
   hideSplash();
   refreshChatBadge();
+  checkApk();
   setInterval(refreshChatBadge, 6000);
   document.addEventListener("pointerdown", initAudio, { once:true });
 })();
@@ -639,28 +641,31 @@ function ensureInstallFab(){
   ib.innerHTML = "⬇️ " + (LANG==="en"?"Install App":"تثبيت التطبيق");
   ib.style.display = "";
 }
-function installApp(){
-  if(deferredPrompt){
-    const dp = deferredPrompt;
-    dp.prompt();
-    dp.userChoice.then(r => { if(r.outcome==="accepted") notify(t("installed_toast")); deferredPrompt=null; hideInstallUI(); }).catch(()=>{ deferredPrompt=null; });
-  } else {
-    showInstallGuide();
-  }
+const APK_URL = "downloads/zarqa-free-zone.apk";
+function checkApk(){
+  fetch(APK_URL, {method:"HEAD"}).then(r=>{ const ok = r.ok && (r.headers.get('content-type')||'').includes('android.package'); if(ok!==!!window.__APK_READY){ window.__APK_READY=ok; if(window.render) render(); } }).catch(()=>{});
 }
+function doNativeInstall(){
+  if(deferredPrompt){ const dp=deferredPrompt; dp.prompt(); dp.userChoice.then(r=>{ if(r.outcome==="accepted") notify(t("installed_toast")); deferredPrompt=null; closeInstallGuide(); hideInstallUI(); }).catch(()=>{ deferredPrompt=null; }); }
+}
+function installApp(){ showInstallGuide(); }
 function showInstallGuide(){
+  const native = !!deferredPrompt;
   let title, steps;
   if(pwaIsIOS()){ title=t("install_ios_t"); steps=t("install_ios_s"); }
   else if(pwaIsAndroid()){ title=t("install_and_t"); steps=t("install_and_s"); }
   else { title=t("install_pc_t"); steps=t("install_pc_s"); }
+  const apkBtn = window.__APK_READY ? `<a class="btn btn-primary btn-block btn-lg" href="${APK_URL}" download style="text-decoration:none;margin-bottom:8px">${t("apk_download")}</a><p class="muted center" style="font-size:12px;margin-bottom:12px">${t("apk_hint")}</p>` : "";
+  const nowBtn = native ? `<button class="btn ${window.__APK_READY?'btn-ghost':'btn-primary'} btn-block btn-lg" onclick="doNativeInstall()" style="margin-bottom:12px">${t("install_now")}</button>` : "";
   overlay.classList.add("show");
   overlay.innerHTML = `<div class="modal modal-wrap">
     <button class="modal-close" onclick="closeInstallGuide()">×</button>
     <div style="font-size:52px;text-align:center;margin-bottom:4px">📲</div>
     <h2 style="text-align:center">${t("install_title")}</h2>
-    <p class="muted center" style="margin-bottom:18px">${t("install_sub")}</p>
+    <p class="muted center" style="margin-bottom:16px">${t("install_sub")}</p>
+    ${apkBtn}${nowBtn}
     <div class="install-guide"><h4 style="margin-bottom:8px">${title}</h4><p style="white-space:pre-line;line-height:1.9">${esc(steps)}</p></div>
-    <button class="btn btn-primary btn-block btn-lg" style="margin-top:18px" onclick="closeInstallGuide()">${t("got_it")}</button></div>`;
+    <button class="btn btn-ghost btn-block" style="margin-top:14px" onclick="closeInstallGuide()">${t("got_it")}</button></div>`;
 }
 function closeInstallGuide(){ overlay.classList.remove("show"); overlay.innerHTML=""; }
 function hideInstallUI(){

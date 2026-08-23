@@ -28,7 +28,7 @@ const DEFAULT_BANNERS = [
   { id:"square", active:true, text_ar:"🏭 مستودعات وأراضٍ متاحة للإيجار داخل المنطقة الحرة", text_en:"🏭 Warehouses & land available for lease in the Free Zone", link:"#browse" }
 ];
 
-const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".woff2":"font/woff2" };
+const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".apk":"application/vnd.android.package-archive",".woff2":"font/woff2" };
 
 /* ---------- قاعدة البيانات (MongoDB Atlas دائمة + db.json احتياطي محلي) ---------- */
 let mongoClient=null, stateCol=null, chatCol=null, imgCol=null, MONGO_ERR="";
