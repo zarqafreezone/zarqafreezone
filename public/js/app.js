@@ -69,6 +69,7 @@ function renderTopbar(){
     : `<button class="btn btn-primary" onclick="openAuth()">${t("login")}</button>`;
   el.innerHTML = langBtn + chatBtn + userHtml + `<button class="btn btn-ghost btn-sm" onclick="go('admin')" title="${t("nav_admin")}">⚙️</button>`;
   paintBadge();
+  ensureInstallFab();
 }
 function updateStaticUI(){
   document.getElementById("topSearch").placeholder = t("search_ph");
@@ -87,7 +88,8 @@ function updateStaticUI(){
   document.getElementById("logoLink").onclick = ()=>go("home");
   document.getElementById("footLinks").innerHTML =
     [["home",t("nav_home")],["categories",t("nav_cats")],["add","＋ "+t("add_listing")],["admin",t("nav_admin")]]
-    .map(([r,lbl])=>`<a onclick="go('${r}')">${lbl}</a>`).join("");
+    .map(([r,lbl])=>`<a onclick="go('${r}')">${lbl}</a>`).join("") +
+    (pwaStandalone()?'':`<a onclick="installApp()">${t("install_app")}</a>`);
 }
 
 /* =========================================================================
@@ -173,7 +175,8 @@ function viewHome(){
           <div><b>${CATEGORIES.length}</b><span>${t("stat_sections")}</span></div>
           <div><b>${subs}</b><span>${t("stat_subs")}</span></div>
           <div><b>${COUNTRY_CODES.length}+</b><span>${t("stat_countries")}</span></div>
-        </div></div>
+        </div>
+        ${pwaStandalone()?'':`<div style="text-align:center;margin-top:18px"><button class="btn btn-ghost" id="heroInstall" onclick="installApp()" style="font-weight:700">${t("install_app")}</button></div>`}</div>
     </section>
     <div class="wrap">${bannerLong()}</div>
     <section class="section"><div class="wrap"><div class="sec-head"><h2>${t("main_sections")}</h2></div>
@@ -622,31 +625,51 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
 function hideSplash(){ const sp=document.getElementById("splash"); if(!sp) return; setTimeout(()=>{ sp.classList.add("hide"); setTimeout(()=>sp.remove(),600); }, 650); }
 
 /* =========================================================================
-   PWA: تسجيل Service Worker + زر التثبيت
+   PWA: تسجيل Service Worker + زر تثبيت التطبيق (يعمل على كل المنصات)
    ========================================================================= */
 let deferredPrompt = null;
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault(); deferredPrompt = e;
+function pwaStandalone(){ return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
+function pwaIsIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function pwaIsAndroid(){ return /android/i.test(navigator.userAgent); }
+
+function ensureInstallFab(){
+  if(pwaStandalone()) return; // التطبيق مثبّت بالفعل
   let ib = document.getElementById("installBtn");
-  if(!ib){
-    ib = document.createElement("button");
-    ib.id = "installBtn";
-    ib.className = "install-fab";
-    ib.onclick = async () => {
-      ib.style.display = "none";
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if(outcome === "accepted") notify(LANG==="en"?"Installed ✓":"تم التثبيت ✓");
-      deferredPrompt = null;
-    };
-    document.body.appendChild(ib);
-  }
-  ib.innerHTML = "⬇️ " + (LANG==="en"?"Install app":"تثبيت التطبيق");
+  if(!ib){ ib = document.createElement("button"); ib.id="installBtn"; ib.className="install-fab"; ib.onclick=installApp; document.body.appendChild(ib); }
+  ib.innerHTML = "⬇️ " + (LANG==="en"?"Install App":"تثبيت التطبيق");
   ib.style.display = "";
-});
-window.addEventListener("appinstalled", () => {
-  const ib = document.getElementById("installBtn"); if(ib) ib.style.display = "none";
-});
+}
+function installApp(){
+  if(deferredPrompt){
+    const dp = deferredPrompt;
+    dp.prompt();
+    dp.userChoice.then(r => { if(r.outcome==="accepted") notify(t("installed_toast")); deferredPrompt=null; hideInstallUI(); }).catch(()=>{ deferredPrompt=null; });
+  } else {
+    showInstallGuide();
+  }
+}
+function showInstallGuide(){
+  let title, steps;
+  if(pwaIsIOS()){ title=t("install_ios_t"); steps=t("install_ios_s"); }
+  else if(pwaIsAndroid()){ title=t("install_and_t"); steps=t("install_and_s"); }
+  else { title=t("install_pc_t"); steps=t("install_pc_s"); }
+  overlay.classList.add("show");
+  overlay.innerHTML = `<div class="modal modal-wrap">
+    <button class="modal-close" onclick="closeInstallGuide()">×</button>
+    <div style="font-size:52px;text-align:center;margin-bottom:4px">📲</div>
+    <h2 style="text-align:center">${t("install_title")}</h2>
+    <p class="muted center" style="margin-bottom:18px">${t("install_sub")}</p>
+    <div class="install-guide"><h4 style="margin-bottom:8px">${title}</h4><p style="white-space:pre-line;line-height:1.9">${esc(steps)}</p></div>
+    <button class="btn btn-primary btn-block btn-lg" style="margin-top:18px" onclick="closeInstallGuide()">${t("got_it")}</button></div>`;
+}
+function closeInstallGuide(){ overlay.classList.remove("show"); overlay.innerHTML=""; }
+function hideInstallUI(){
+  const ib=document.getElementById("installBtn"); if(ib) ib.style.display="none";
+  const hi=document.getElementById("heroInstall"); if(hi) hi.style.display="none";
+}
+
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; ensureInstallFab(); });
+window.addEventListener("appinstalled", () => { hideInstallUI(); deferredPrompt=null; });
 if("serviceWorker" in navigator){
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 }

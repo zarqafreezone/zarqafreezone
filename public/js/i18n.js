@@ -232,6 +232,19 @@ const STR = {
   call_seller:      { ar:"📞 اتصال", en:"📞 Call" },
   online:           { ar:"متصل", en:"online" },
   start_chat_login: { ar:"سجّل الدخول لبدء المحادثة", en:"Login to start chatting" },
+
+  /* تثبيت التطبيق */
+  install_app:      { ar:"📱 تثبيت التطبيق", en:"📱 Install App" },
+  install_title:    { ar:"📲 ثبّت تطبيق المنطقة الحرة الزرقاء", en:"📲 Install the Zarqa Free Zone app" },
+  install_sub:      { ar:"وصول سريع وتجربة كالتطبيقات على جهازك، مع إمكانية العمل دون اتصال.", en:"Quick access and a native-app experience on your device, with offline support." },
+  installed_toast:  { ar:"تم تثبيت التطبيق ✓", en:"App installed ✓" },
+  install_ios_t:    { ar:"آيفون / آيباد (Safari)", en:"iPhone / iPad (Safari)" },
+  install_ios_s:    { ar:"١) اضغط زر المشاركة ⎋ في أسفل المتصفح\n٢) اختر «إضافة إلى الشاشحة الرئيسية»\n٣) اضغط «إضافة»", en:"1) Tap the Share button ⎋ at the bottom\n2) Choose 'Add to Home Screen'\n3) Tap 'Add'" },
+  install_and_t:    { ar:"أندرويد", en:"Android" },
+  install_and_s:    { ar:"١) افتح قائمة المتصفح ⋮\n٢) اختر «تثبيت التطبيق» أو «إضافة إلى الشاشحة الرئيسية»", en:"1) Open the browser menu ⋮\n2) Choose 'Install app' or 'Add to Home screen'" },
+  install_pc_t:     { ar:"كمبيوتر", en:"Desktop" },
+  install_pc_s:     { ar:"اضغط أيقونة التثبيت ⊕ بجانب شريط العنوان، أو من قائمة المتصفح ⋮ اختر «تثبيت التطبيق».", en:"Click the install icon ⊕ next to the address bar, or from the browser menu ⋮ choose 'Install app'." },
+  got_it:           { ar:"حسناً", en:"Got it" },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */

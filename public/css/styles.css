@@ -361,10 +361,12 @@ html[dir="rtl"] .chat-msg.theirs{align-self:flex-start;align-items:flex-start}
 html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:4px;border-bottom-inline-end-radius:14px}
 
 /* ===== زر تثبيت PWA ===== */
-.install-fab{position:fixed;bottom:84px;inset-inline-end:16px;z-index:70;background:var(--green);color:#fff;
-  font-weight:800;font-size:14px;padding:12px 18px;border-radius:30px;box-shadow:0 8px 24px rgba(22,163,74,.4);
+.install-fab{position:fixed;bottom:84px;inset-inline-end:16px;z-index:70;background:linear-gradient(135deg,var(--green),#0d9488);color:#fff;
+  font-weight:800;font-size:14px;padding:13px 20px;border-radius:30px;box-shadow:0 8px 24px rgba(22,163,74,.45);
   display:none;animation:pop .25s}
-.install-fab:hover{background:#15803d;transform:translateY(-2px)}
+.install-fab:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(22,163,74,.55)}
+.install-guide{background:#f1f5f9;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.install-guide h4{color:var(--blue);margin:0}
 
 /* =========================================================================
    الشاشة الافتتاحية (Splash) + الشعار
