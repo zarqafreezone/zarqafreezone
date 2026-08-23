@@ -86,6 +86,9 @@ const store = {
     return d.url;
   },
   async offerListing(id, price, note){ const d=await jpost("/api/listings/"+id+"/offer", {price, note}); if(d.offers!=null){ const l=state.listings.find(x=>x.id===id); if(l) l.offers=d.offers; } return d; },
+  async postComment(id, text, parentId){ const d=await jpost("/api/listings/"+id+"/comment", {text, parentId}); if(d.comments!=null){ const l=state.listings.find(x=>x.id===id); if(l) l.comments=d.comments; } return d.comments; },
+  async getUserProfile(id){ return jget("/api/users/"+id+"/profile"); },
+  async updateMyProfile(patch){ const d=await jpatch("/api/me", patch); if(d.user){ state.user=d.user; } return d.user; },
   async uploadImage(file){
     const dataURL = typeof file==="string" ? file : await resizeImageToDataURL(file);
     const d=await jpost("/api/upload",{data:dataURL});
@@ -135,11 +138,13 @@ function daysLeft(l){ return Math.max(0, Math.round(FREE_DAYS-(Date.now()-new Da
 
 function promoActive(l){ return l.promo && l.promoUntil && l.promoUntil>=new Date().toISOString().slice(0,10); }
 function promoRank(l){ if(!promoActive(l)) return 0; return {premium:3,boost:2,featured:1}[l.promo]||0; }
-function queryListings({section,sub,deal,q,featured,sort,min,max,zone}={}){
+function queryListings({section,sub,deal,q,featured,sort,min,max,zone,dealer}={}){
   let r = state.listings.slice();
   if(section)  r=r.filter(l=>l.section===section);
   if(sub)      r=r.filter(l=>l.sub===sub);
   if(deal)     r=r.filter(l=>l.deal===deal);
+  if(dealer==="dealer") r=r.filter(l=>l.owner&&l.owner.type==="dealer");
+  else if(dealer==="individual") r=r.filter(l=>!(l.owner&&l.owner.type==="dealer"));
   if(featured) r=r.filter(l=>l.featured);
   if(zone)     r=r.filter(l=>l.zone===zone);
   if(min!=null && min!=="") r=r.filter(l=>Number(l.price)>=Number(min));

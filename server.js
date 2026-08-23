@@ -33,7 +33,7 @@ const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-
 /* ---------- قاعدة البيانات (MongoDB Atlas دائمة + db.json احتياطي محلي) ---------- */
 let mongoClient=null, stateCol=null, chatCol=null, imgCol=null, MONGO_ERR="";
 function freshSeed(){ return { users:SEED_USERS.map(u=>({...u,token:"",favorites:[]})), listings:SEED_LISTINGS.slice(), banners:DEFAULT_BANNERS.slice(), payments:[], revenue:0, meta:{created:Date.now()} }; }
-function loadDBFile(){ try { return JSON.parse(fs.readFileSync(DB_FILE)); } catch { const db=freshSeed(); try{fs.writeFileSync(DB_FILE,JSON.stringify(db));}catch{} return db; } }
+function loadDBFile(){ try { return migrateDB(JSON.parse(fs.readFileSync(DB_FILE))); } catch { const db=migrateDB(freshSeed()); try{fs.writeFileSync(DB_FILE,JSON.stringify(db));}catch{} return db; } }
 async function connectMongo(){
   if(!MONGO_URI) return false;
   try{
@@ -80,8 +80,13 @@ async function initDB(){
   } else { CHAT = loadChatFile(); }
 }
 
-function pubUser(u){ return u ? {id:u.id,name:u.name,phone:u.phone,country:u.country,joined:u.joined,verified:u.verified,stars:u.stars,deals:u.deals,bio:u.bio} : null; }
-function withOwner(l){ return Object.assign({views:0, reports:0, offers:[]}, l, { owner: pubUser(DB.users.find(u=>u.id===l.user)) }); }
+function pubUser(u){ return u ? {id:u.id,name:u.name,phone:u.phone,country:u.country,joined:u.joined,verified:u.verified,stars:u.stars,deals:u.deals,bio:u.bio,type:u.type||"individual",storeName:u.storeName||"",storeDesc:u.storeDesc||"",storeLogo:u.storeLogo||""} : null; }
+function withOwner(l){ return Object.assign({views:0, reports:0, offers:[], comments:[]}, l, { owner: pubUser(DB.users.find(u=>u.id===l.user)) }); }
+function migrateDB(db){
+  db.users.forEach(u=>{ if(!u.type){ u.type=(u.deals>=20 && u.verified)?"dealer":"individual"; } if(!u.storeName && u.type==="dealer"){ u.storeName=u.name; } if(u.storeDesc===undefined){ u.storeDesc=u.bio||""; } });
+  db.listings.forEach(l=>{ if(!l.comments) l.comments=[]; });
+  return db;
+}
 
 /* ---------- مساعدات الرد والاستقبال ---------- */
 function send(res, code, body, type="application/json"){
@@ -182,7 +187,7 @@ const server = http.createServer(async (req,res)=>{
     const b=await readBody(req);
     if(!b.phone) return send(res,400,{error:"phone_required"});
     let u = DB.users.find(x=>x.phone===b.phone);
-    if(!u){ u={id:"u"+Date.now(), name:(b.name||"").trim()||("User "+b.phone.slice(-4)), phone:b.phone, country:b.country||"", joined:new Date().toISOString().slice(0,10), verified:false, stars:0, deals:0, bio:"", token:"", favorites:[]}; DB.users.push(u); }
+    if(!u){ u={id:"u"+Date.now(), name:(b.name||"").trim()||("User "+b.phone.slice(-4)), phone:b.phone, country:b.country||"", joined:new Date().toISOString().slice(0,10), verified:false, stars:0, deals:0, bio:"", type:"individual", storeName:"", storeDesc:"", token:"", favorites:[]}; DB.users.push(u); }
     else if(b.name && !u.name){ u.name=b.name; }
     if(b.country) u.country=b.country;
     u.token = crypto.randomBytes(16).toString("hex"); saveDB(DB);
@@ -193,6 +198,22 @@ const server = http.createServer(async (req,res)=>{
   }
   if(p==="/api/me" && M==="GET"){
     const u=authUser(req); return u? send(res,200,{user:pubUser(u)}) : send(res,200,{user:null});
+  }
+  if(p==="/api/me" && M==="PATCH"){
+    const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
+    const b=await readBody(req);
+    if("type" in b && ["individual","dealer"].includes(b.type)) u.type=b.type;
+    if(b.storeName!==undefined) u.storeName=String(b.storeName).slice(0,80);
+    if(b.storeDesc!==undefined) u.storeDesc=String(b.storeDesc).slice(0,400);
+    if(b.name!==undefined) u.name=String(b.name).slice(0,80);
+    if(b.bio!==undefined) u.bio=String(b.bio).slice(0,400);
+    if(u.type==="dealer" && !u.storeName) u.storeName=u.name;
+    saveDB(DB); return send(res,200,{user:pubUser(u)});
+  }
+  if(m(/^\/api\/users\/([^/]+)\/profile$/) && M==="GET"){
+    const id=p.split("/")[3], u=DB.users.find(x=>x.id===id); if(!u) return send(res,404,{error:"not_found"});
+    const listings=DB.listings.filter(l=>l.user===id).map(withOwner);
+    return send(res,200,{user:pubUser(u), listings});
   }
 
   /* ----- رفع صورة ----- */
@@ -281,6 +302,17 @@ const server = http.createServer(async (req,res)=>{
     l.promo=b.pkg; l.promoUntil=d.toISOString().slice(0,10); if(b.pkg!=="boost") l.featured=true;
     DB.payments=DB.payments||[]; DB.payments.push({id:"pay"+Date.now(), user:u.id, listing:id, plan:"promo_"+b.pkg, amount:pkg.price, date:new Date().toISOString().slice(0,10)}); DB.revenue=(DB.revenue||0)+pkg.price;
     saveDB(DB); return send(res,200,{ok:true, listing:withOwner(l)});
+  }
+  if(m(/^\/api\/listings\/([^/]+)\/comment$/) && M==="POST"){
+    const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
+    const id=p.split("/")[3], l=DB.listings.find(x=>x.id===id); if(!l) return send(res,404,{error:"not_found"});
+    const b=await readBody(req);
+    const text=(b.text||"").trim().slice(0,500); if(!text) return send(res,400,{error:"empty"});
+    l.comments=l.comments||[];
+    const cm={id:"c"+Date.now(), user:u.id, name:u.name, text, ts:Date.now(), replies:[]};
+    if(b.parentId){ const parent=l.comments.find(c=>c.id===b.parentId); if(parent){ parent.replies=parent.replies||[]; parent.replies.push({id:"c"+Date.now(), user:u.id, name:u.name, text, ts:Date.now()}); } }
+    else { l.comments.push(cm); }
+    saveDB(DB); return send(res,200,{ok:true, comments:l.comments});
   }
   if(p==="/api/push/subscribe" && M==="POST"){
     const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});

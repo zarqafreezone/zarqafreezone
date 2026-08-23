@@ -576,3 +576,35 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 [data-theme="dark"] .promo-pkg{background:#1e293b}
 [data-theme="dark"] .promo-pkg.cur{background:#0c2a3a}
 [data-theme="dark"] .alert-item:hover{background:#1e293b}
+
+/* =========================================================================
+   v6 (المرحلة 3) — صفحات المتاجر + التعليقات + أفراد/معارض
+   ========================================================================= */
+/* رأس صفحة المتجر */
+.store-head{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,#1e3a8a,#2563eb 60%,#0d9488);color:#fff;border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);flex-wrap:wrap}
+.store-logo{width:84px;height:84px;border-radius:20px;background:rgba(255,255,255,.2);color:#fff;display:grid;place-items:center;font-size:32px;font-weight:800;flex-shrink:0}
+.store-head h1{font-size:24px;color:#fff;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.store-head .muted,.store-head .verified{color:rgba(255,255,255,.9)}
+.store-head .stars{color:var(--gold)}
+.store-bio{color:rgba(255,255,255,.92);font-size:14px;line-height:1.7;margin-top:8px;max-width:560px}
+.store-cta{display:flex;gap:8px;flex-wrap:wrap}
+.store-cta .btn{background:#fff;color:var(--blue-d);border:none}
+.store-cta .btn-primary{background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.5)}
+.dealer-pill{display:inline-flex;align-items:center;background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;margin-inline-end:4px}
+
+/* التعليقات */
+.comment{display:flex;gap:10px}
+.comment.reply{margin-top:10px;padding-inline-start:12px;border-inline-start:2px solid var(--line)}
+.cmt-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue-l),var(--blue-d));color:#fff;display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.cmt-avatar.sm{width:30px;height:30px;font-size:13px}
+.cmt-head{display:flex;align-items:center;gap:8px}
+.cmt-body{font-size:14px;line-height:1.6;color:#334155;margin-top:2px;overflow-wrap:anywhere}
+.cmt-reply{color:var(--blue);font-size:12px;font-weight:700;margin-top:4px;padding:2px 0}
+.cmt-reply:hover{text-decoration:underline}
+.comment-box textarea,.reply-input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;background:#fff;resize:vertical;font-family:inherit;font-size:14px}
+.comment-box textarea:focus,.reply-input:focus{outline:none;border-color:var(--blue)}
+
+/* الوضع الليلي */
+[data-theme="dark"] .cmt-body{color:#cbd5e1}
+[data-theme="dark"] .comment.reply{border-inline-start-color:#273449}
+[data-theme="dark"] .comment-box textarea,[data-theme="dark"] .reply-input{background:var(--card);color:var(--ink)}

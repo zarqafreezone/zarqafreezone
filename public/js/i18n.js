@@ -322,6 +322,36 @@ const STR = {
   alerts_sub:       { ar:"نتائج جديدة مطابقة لعمليات بحثك المحفوظة", en:"New results matching your saved searches" },
   enable_notif:     { ar:"تفعيل إشعارات المتصفح", en:"Enable browser notifications" },
   notif_on:         { ar:"تم تفعيل الإشعارات ✓", en:"Notifications enabled ✓" },
+
+  /* صفحات المتاجر + فلتر أفراد/معارض */
+  store_title:      { ar:"المتجر", en:"Store" },
+  store_listings:   { ar:"إعلانات المتجر", en:"Store listings" },
+  store_since:      { ar:"عضو منذ", en:"Member since" },
+  store_empty:      { ar:"لا توجد إعلانات في هذا المتجر بعد", en:"No listings in this store yet" },
+  view_store:       { ar:"عرض المتجر", en:"View store" },
+  dealer:           { ar:"معرض", en:"Dealer" },
+  individual:       { ar:"فرد", en:"Individual" },
+  filter_dealer_all:{ ar:"الكل", en:"All" },
+  filter_dealer_d:  { ar:"معارض", en:"Dealers" },
+  filter_dealer_i:  { ar:"أفراد", en:"Individuals" },
+  become_dealer:    { ar:"تحويل إلى حساب معرض (متجر)", en:"Upgrade to dealer account (store)" },
+  become_individual:{ ar:"تحويل إلى حساب فرد", en:"Switch to individual account" },
+  store_name_lbl:   { ar:"اسم المتجر/المعرض", en:"Store/Dealer name" },
+  store_desc_lbl:   { ar:"نبذة عن المتجر", en:"About the store" },
+  save_store:       { ar:"حفظ", en:"Save" },
+  account_type:     { ar:"نوع الحساب", en:"Account type" },
+  dealer_badge:     { ar:"🏛️ معرض موثّق", en:"🏛️ Verified dealer" },
+
+  /* التعليقات */
+  comments:         { ar:"التعليقات والأسئلة", en:"Comments & questions" },
+  comments_count:   { ar:"تعليق", en:"comments" },
+  no_comments:      { ar:"لا توجد تعليقات بعد — كن أول من يعلّق!", en:"No comments yet — be the first!" },
+  write_comment:    { ar:"اكتب تعليقاً أو سؤالاً...", en:"Write a comment or question..." },
+  comment_reply_ph: { ar:"اكتب ردّك...", en:"Write your reply..." },
+  reply:            { ar:"رد", en:"Reply" },
+  comment_send:     { ar:"إرسال", en:"Send" },
+  comment_posted:   { ar:"تم نشر تعليقك ✓", en:"Your comment was posted ✓" },
+  login_comment:    { ar:"سجّل الدخول للتعليق", en:"Login to comment" },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */

@@ -84,6 +84,7 @@ function render(){
     case "account":    return viewAccount();
     case "favorites":  return viewFavorites();
     case "chat":       return viewChat(route.params);
+    case "store":      return viewStore(route.params.id);
     case "admin":      return viewAdmin();
     default:           return viewHome();
   }
@@ -287,7 +288,7 @@ function viewBrowse(p){
       </div>
       <input id="brQ" placeholder="${t("search_text")}" value="${esc(p.q||"")}" style="flex:1;min-width:140px" onkeydown="if(event.key==='Enter')browseSearch()">
       <select id="brSort" onchange="go('browse',{...currentBrowse(),sort:this.value})"><option value="">${t("sort_latest")}</option><option value="price_asc" ${p.sort==='price_asc'?'selected':''}>${t("sort_price_up")}</option><option value="price_desc" ${p.sort==='price_desc'?'selected':''}>${t("sort_price_down")}</option><option value="popular" ${p.sort==='popular'?'selected':''}>${t("sort_popular")}</option></select></div>
-      <div class="filter-bar"><span class="muted" style="font-weight:700;white-space:nowrap">${t("filter_price")}</span><input id="brMin" type="number" inputmode="numeric" placeholder="${t("min_price")}" value="${esc(p.min||"")}" style="width:84px"><span class="muted">—</span><input id="brMax" type="number" inputmode="numeric" placeholder="${t("max_price")}" value="${esc(p.max||"")}" style="width:84px"><select id="brZone"><option value="">${t("zone_all")}</option><option value="inside" ${p.zone==='inside'?'selected':''}>${t("zone_inside")}</option><option value="outside" ${p.zone==='outside'?'selected':''}>${t("zone_outside")}</option></select><button class="btn btn-primary btn-sm" onclick="applyFilters()">${t("apply")}</button><button class="btn btn-ghost btn-sm" onclick="saveSearch()">${t("save_search")}</button></div>
+      <div class="filter-bar"><span class="muted" style="font-weight:700;white-space:nowrap">${t("filter_price")}</span><input id="brMin" type="number" inputmode="numeric" placeholder="${t("min_price")}" value="${esc(p.min||"")}" style="width:84px"><span class="muted">—</span><input id="brMax" type="number" inputmode="numeric" placeholder="${t("max_price")}" value="${esc(p.max||"")}" style="width:84px"><select id="brZone"><option value="">${t("zone_all")}</option><option value="inside" ${p.zone==='inside'?'selected':''}>${t("zone_inside")}</option><option value="outside" ${p.zone==='outside'?'selected':''}>${t("zone_outside")}</option></select><select id="brDealer"><option value="">${t("filter_dealer_all")}</option><option value="dealer" ${p.dealer==='dealer'?'selected':''}>${t("filter_dealer_d")}</option><option value="individual" ${p.dealer==='individual'?'selected':''}>${t("filter_dealer_i")}</option></select><button class="btn btn-primary btn-sm" onclick="applyFilters()">${t("apply")}</button><button class="btn btn-ghost btn-sm" onclick="saveSearch()">${t("save_search")}</button></div>
       <p class="muted" style="margin-bottom:14px">${items.length} ${t("results_count")}</p>
       ${items.length?`<div class="list-grid">${listCardsHTML(items)}</div>`:`<div class="list-empty"><div class="big">🔍</div><p>${t("no_results")}</p><button class="btn btn-primary" style="margin-top:14px" onclick="go('add')">${t("add_your_ad")}</button></div>`}
       ${bannerLong()}</div>
@@ -296,7 +297,7 @@ function viewBrowse(p){
 }
 function currentBrowse(){ return route.params; }
 function browseSearch(){ go("browse",{...currentBrowse(),q:document.getElementById("brQ").value}); }
-function applyFilters(){ go("browse",{...currentBrowse(),min:document.getElementById("brMin").value,max:document.getElementById("brMax").value,zone:document.getElementById("brZone").value}); }
+function applyFilters(){ go("browse",{...currentBrowse(),min:document.getElementById("brMin").value,max:document.getElementById("brMax").value,zone:document.getElementById("brZone").value,dealer:document.getElementById("brDealer").value}); }
 let savedSearches=JSON.parse(localStorage.getItem("fz_saved_searches")||"[]");
 function searchLabel(p){ const b=[]; if(p.q)b.push(p.q); if(p.section)b.push(tData(getSectionName(p.section))); if(p.deal==='sell')b.push(t("deal_sell")); if(p.deal==='buy')b.push(t("deal_buy")); return b.join(" \u2022 ")||t("all_categories"); }
 function saveSearch(){ const s={...route.params,saved:Date.now()}; savedSearches.unshift(s); savedSearches=savedSearches.slice(0,12); localStorage.setItem("fz_saved_searches",JSON.stringify(savedSearches)); notify(t("search_saved")); renderTopbar(); }
@@ -354,11 +355,13 @@ function viewDetail(id){
       <div class="info-card"><h3 style="margin-bottom:8px">${t("description")}</h3><p class="desc">${esc(l.desc||t("no_desc"))}</p>
         <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:14px"><span>📍 ${esc(l.location)}</span><span>👁 ${l.views||0} ${t("views")}</span><span>🕒 ${relDate(l.date)}</span></div></div>
       ${offersCard(l,owner)}
+      ${commentsCard(l,owner)}
       ${owner.name?`<div class="info-card"><h3 style="margin-bottom:12px">${t("publisher")}</h3>
-        <div class="seller"><span class="avatar">${esc(userInitials(owner.name))}</span><div style="flex:1"><div class="nm">${esc(owner.name)}</div>
+        <div class="seller"><span class="avatar">${esc(userInitials(owner.name))}</span><div style="flex:1"><div class="nm">${owner.type==="dealer"?"<span class=\"dealer-pill\">🏛️ "+t("dealer")+"</span> ":""}<a onclick="go('store',{id:'${owner.id}'})" style="cursor:pointer;color:inherit">${esc(owner.name)}</a></div>
           <div class="stars">${starsHTML(owner.stars||0)} <span class="muted" style="font-size:12px">(${owner.deals||0} ${t("deals_count")})</span></div>
           ${owner.verified?`<div class="verified">${t("verified")}</div>`:""}</div></div>
         <p class="muted" style="font-size:13px;margin-top:10px">🌐 ${esc(showCountry(owner.country))}</p>
+        <a class="btn btn-ghost btn-sm" style="margin-top:8px;display:inline-flex" onclick="go('store',{id:'${owner.id}'})">🏪 ${t("view_store")}</a>
         <div class="detail-cta">
           <button class="btn btn-primary" style="flex:1" onclick="openChatFromListing('${esc(owner.phone)}','${esc(owner.name).replace(/'/g,"")}')">${t("chat_now")}</button>
           <a class="btn btn-ghost" href="tel:${esc(owner.phone)}">📞 ${t("call")}</a>
@@ -450,6 +453,7 @@ function viewAccount(){
         <div class="stars" style="margin-top:6px">${starsHTML(u.stars)} <span style="font-size:13px;opacity:.85">${u.deals} ${t("deals_count")}</span></div></div>
       <button class="btn btn-ghost" onclick="doLogout()">${t("logout")}</button></div>
     <div class="stat-row"><div class="stat-box"><b>${mine.length}</b><span>${t("my_ads")}</span></div><div class="stat-box"><b>${freeCount}</b><span>${t("my_free")}</span></div><div class="stat-box"><b>${u.stars||0}/5</b><span>${t("my_rating")}</span></div><div class="stat-box"><b>${u.deals}</b><span>${t("my_deals")}</span></div><div class="stat-box"><b>${totalViews}</b><span>${t("my_views")}</span></div></div>
+    ${accountTypeCard(u)}
     <div class="info-card" style="max-width:none"><h3 style="margin-bottom:12px">${t("saved_searches")}</h3>${savedSearches.length?`<div class="saved-list">${savedSearches.map((s,i)=>{const n=savedNewCount(s);return `<div class="saved-item" onclick="goSaved(${i})"><span style="flex:1">${esc(searchLabel(s))}</span>${n?`<span class="ci-badge">${n} ${t("new_results")}</span>`:""}<button class="saved-del" onclick="event.stopPropagation();delSavedSearch(${i})">×</button></div>`;}).join("")}</div>`:`<p class="muted" style="font-size:13px">${t("no_saved_search")}</p>`}</div>
     <div class="sec-head"><h2>${t("my_listings")}</h2><button class="btn btn-primary" onclick="go('add')">${t("add_listing")}</button></div>
     ${mine.length?`<div class="list-grid">${listCardsHTML(mine)}</div>`:`<div class="list-empty"><div class="big">📭</div><p>${t("no_listings")}</p><button class="btn btn-primary" style="margin-top:14px" onclick="go('add')">${t("add_first")}</button></div>`}
@@ -840,4 +844,64 @@ async function enableNotifications(){
     notify(t("notif_on"));
   }catch(e){ notify(LANG=="en"?"Failed":"تعذّر"); }
 }
+/* =========================================================================
+   14) صفحات المتاجر + أفراد/معارض + التعليقات (المرحلة 3)
+   ========================================================================= */
+async function viewStore(id){
+  app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">← ${t("back")}</span><div class="center muted" style="padding:40px">⏳</div></div></section>`;
+  window.scrollTo(0,0);
+  let data=null; try{ data=await store.getUserProfile(id); }catch(e){}
+  if(!data||!data.user){ app.innerHTML=`<section class="section"><div class="wrap"><p class="center muted">${LANG=="en"?"Store not found":"المتجر غير موجود"}</p></div></section>`; return; }
+  const u=data.user; const listings=data.listings||[]; const me=currentUser();
+  app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">← ${t("back")}</span>
+    <div class="store-head">
+      <div class="store-logo">${esc(userInitials(u.storeName||u.name))}</div>
+      <div style="flex:1;min-width:0">
+        <h1>${esc(u.storeName||u.name)} ${u.verified?'<i class="verified">✔</i>':""}</h1>
+        <div class="muted" style="margin-top:4px">${u.type==="dealer"?'<span class="dealer-pill">🏛️ '+t("dealer")+'</span> ':""}🌐 ${esc(showCountry(u.country))} • ${t("store_since")} ${u.joined}</div>
+        ${(u.storeDesc||u.bio)?`<p class="store-bio">${esc(u.storeDesc||u.bio)}</p>`:""}
+        <div style="margin-top:8px">${u.stars?`<span class="stars">${"★".repeat(u.stars)}<span class="empty">${"☆".repeat(5-u.stars)}</span></span> <span class="muted" style="font-size:13px">• ${u.deals} ${t("deals_count")}</span>`:""}</div>
+      </div>
+      <div class="store-cta">${me&&me.id===u.id?"":`<a class="btn btn-ghost btn-sm" href="tel:${esc(u.phone)}">📞 ${t("call")}</a><button class="btn btn-primary btn-sm" onclick="openChatFromListing('${esc(u.phone)}','${esc((u.storeName||u.name)).replace(/'/g,"")}')">${t("chat_now")}</button>`}</div>
+    </div>
+    <div class="sec-head" style="margin-top:24px"><h2>${t("store_listings")} <span class="muted" style="font-size:16px">(${listings.length})</span></h2></div>
+    ${listings.length?`<div class="list-grid">${listCardsHTML(listings)}</div>`:`<div class="list-empty"><div class="big">🏪</div><p>${t("store_empty")}</p></div>`}
+  </div></section>`;
+}
+/* ---- التعليقات ---- */
+function commentsCard(l,owner){
+  const cm=l.comments||[];
+  return `<div class="info-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3>💬 ${t("comments")}</h3><span class="pill">${cm.length} ${t("comments_count")}</span></div>
+    <div class="comment-box"><textarea id="cmText" placeholder="${t("write_comment")}" style="min-height:60px"></textarea><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="postComment('${l.id}',null)">↩ ${t("comment_send")}</button></div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px">${cm.length?cm.map(c=>commentHTML(c,l.id)).join(""):`<p class="muted center" style="padding:10px 0;font-size:13px">${t("no_comments")}</p>`}</div></div>`;
+}
+function commentHTML(c,lid){
+  const replies=(c.replies||[]).map(r=>`<div class="comment reply"><div class="cmt-avatar sm">${esc((r.name||"?").slice(0,1))}</div><div style="flex:1;min-width:0"><div class="cmt-head"><b>${esc(r.name)}</b><span class="muted" style="font-size:11px">${relDate(new Date(r.ts).toISOString())}</span></div><div class="cmt-body">${esc(r.text)}</div></div></div>`).join("");
+  return `<div class="comment"><div class="cmt-avatar">${esc((c.name||"?").slice(0,1))}</div><div style="flex:1;min-width:0"><div class="cmt-head"><b>${esc(c.name)}</b><span class="muted" style="font-size:11px">${relDate(new Date(c.ts).toISOString())}</span></div><div class="cmt-body">${esc(c.text)}</div><button class="cmt-reply" onclick="toggleReply('${c.id}')">${t("reply")}</button>${replies}<div id="reply_${c.id}" style="display:none;margin-top:8px"><textarea id="replyText_${c.id}" class="reply-input" placeholder="${t("comment_reply_ph")}" style="min-height:44px"></textarea><button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="postComment('${lid}','${c.id}')">${t("comment_send")}</button></div></div></div>`;
+}
+function toggleReply(cid){ const el=document.getElementById("reply_"+cid); if(el) el.style.display=el.style.display==="none"?"block":"none"; }
+async function postComment(lid,parentId){
+  if(!currentUser()){notify(t("login_comment"));openAuth();return;}
+  const ta=document.getElementById(parentId?("replyText_"+parentId):"cmText"); if(!ta) return;
+  const text=ta.value.trim(); if(!text) return;
+  try{ await store.postComment(lid,text,parentId); notify(t("comment_posted")); render(); }catch(e){ notify(LANG=="en"?"Failed":"تعذّر"); }
+}
+/* ---- نوع الحساب (أفراد/معارض) + إعدادات المتجر ---- */
+function accountTypeCard(u){
+  const isD=u.type==="dealer";
+  return `<div class="info-card" style="max-width:none"><h3 style="margin-bottom:12px">${t("account_type")}: <span class="pill">${isD?"🏛️ "+t("dealer"):"👤 "+t("individual")}</span></h3>
+    <button class="btn ${isD?"btn-ghost":"btn-primary"} btn-block" onclick="toggleDealerType()">${isD?t("become_individual"):t("become_dealer")}</button>
+    ${isD?`<div style="margin-top:14px"><div class="field"><label>${t("store_name_lbl")}</label><input id="stName" value="${esc(u.storeName||u.name)}"></div><div class="field"><label>${t("store_desc_lbl")}</label><textarea id="stDesc" style="min-height:70px">${esc(u.storeDesc||u.bio||"")}</textarea></div><button class="btn btn-primary btn-block" onclick="saveStore()">💾 ${t("save_store")}</button></div>`:""}</div>`;
+}
+async function toggleDealerType(){
+  if(!currentUser()) return;
+  const newType=currentUser().type==="dealer"?"individual":"dealer";
+  try{ await store.updateMyProfile({type:newType}); notify(newType==="dealer"?t("become_dealer"):t("become_individual")+" ✓"); render(); }catch(e){ notify(LANG=="en"?"Failed":"تعذّر"); }
+}
+async function saveStore(){
+  if(!currentUser()) return;
+  const name=document.getElementById("stName").value.trim(), desc=document.getElementById("stDesc").value.trim();
+  try{ await store.updateMyProfile({storeName:name,storeDesc:desc,name}); notify(t("save_store")+" ✓"); render(); }catch(e){ notify(LANG=="en"?"Failed":"تعذّر"); }
+}
+
 
