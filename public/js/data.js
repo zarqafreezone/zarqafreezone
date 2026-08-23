@@ -462,6 +462,20 @@ const CATEGORIES = [
       { id: "consultancy",      name: "استشارات إدارية ومالية", icon: "📊", types: ["استشارات إدارية", "استشارات مالية ومحاسبة", "دراسات جدوى", "تدقيق وضرائب", "أخرى"], brands: [] },
       { id: "services_other",   name: "خدمات أخرى",             icon: "➕", types: ["خدمات ترجمة", "خدمات تأمينية", "أخرى"], brands: [] }
     ]
+  },
+  {
+    id: "other",
+    name: "أخرى",
+    icon: "💼",
+    color: "#ea580c",
+    subs: [
+      { id: "brokerage",     name: "وساطة تجارية",   icon: "🧑‍💼", types: ["وساطة بيع وشراء", "وكالة تجارية", "تمثيل شركات أجنبية", "ربط صفقات", "وساطة استيراد وتصدير", "سمسار معتمد", "أخرى"], brands: [] },
+      { id: "marketing",     name: "تسويق",          icon: "📣", types: ["شراكة تسويقية", "رعاية وإعلان", "تسويق بالعمولة", "وكالة تسويق", "علاقات عامة", "حملات إطلاق منتج", "أخرى"], brands: [] },
+      { id: "partnership",   name: "عروض شراكة",     icon: "🤝", types: ["شريك مؤسس", "شريك مالي", "شراكة تشغيلية", "شراكة عينية", "انضمام لفريق مؤسس", "شراكة توسّع", "أخرى"], brands: [] },
+      { id: "investment",    name: "عروض استثمار",   icon: "💰", types: ["استثمار في مشروع ناشئ", "بيع حصة في شركة", "استثمار عقاري", "تمويل رأس مال", "صناديق استثمار", "طرح عام", "استثمار زراعي/صناعي", "أخرى"], brands: [] },
+      { id: "opportunities", name: "فرص تجارية",     icon: "🎯", types: ["امتياز تجاري", "توزيع ووكالة حصرية", "فرصة استيراد", "فرصة تصدير", "عطاءات ومناقصات", "تصفية محفظة", "أخرى"], brands: [] },
+      { id: "misc_offers",   name: "عروض متنوعة",    icon: "🧩", types: ["تصفية مخزون", "مقايضة", "طلب عروض أسعار", "بيع أصل تجاري", "هدايا وعينيات", "أخرى"], brands: [] }
+    ]
   }
 ];
 
@@ -499,7 +513,9 @@ const SEED_LISTINGS = [
   { id: "l5", deal: "buy",  section: "goods",    sub: "electronics", type: "هواتف ذكية", brand: "آبل", model: "", title: "أبحث عن آيفون 15 برو ماكس بالجملة", price: 0, currency: "USD", location: "—", images: 1, img: "images/seed-phone.jpg", user: "u2", date: "2026-08-17", featured: false, desc: "مشترٍ جاد يبحث عن كمية 50 قطعة آيفون 15 برو ماكس، يرجى التواصل بالأسعار." },
   { id: "l6", deal: "sell", section: "services", sub: "clearance",   type: "خدمات المنطقة الحرة", brand: "", model: "", title: "خدمات تخليص جمركي بالمنطقة الحرة", price: 0, currency: "USD", location: "مكتب 7", images: 1, img: "images/warehouse2.jpg", user: "u3", date: "2026-08-12", featured: true,  desc: "جميع معاملات التخليص الجمركي داخل المنطقة الحرة، سرعة في الإنجاز وأسعار منافسة." },
   { id: "l7", deal: "sell", section: "services", sub: "land",        type: "مستودعات ومخازن", brand: "", model: "", title: "مستودع 400م للإيجار داخل المنطقة الحرة", price: 800, currency: "USD", location: "المنطقة الغربية", images: 1, img: "images/warehouse3.jpg", user: "u3", date: "2026-08-08", featured: false, desc: "مستودع بمساحة 400 متر مربع، ارتفاع 7م، كهرباء وماء، موقع مميز." },
-  { id: "l8", deal: "sell", section: "vehicles", sub: "bikes",       type: "دراجة نارية رياضية", brand: "ياماها", model: "YZF-R1", title: "ياماها R1 2022 حالة الوكيل", price: 13500, currency: "USD", location: "معرض الأزرق", images: 1, img: "images/seed-bike.jpg", user: "u1", date: "2026-08-14", featured: false, desc: "دراجة ياماها R1، استخدام نادر، إطارات جديدة." }
+  { id: "l8", deal: "sell", section: "vehicles", sub: "bikes",       type: "دراجة نارية رياضية", brand: "ياماها", model: "YZF-R1", title: "ياماها R1 2022 حالة الوكيل", price: 13500, currency: "USD", location: "معرض الأزرق", images: 1, img: "images/seed-bike.jpg", user: "u1", date: "2026-08-14", featured: false, desc: "دراجة ياماها R1، استخدام نادر، إطارات جديدة." },
+  { id: "l9", deal: "sell", section: "other", sub: "partnership",  type: "شريك مالي", brand: "", model: "", title: "عرض شراكة: معرض سيارات ومركبات بالمنطقة الحرة", price: 0, currency: "USD", location: "معرض الأزرق", images: 1, img: "images/seed-partnership.jpg", user: "u1", date: "2026-08-20", featured: true,  desc: "معرض قائم منذ 12 عاماً داخل المنطقة الحرة يبحث عن شريك مالي للتوسّع وزيادة الاستيراد. أصول ثابتة وقاعدة عملاء ممتازة. للجادين فقط." },
+  { id: "l10", deal: "sell", section: "other", sub: "investment",  type: "استثمار عقاري", brand: "", model: "", title: "فرصة استثمار: مستودعات وأراضٍ بالمنطقة الحرة الزرقاء", price: 0, currency: "USD", location: "المنطقة الغربية", images: 1, img: "images/seed-investment.jpg", user: "u3", date: "2026-08-21", featured: true,  desc: "فرصة استثمارية في مستودعات وأراضٍ تجارية داخل المنطقة الحرة، عائد متوقع مرتفع وإعفاءات جمركية. التفاصيل عند التواصل." }
 ];
 
 // الصور عبر خدمة صور وهمية ملوّنة حسب القسم (data URI متجهات بسيطة)

@@ -64,11 +64,14 @@ async function initDB(){
     DB = loadDBFile(); console.log("📄 DB من ملف db.json (محلي)");
   }
   DB.users=DB.users||[]; DB.listings=DB.listings||[]; DB.banners=DB.banners||DEFAULT_BANNERS.slice(); DB.payments=DB.payments||[]; DB.revenue=DB.revenue||0;
-  // ترحيل آمن (مرة واحدة): تعبئة صور الإعلانات النموذجية التي كانت بلا صور
-  const SEED_IMG_BACKFILL = { l1:"images/seed-car.jpg", l4:"images/seed-ac.jpg", l5:"images/seed-phone.jpg", l8:"images/seed-bike.jpg" };
-  let _imgFilled = false;
-  (DB.listings||[]).forEach(l=>{ if(SEED_IMG_BACKFILL[l.id] && !l.img){ l.img = SEED_IMG_BACKFILL[l.id]; _imgFilled = true; } });
-  if(_imgFilled){ saveDB(DB); console.log("🖼️ تم تحديث صور الإعلانات النموذجية بلا صور"); }
+  // مزامنة الإعلانات النموذجية: إدراج الجديدة المفقودة + تعبئة أي صورة ناقصة (آمن، مرة واحدة)
+  let _seedSynced = false;
+  for(const sl of SEED_LISTINGS){
+    const ex = (DB.listings||[]).find(l=>l.id===sl.id);
+    if(!ex){ DB.listings.push({...sl}); _seedSynced = true; }           // إدراج إعلان جديد
+    else if(sl.img && !ex.img){ ex.img = sl.img; _seedSynced = true; }  // تعبئة صورة ناقصة
+  }
+  if(_seedSynced){ saveDB(DB); console.log("🧩 تمت مزامنة الإعلانات النموذجية (إضافة/صور)"); }
   // تحميل المحادثات
   if(chatCol){
     const cdoc = await chatCol.findOne({_id:"main"});

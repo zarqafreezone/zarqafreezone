@@ -354,6 +354,15 @@ const DICT = {
   "طباعة ودعاية":"Printing & Advertising","طباعة ومستنسخات":"Printing & Copiers","لافتات وإعلانات":"Signs & Ads","هدايا دعائية":"Promotional Gifts","تصميم جرافيك":"Graphic Design",
   "محطات وقود وغاز":"Fuel & Gas Stations","محطة وقود":"Fuel Station","بيع غاز":"Gas Sales","زيوت ومواد تشحيم":"Oils & Lubricants",
   "استشارات إدارية ومالية":"Management & Financial Consulting","استشارات إدارية":"Management Consulting","استشارات مالية ومحاسبة":"Financial & Accounting","دراسات جدوى":"Feasibility Studies","تدقيق وضرائب":"Audit & Taxes",
+
+  // ===== قسم "أخرى" =====
+  "تسويق":"Marketing","وساطة تجارية":"Commercial Brokerage","عروض شراكة":"Partnership Offers","عروض استثمار":"Investment Offers","فرص تجارية":"Business Opportunities","عروض متنوعة":"Miscellaneous Offers",
+  "وساطة بيع وشراء":"Buy/Sell Brokerage","وكالة تجارية":"Commercial Agency","تمثيل شركات أجنبية":"Foreign Company Representation","ربط صفقات":"Deal Matching","وساطة استيراد وتصدير":"Import/Export Brokerage","سمسار معتمد":"Certified Broker",
+  "شراكة تسويقية":"Marketing Partnership","رعاية وإعلان":"Sponsorship & Ads","تسويق بالعمولة":"Affiliate Marketing","وكالة تسويق":"Marketing Agency","علاقات عامة":"Public Relations","حملات إطلاق منتج":"Product Launch Campaigns",
+  "شريك مؤسس":"Co-founder Partner","شريك مالي":"Financial Partner","شراكة تشغيلية":"Operational Partnership","شراكة عينية":"In-kind Partnership","انضمام لفريق مؤسس":"Join Founding Team","شراكة توسّع":"Expansion Partnership",
+  "استثمار في مشروع ناشئ":"Startup Investment","بيع حصة في شركة":"Selling Company Share","استثمار عقاري":"Real Estate Investment","تمويل رأس مال":"Venture Capital","صناديق استثمار":"Investment Funds","طرح عام":"Public Offering (IPO)","استثمار زراعي/صناعي":"Agro/Industrial Investment",
+  "امتياز تجاري":"Franchise","توزيع ووكالة حصرية":"Exclusive Distribution","فرصة استيراد":"Import Opportunity","فرصة تصدير":"Export Opportunity","عطاءات ومناقصات":"Tenders & Bids","تصفية محفظة":"Portfolio Liquidation",
+  "تصفية مخزون":"Stock Liquidation","مقايضة":"Barter / Swap","طلب عروض أسعار":"Request for Quotation","بيع أصل تجاري":"Selling Business Asset","هدايا وعينيات":"Gifts & In-kind",
 };
 
 function t(key){ const s = STR[key]; return s ? (s[LANG] || s.ar) : key; }
