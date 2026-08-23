@@ -38,6 +38,11 @@ function resizeImageToDataURL(file, maxW=1000){
   });
 }
 
+/* قراءة ملف (فيديو) إلى Data URL كما هو دون تصغير */
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file); });
+}
+
 /* =========================================================================
    واجهة store (عمليات غير متزامنة تتصل بالخادم)
    ========================================================================= */
@@ -66,13 +71,21 @@ const store = {
 
   /* الإعلانات */
   async createListing(data){
-    let img="";
+    let img="", video="";
     if(data.file){ try{ const url=await this.uploadImage(data.file); img=url; }catch(e){} }
-    const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,zone:data.zone||"inside",location:data.location,desc:data.desc,img};
+    if(data.videoFile){ try{ const url=await this.uploadVideo(data.videoFile); video=url; }catch(e){} }
+    const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,zone:data.zone||"inside",location:data.location,desc:data.desc,img,video};
     const d=await jpost("/api/listings", body);
     if(d.listing){ state.listings.unshift(d.listing); }
     return d.listing;
   },
+  async uploadVideo(file){
+    const dataURL = typeof file==="string" ? file : await fileToDataURL(file);
+    const d=await jpost("/api/upload-video",{data:dataURL});
+    if(!d.url) throw new Error("upload_failed");
+    return d.url;
+  },
+  async offerListing(id, price, note){ const d=await jpost("/api/listings/"+id+"/offer", {price, note}); if(d.offers!=null){ const l=state.listings.find(x=>x.id===id); if(l) l.offers=d.offers; } return d; },
   async uploadImage(file){
     const dataURL = typeof file==="string" ? file : await resizeImageToDataURL(file);
     const d=await jpost("/api/upload",{data:dataURL});
@@ -118,15 +131,19 @@ function isAdmin(){ return !!state.adminToken; }
 function isFree(l){ if(!l||!l.date) return true; return (Date.now()-new Date(l.date).getTime())/86400000 <= FREE_DAYS; }
 function daysLeft(l){ return Math.max(0, Math.round(FREE_DAYS-(Date.now()-new Date(l.date).getTime())/86400000)); }
 
-function queryListings({section,sub,deal,q,featured,sort}={}){
+function queryListings({section,sub,deal,q,featured,sort,min,max,zone}={}){
   let r = state.listings.slice();
   if(section)  r=r.filter(l=>l.section===section);
   if(sub)      r=r.filter(l=>l.sub===sub);
   if(deal)     r=r.filter(l=>l.deal===deal);
   if(featured) r=r.filter(l=>l.featured);
+  if(zone)     r=r.filter(l=>l.zone===zone);
+  if(min!=null && min!=="") r=r.filter(l=>Number(l.price)>=Number(min));
+  if(max!=null && max!=="") r=r.filter(l=>Number(l.price)<=Number(max));
   if(q){ const s=q.toLowerCase(); r=r.filter(l=>(l.title||"").toLowerCase().includes(s)||(l.desc||"").toLowerCase().includes(s)||(l.type||"").toLowerCase().includes(s)||(l.brand||"").toLowerCase().includes(s)||(tData(l.type)||"").toLowerCase().includes(s)||(tData(l.brand)||"").toLowerCase().includes(s)); }
   if(sort==="price_asc") r.sort((a,b)=>a.price-b.price);
   else if(sort==="price_desc") r.sort((a,b)=>b.price-a.price);
+  else if(sort==="popular") r.sort((a,b)=>(b.views||0)-(a.views||0));
   else r.sort((a,b)=>(b.date<a.date?-1:1));
   return r;
 }

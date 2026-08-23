@@ -481,3 +481,41 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 [data-theme="dark"] .note-free,
 [data-theme="dark"] .pay-note{background:#0c2a3a;border-color:#155e75;color:#7dd3fc}
 [data-theme="dark"] .splash{background:linear-gradient(160deg,#0b1220,#141c2e 60%,#0d2a2a)}
+
+/* =========================================================================
+   v4 (المرحلة 2) — عروض الأسعار، الفلاتر، البحث المحفوظ، الفيديو
+   ========================================================================= */
+/* شريط الفلاتر في التصفّح */
+.filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:14px;background:#fff;border-radius:14px;box-shadow:var(--shadow)}
+.filter-bar input,.filter-bar select{padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;min-width:0}
+.filter-bar .muted{font-size:14px}
+
+/* بطاقة عروض الأسعار + قائمة العروض */
+.offer-row{background:var(--bg);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;border:1px solid var(--line)}
+.offer-price{font-weight:800;color:var(--blue-d);font-size:16px}
+
+/* البحث المحفوظ */
+.saved-list{display:flex;flex-direction:column;gap:8px}
+.saved-item{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;transition:.15s}
+.saved-item:hover{border-color:var(--blue);background:#eff6ff}
+.saved-item .ci-badge{background:var(--green)}
+.saved-del{background:transparent;color:var(--muted);font-size:20px;width:28px;height:28px;border-radius:8px;flex-shrink:0;transition:.15s}
+.saved-del:hover{color:var(--red);background:#fef2f2}
+
+/* فيديو الإعلان */
+.gallery .main video{width:100%;height:100%;object-fit:cover;background:#000;display:block}
+.list-card .thumb video{width:100%;height:100%;object-fit:cover}
+
+/* شبكة 5 أعمدة للإحصائيات على الكمبيوتر */
+.stat-row{grid-template-columns:repeat(5,1fr)}
+@media(max-width:980px){.stat-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+
+/* الوضع الليلي للمكوّنات الجديدة */
+[data-theme="dark"] .filter-bar,
+[data-theme="dark"] .offer-row,
+[data-theme="dark"] .saved-item{background:var(--card)}
+[data-theme="dark"] .filter-bar input,
+[data-theme="dark"] .filter-bar select,
+[data-theme="dark"] .offer-row{border-color:var(--line)}
+[data-theme="dark"] .saved-item:hover{background:#1e293b}

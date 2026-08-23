@@ -195,7 +195,7 @@ function bannerSquare(){
    ========================================================================= */
 function viewHome(){
   const total=allListings().length; const subs=CATEGORIES.reduce((a,c)=>a+c.subs.length,0);
-  const featured=queryListings({featured:true}); const latest=queryListings({sort:"newest"}).slice(0,8);
+  const featured=queryListings({featured:true}); const latest=queryListings({sort:"newest"}).slice(0,8); const wanted=queryListings({deal:"buy"}).slice(0,4);
   app.innerHTML=`
     <section class="hero" style="background-image:linear-gradient(135deg,rgba(30,58,138,.86),rgba(37,99,235,.78)),url('images/zone.jpg')">
       <div class="wrap"><div class="badge-free">${t("hero_free_badge")}</div>
@@ -220,6 +220,7 @@ function viewHome(){
         return `<div class="cat-card" onclick="go('section',{section:'${c.id}'})"><span class="count">${n} ${t("ads_label")}</span><div class="ico">${c.icon}</div><h3>${tData(c.name)}</h3><p>${c.subs.length} ${t("sub_count")}</p></div>`;}).join("")}</div></div></section>
     ${featured.length?`<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("featured")}</h2><a onclick="go('browse',{featured:'1'})">${t("view_all")}</a></div><div class="list-grid">${listCardsHTML(featured)}</div></div></section>`:""}
     <section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("latest")}</h2><a onclick="go('browse',{sort:'newest'})">${t("view_all")}</a></div><div class="list-grid">${listCardsHTML(latest)}</div></div></section>
+    ${wanted.length?`<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("wanted_section")}</h2><a onclick="go('browse',{deal:'buy'})">${t("wanted_view_all")}</a></div><div class="list-grid">${listCardsHTML(wanted)}</div></div></section>`:""}
     <section class="section" style="padding-top:0"><div class="wrap"><div class="rating-legend"><h3>${t("rating_title")}</h3>
       ${[["★★★★★",100,"rt_5"],["★★★★",80,"rt_4"],["★★★",60,"rt_3"],["★★",40,"rt_2"],["★",20,"rt_1"]].map(r=>`<div class="rt-row"><span class="s">${r[0]}</span><div class="bar"><i style="width:${r[1]}%"></i></div><span class="d">${t(r[2])}</span></div>`).join("")}</div></div></section>`;
 }
@@ -282,7 +283,8 @@ function viewBrowse(p){
         <button class="${p.deal==='buy'?'active':''}" onclick="go('browse',{...currentBrowse(),deal:'buy'})">${t("deal_buy")}</button>
       </div>
       <input id="brQ" placeholder="${t("search_text")}" value="${esc(p.q||"")}" style="flex:1;min-width:140px" onkeydown="if(event.key==='Enter')browseSearch()">
-      <select id="brSort" onchange="go('browse',{...currentBrowse(),sort:this.value})"><option value="">${t("sort_latest")}</option><option value="price_asc" ${p.sort==='price_asc'?'selected':''}>${t("sort_price_up")}</option><option value="price_desc" ${p.sort==='price_desc'?'selected':''}>${t("sort_price_down")}</option></select></div>
+      <select id="brSort" onchange="go('browse',{...currentBrowse(),sort:this.value})"><option value="">${t("sort_latest")}</option><option value="price_asc" ${p.sort==='price_asc'?'selected':''}>${t("sort_price_up")}</option><option value="price_desc" ${p.sort==='price_desc'?'selected':''}>${t("sort_price_down")}</option><option value="popular" ${p.sort==='popular'?'selected':''}>${t("sort_popular")}</option></select></div>
+      <div class="filter-bar"><span class="muted" style="font-weight:700;white-space:nowrap">${t("filter_price")}</span><input id="brMin" type="number" inputmode="numeric" placeholder="${t("min_price")}" value="${esc(p.min||"")}" style="width:84px"><span class="muted">—</span><input id="brMax" type="number" inputmode="numeric" placeholder="${t("max_price")}" value="${esc(p.max||"")}" style="width:84px"><select id="brZone"><option value="">${t("zone_all")}</option><option value="inside" ${p.zone==='inside'?'selected':''}>${t("zone_inside")}</option><option value="outside" ${p.zone==='outside'?'selected':''}>${t("zone_outside")}</option></select><button class="btn btn-primary btn-sm" onclick="applyFilters()">${t("apply")}</button><button class="btn btn-ghost btn-sm" onclick="saveSearch()">${t("save_search")}</button></div>
       <p class="muted" style="margin-bottom:14px">${items.length} ${t("results_count")}</p>
       ${items.length?`<div class="list-grid">${listCardsHTML(items)}</div>`:`<div class="list-empty"><div class="big">🔍</div><p>${t("no_results")}</p><button class="btn btn-primary" style="margin-top:14px" onclick="go('add')">${t("add_your_ad")}</button></div>`}
       ${bannerLong()}</div>
@@ -291,6 +293,20 @@ function viewBrowse(p){
 }
 function currentBrowse(){ return route.params; }
 function browseSearch(){ go("browse",{...currentBrowse(),q:document.getElementById("brQ").value}); }
+function applyFilters(){ go("browse",{...currentBrowse(),min:document.getElementById("brMin").value,max:document.getElementById("brMax").value,zone:document.getElementById("brZone").value}); }
+let savedSearches=JSON.parse(localStorage.getItem("fz_saved_searches")||"[]");
+function searchLabel(p){ const b=[]; if(p.q)b.push(p.q); if(p.section)b.push(tData(getSectionName(p.section))); if(p.deal==='sell')b.push(t("deal_sell")); if(p.deal==='buy')b.push(t("deal_buy")); return b.join(" \u2022 ")||t("all_categories"); }
+function saveSearch(){ const s={...route.params,saved:Date.now()}; savedSearches.unshift(s); savedSearches=savedSearches.slice(0,12); localStorage.setItem("fz_saved_searches",JSON.stringify(savedSearches)); notify(t("search_saved")); }
+function savedNewCount(s){ try{ const list=queryListings(s); const since=new Date(s.saved).toISOString().slice(0,10); return list.filter(l=>l.date&&l.date>=since).length; }catch(e){ return 0; } }
+function goSaved(i){ const s=savedSearches[i]; if(!s)return; const {saved,...params}=s; go("browse",params); }
+function delSavedSearch(i){ savedSearches.splice(i,1); localStorage.setItem("fz_saved_searches",JSON.stringify(savedSearches)); render(); }
+/* عروض الأسعار (Make Offer) */
+let offerTarget=null;
+function openOffer(id){ if(!currentUser()){notify(t("r_login"));openAuth();return;} offerTarget=id; overlay.classList.add("show"); overlay.innerHTML=`<div class="modal modal-wrap"><button class="modal-close" onclick="closeOffer()">×</button><div style="font-size:44px;text-align:center">💎</div><h2 style="text-align:center">${t("offer_title")}</h2><p class="muted center" style="margin-bottom:14px">${t("offer_desc")}</p><div class="field"><label>${t("offer_price")} (${CUR_SYM[CUR]})</label><input id="offerPrice" type="number" min="0" inputmode="numeric" placeholder="0"></div><div class="field"><label>${t("offer_note")}</label><textarea id="offerNote" style="min-height:80px"></textarea></div><button class="btn btn-primary btn-block btn-lg" onclick="submitOffer()">${t("make_offer")}</button><button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeOffer()">${t("got_it")}</button></div>`; }
+function closeOffer(){ overlay.classList.remove("show"); overlay.innerHTML=""; offerTarget=null; }
+async function submitOffer(){ if(!offerTarget)return; const l=findListing(offerTarget); if(!l)return; const price=document.getElementById("offerPrice").value; const note=document.getElementById("offerNote").value.trim(); const me=currentUser(); try{ await store.offerListing(offerTarget,price,note); if(l.owner&&l.owner.phone){ const txt=(LANG=="en"?"\U0001f4b0 New offer: ":"\U0001f4b0 عرض سعر جديد: ")+(price?(Number(price).toLocaleString("en-US")+" "+CUR_SYM[CUR]):t("at_call"))+(note?(" \u2014 "+note):""); fetch("/api/chat/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({from:me.phone,to:l.owner.phone,text:txt,lang:LANG})}); } closeOffer(); notify(t("offer_sent")); }catch(e){ notify(LANG=="en"?"Failed":"\u062a\u0639\u0630\u0631"); } }
+function offersListHTML(offers){ return offers.slice().reverse().map(o=>`<div class="offer-row"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(o.name)}</b><span class="muted" style="font-size:12px">${relDate(new Date(o.ts).toISOString())}</span></div><div class="offer-price">${o.price?(Number(o.price).toLocaleString("en-US")+" "+CUR_SYM[CUR]):t("at_call")}</div>${o.note?`<div class="muted" style="font-size:13px;margin-top:2px">${esc(o.note)}</div>`:""}</div>`).join(""); }
+function offersCard(l,owner){ const offers=l.offers||[]; const mine=currentUser()&&owner&&currentUser().id===owner.id; return `<div class="info-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3>${t("offers_label")}</h3><span class="pill">${offers.length} ${t("offers_count")}</span></div><button class="btn btn-primary btn-block" onclick="openOffer('${l.id}')">${t("make_offer")}</button>${mine&&offers.length?`<div style="margin-top:14px">${offersListHTML(offers)}</div>`:(mine?`<p class="muted" style="margin-top:12px;font-size:13px">${t("no_offers")}</p>`:"")}</div>`; }
 
 /* =========================================================================
    بطاقات الإعلانات + المفضلة
@@ -322,7 +338,7 @@ function viewDetail(id){
   const owner=l.owner||{}, sec=findSection(l.section), sub=findSub(l.section,l.sub), free=isFree(l);
   app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">${t("back")}</span>
     <div class="detail-grid"><div>
-      <div class="gallery"><div class="main"><img src="${thumbURL(l)}" alt=""></div></div>
+      <div class="gallery"><div class="main">${l.video?`<video src="${l.video}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;background:#000"></video>`:`<img src="${thumbURL(l)}" alt="">`}</div></div>
       ${bannerLong()}
       ${sub&&sub.types.length?`<div class="info-card" style="margin-top:16px"><h3 style="margin-bottom:10px">${t("related_types")}</h3><div class="type-list">${sub.types.map(ty=>`<span class="type-chip" onclick="go('browse',{section:'${l.section}',sub:'${l.sub}',q:'${ty.replace(/'/g,"")}'}">${tData(ty)}</span>`).join("")}</div></div>`:""}
     </div><div class="detail-info">
@@ -333,6 +349,7 @@ function viewDetail(id){
       <div class="tags"><span class="pill">${sec.icon} ${tData(sec.name)}</span>${sub?`<span class="pill">${sub.icon} ${tData(sub.name)}</span>`:""}${l.zone==='outside'?`<span class="pill" style="background:#dbeafe;color:#1d4ed8">🌐 ${t("zone_outside")}</span>`:`<span class="pill" style="background:#d1fae5;color:#047857">📍 ${t("zone_inside")}</span>`}${l.type?`<span class="pill">🏷️ ${tData(l.type)}</span>`:""}${l.brand?`<span class="pill">🏢 ${tData(l.brand)}</span>`:""}${l.model?`<span class="pill">🔢 ${esc(l.model)}</span>`:""}</div></div>
       <div class="info-card"><h3 style="margin-bottom:8px">${t("description")}</h3><p class="desc">${esc(l.desc||t("no_desc"))}</p>
         <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:14px"><span>📍 ${esc(l.location)}</span><span>👁 ${l.views||0} ${t("views")}</span><span>🕒 ${relDate(l.date)}</span></div></div>
+      ${offersCard(l,owner)}
       ${owner.name?`<div class="info-card"><h3 style="margin-bottom:12px">${t("publisher")}</h3>
         <div class="seller"><span class="avatar">${esc(userInitials(owner.name))}</span><div style="flex:1"><div class="nm">${esc(owner.name)}</div>
           <div class="stars">${starsHTML(owner.stars||0)} <span class="muted" style="font-size:12px">(${owner.deals||0} ${t("deals_count")})</span></div>
@@ -388,6 +405,7 @@ function drawAdd(){
       <div class="field full"><label>${t("f_model")}</label><input id="fModel" placeholder="${t("f_model_ph")}"></div>
       <div class="field full"><label>${t("f_desc")}</label><textarea id="fDesc" placeholder="${t("f_desc_ph")}"></textarea></div>
       <div class="field full"><label>${t("f_image")}</label><input id="fImg" type="file" accept="image/*"></div>
+      <div class="field full"><label>${t("video_field")}</label><input id="fVideo" type="file" accept="video/*"></div>
       <button class="btn btn-primary btn-block btn-lg" id="publishBtn" onclick="submitListing()">${t("publish_free")}</button>
     </div></div></section>`;
 }
@@ -402,11 +420,13 @@ async function submitListing(){
   if(addForm.zone==="outside"&&!document.getElementById("fLoc").value.trim()){notify(t("offer_address"));return;}
   const btn=document.getElementById("publishBtn"); btn.disabled=true; btn.textContent=LANG==="en"?"Publishing…":"جارٍ النشر…";
   const imgEl=document.getElementById("fImg"), file=imgEl&&imgEl.files&&imgEl.files[0];
+  const vidEl=document.getElementById("fVideo"), vfile=vidEl&&vidEl.files&&vidEl.files[0];
+  if(vfile && vfile.size>8*1024*1024){ btn.disabled=false; btn.textContent=t("publish_free"); notify(t("video_too_big")); return; }
   try{
     const l=await store.createListing({deal:addForm.deal,section:addForm.section,sub:addForm.sub,
       type:document.getElementById("fType")?.value||"",brand:document.getElementById("fBrand")?.value||"",
       model:document.getElementById("fModel").value.trim(),title,price:document.getElementById("fPrice").value,
-      zone:addForm.zone,location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),file});
+      zone:addForm.zone,location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),file,videoFile:vfile});
     notify(LANG==="en"?"Published ✓ (free 3 months)":"تم نشر إعلانك بنجاح ✓ (مجاني 3 أشهر)");
     go("detail",{id:l.id});
   }catch(e){ btn.disabled=false; btn.textContent=t("publish_free"); notify(LANG==="en"?"Failed to publish":"تعذّر النشر"); }
@@ -418,14 +438,15 @@ async function submitListing(){
 function viewAccount(){
   const u=currentUser();
   if(!u){app.innerHTML=`<section class="section"><div class="wrap center"><div class="form-card" style="max-width:420px"><div class="big" style="font-size:60px">🔒</div><h2 style="margin:10px 0">${t("acc_login_title")}</h2><p class="muted" style="margin-bottom:18px">${t("acc_login_desc")}</p><button class="btn btn-primary btn-block btn-lg" onclick="openAuth()">${t("login")}</button></div></div></section>`;return;}
-  const mine=userListings(u.id), freeCount=mine.filter(isFree).length;
+  const mine=userListings(u.id), freeCount=mine.filter(isFree).length, totalViews=mine.reduce((a,l)=>a+(l.views||0),0);
   app.innerHTML=`<section class="section"><div class="wrap">
     <div class="profile-head"><span class="avatar">${esc(userInitials(u.name))}</span>
       <div style="flex:1"><h2>${esc(u.name)} ${u.verified?`<span style="font-size:14px;opacity:.8">${t("verified")}</span>`:""}</h2>
         <div class="ph">${esc(showCountry(u.country))} • ${esc(u.phone)}</div>
         <div class="stars" style="margin-top:6px">${starsHTML(u.stars)} <span style="font-size:13px;opacity:.85">${u.deals} ${t("deals_count")}</span></div></div>
       <button class="btn btn-ghost" onclick="doLogout()">${t("logout")}</button></div>
-    <div class="stat-row"><div class="stat-box"><b>${mine.length}</b><span>${t("my_ads")}</span></div><div class="stat-box"><b>${freeCount}</b><span>${t("my_free")}</span></div><div class="stat-box"><b>${u.stars||0}/5</b><span>${t("my_rating")}</span></div><div class="stat-box"><b>${u.deals}</b><span>${t("my_deals")}</span></div></div>
+    <div class="stat-row"><div class="stat-box"><b>${mine.length}</b><span>${t("my_ads")}</span></div><div class="stat-box"><b>${freeCount}</b><span>${t("my_free")}</span></div><div class="stat-box"><b>${u.stars||0}/5</b><span>${t("my_rating")}</span></div><div class="stat-box"><b>${u.deals}</b><span>${t("my_deals")}</span></div><div class="stat-box"><b>${totalViews}</b><span>${t("my_views")}</span></div></div>
+    <div class="info-card" style="max-width:none"><h3 style="margin-bottom:12px">${t("saved_searches")}</h3>${savedSearches.length?`<div class="saved-list">${savedSearches.map((s,i)=>{const n=savedNewCount(s);return `<div class="saved-item" onclick="goSaved(${i})"><span style="flex:1">${esc(searchLabel(s))}</span>${n?`<span class="ci-badge">${n} ${t("new_results")}</span>`:""}<button class="saved-del" onclick="event.stopPropagation();delSavedSearch(${i})">×</button></div>`;}).join("")}</div>`:`<p class="muted" style="font-size:13px">${t("no_saved_search")}</p>`}</div>
     <div class="sec-head"><h2>${t("my_listings")}</h2><button class="btn btn-primary" onclick="go('add')">${t("add_listing")}</button></div>
     ${mine.length?`<div class="list-grid">${listCardsHTML(mine)}</div>`:`<div class="list-empty"><div class="big">📭</div><p>${t("no_listings")}</p><button class="btn btn-primary" style="margin-top:14px" onclick="go('add')">${t("add_first")}</button></div>`}
     <div class="rating-legend" style="margin-top:24px"><h3>${t("rating_me")}</h3>
@@ -652,7 +673,7 @@ function paintBadge(){ const el=document.getElementById("chatBadge"); if(el){ el
 document.getElementById("fabAdd").addEventListener("click",()=>go("add"));
 document.querySelectorAll(".bottom-nav [data-route]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.route)));
 document.getElementById("topSearch").addEventListener("keydown",e=>{ if(e.key==="Enter"){const q=e.target.value.trim(); if(q) go("browse",{q});} });
-overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); closeReport(); closeInstallGuide(); } });
+overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); closeReport(); closeInstallGuide(); closeOffer(); } });
 
 /* انطلاق */
 (async function init(){

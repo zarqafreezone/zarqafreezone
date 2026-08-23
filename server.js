@@ -28,7 +28,7 @@ const DEFAULT_BANNERS = [
   { id:"square", active:true, text_ar:"🏭 مستودعات وأراضٍ متاحة للإيجار داخل المنطقة الحرة", text_en:"🏭 Warehouses & land available for lease in the Free Zone", link:"#browse" }
 ];
 
-const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".apk":"application/vnd.android.package-archive",".woff2":"font/woff2" };
+const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".mp4":"video/mp4",".webm":"video/webm",".apk":"application/vnd.android.package-archive",".woff2":"font/woff2" };
 
 /* ---------- قاعدة البيانات (MongoDB Atlas دائمة + db.json احتياطي محلي) ---------- */
 let mongoClient=null, stateCol=null, chatCol=null, imgCol=null, MONGO_ERR="";
@@ -81,7 +81,7 @@ async function initDB(){
 }
 
 function pubUser(u){ return u ? {id:u.id,name:u.name,phone:u.phone,country:u.country,joined:u.joined,verified:u.verified,stars:u.stars,deals:u.deals,bio:u.bio} : null; }
-function withOwner(l){ return Object.assign({views:0, reports:0}, l, { owner: pubUser(DB.users.find(u=>u.id===l.user)) }); }
+function withOwner(l){ return Object.assign({views:0, reports:0, offers:[]}, l, { owner: pubUser(DB.users.find(u=>u.id===l.user)) }); }
 
 /* ---------- مساعدات الرد والاستقبال ---------- */
 function send(res, code, body, type="application/json"){
@@ -107,6 +107,17 @@ function saveDataURI(dataURI, id){
     const ext = m[1]==="jpeg"?"jpg":m[1];
     try { fs.writeFileSync(path.join(UPLOAD_DIR, id+"."+ext), Buffer.from(m[2],"base64")); } catch {}
     if(imgCol){ imgCol.updateOne({_id:id}, {$set:{data:dataURI, ext, updatedAt:new Date()}}, {upsert:true}).catch(()=>{}); }
+    return "/api/img/"+id;
+  }catch(e){ return null; }
+}
+/* رفع مقطع فيديو (يُخزَّن في مجموعة الوسائط، الحد 10MB) */
+function saveVideo(dataURI, id){
+  try{
+    const m = String(dataURI).match(/^data:video\/(\w+);base64,(.*)$/);
+    if(!m || m[2].length>10*1024*1024) return null;
+    const ext = m[1]==="quicktime"?"mov":m[1];
+    try { fs.writeFileSync(path.join(UPLOAD_DIR, id+"."+ext), Buffer.from(m[2],"base64")); } catch {}
+    if(imgCol){ imgCol.updateOne({_id:id}, {$set:{data:dataURI, ext, kind:"video", updatedAt:new Date()}}, {upsert:true}).catch(()=>{}); }
     return "/api/img/"+id;
   }catch(e){ return null; }
 }
@@ -191,12 +202,18 @@ const server = http.createServer(async (req,res)=>{
     const saved = saveDataURI(b.data, "img"+Date.now());
     return saved? send(res,200,{url:saved}) : send(res,400,{error:"invalid_image"});
   }
+  if(p==="/api/upload-video" && M==="POST"){
+    const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
+    const b=await readBody(req);
+    const saved = saveVideo(b.data, "vid"+Date.now());
+    return saved? send(res,200,{url:saved}) : send(res,400,{error:"invalid_video"});
+  }
   if(m(/^\/api\/img\/([^/]+)$/)){
     if(M!=="GET") return send(res,405,{error:"method"});
     const id=p.split("/")[3];
     try{ const fn = fs.existsSync(UPLOAD_DIR) ? fs.readdirSync(UPLOAD_DIR).find(x=>x.startsWith(id+".")) : null;
       if(fn){ const data=fs.readFileSync(path.join(UPLOAD_DIR,fn)); return send(res,200,data, MIME[path.extname(fn).toLowerCase()]||"image/jpeg"); } }catch{}
-    if(imgCol){ try{ const doc=await imgCol.findOne({_id:id}); if(doc&&doc.data){ const mm=String(doc.data).match(/^data:image\/(\w+)/); const ct=mm?("image/"+(mm[1]==="jpeg"?"jpeg":mm[1])):"image/jpeg"; const b64=String(doc.data).split(",")[1]||""; return send(res,200,Buffer.from(b64,"base64"),ct); } }catch{} }
+    if(imgCol){ try{ const doc=await imgCol.findOne({_id:id}); if(doc&&doc.data){ const mm=String(doc.data).match(/^data:(image|video)\/([\w-]+)/); let ct="image/jpeg"; if(mm){ ct=(mm[1]==="image"&&mm[2]==="jpeg")?"image/jpeg":(mm[1]+"/"+(mm[2]==="quicktime"?"mp4":mm[2])); } const b64=String(doc.data).split(",")[1]||""; return send(res,200,Buffer.from(b64,"base64"),ct); } }catch{} }
     return send(res,404,"Not Found","text/plain");
   }
 
@@ -217,7 +234,7 @@ const server = http.createServer(async (req,res)=>{
   if(p==="/api/listings" && M==="POST"){
     const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
     const b=await readBody(req);
-    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", zone:b.zone||"inside", location:b.location||"", images:b.img?1:0, img:b.img||"", user:u.id, date:new Date().toISOString().slice(0,10), featured:false, desc:(b.desc||"").slice(0,2000) };
+    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", zone:b.zone||"inside", location:b.location||"", images:b.img?1:0, img:b.img||"", video:b.video||"", user:u.id, date:new Date().toISOString().slice(0,10), featured:false, desc:(b.desc||"").slice(0,2000) };
     DB.listings.unshift(l); saveDB(DB);
     return send(res,200,{listing:withOwner(l)});
   }
@@ -243,6 +260,14 @@ const server = http.createServer(async (req,res)=>{
     const b=await readBody(req);
     DB.reports=DB.reports||[]; DB.reports.push({id:"r"+Date.now(), listing:id, by:u.id, reason:(b.reason||"").slice(0,300), date:new Date().toISOString().slice(0,10)});
     l.reports=(l.reports||0)+1; saveDB(DB); return send(res,200,{ok:true});
+  }
+  if(m(/^\/api\/listings\/([^/]+)\/offer$/) && M==="POST"){
+    const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
+    const id=p.split("/")[3], l=DB.listings.find(x=>x.id===id); if(!l) return send(res,404,{error:"not_found"});
+    const b=await readBody(req);
+    l.offers=l.offers||[];
+    l.offers.push({id:"o"+Date.now(), from:u.id, name:u.name, price:Number(b.price)||0, note:(b.note||"").slice(0,300), ts:Date.now()});
+    saveDB(DB); return send(res,200,{ok:true, offers:l.offers});
   }
 
   /* ----- المفضلة ----- */
