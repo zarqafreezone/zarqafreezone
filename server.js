@@ -234,7 +234,7 @@ const server = http.createServer(async (req,res)=>{
   if(p==="/api/listings" && M==="POST"){
     const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
     const b=await readBody(req);
-    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", zone:b.zone||"inside", location:b.location||"", images:b.img?1:0, img:b.img||"", video:b.video||"", user:u.id, date:new Date().toISOString().slice(0,10), featured:false, desc:(b.desc||"").slice(0,2000) };
+    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", zone:b.zone||"inside", location:b.location||"", images:b.img?1:0, img:b.img||"", video:b.video||"", user:u.id, date:new Date().toISOString().slice(0,10), ts:Date.now(), featured:false, desc:(b.desc||"").slice(0,2000) };
     DB.listings.unshift(l); saveDB(DB);
     return send(res,200,{listing:withOwner(l)});
   }
@@ -268,6 +268,28 @@ const server = http.createServer(async (req,res)=>{
     l.offers=l.offers||[];
     l.offers.push({id:"o"+Date.now(), from:u.id, name:u.name, price:Number(b.price)||0, note:(b.note||"").slice(0,300), ts:Date.now()});
     saveDB(DB); return send(res,200,{ok:true, offers:l.offers});
+  }
+  if(m(/^\/api\/listings\/([^/]+)\/promote$/) && M==="POST"){
+    const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
+    const id=p.split("/")[3], l=DB.listings.find(x=>x.id===id); if(!l) return send(res,404,{error:"not_found"});
+    if(l.user!==u.id && !isAdmin(req)) return send(res,403,{error:"forbidden"});
+    const b=await readBody(req);
+    const PROMO={featured:{days:90,price:9},boost:{days:7,price:5},premium:{days:180,price:19}};
+    const pkg=PROMO[b.pkg];
+    if(!pkg) return send(res,400,{error:"invalid_package"});
+    const d=new Date(); d.setDate(d.getDate()+pkg.days);
+    l.promo=b.pkg; l.promoUntil=d.toISOString().slice(0,10); if(b.pkg!=="boost") l.featured=true;
+    DB.payments=DB.payments||[]; DB.payments.push({id:"pay"+Date.now(), user:u.id, listing:id, plan:"promo_"+b.pkg, amount:pkg.price, date:new Date().toISOString().slice(0,10)}); DB.revenue=(DB.revenue||0)+pkg.price;
+    saveDB(DB); return send(res,200,{ok:true, listing:withOwner(l)});
+  }
+  if(p==="/api/push/subscribe" && M==="POST"){
+    const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
+    const b=await readBody(req);
+    if(!b||!b.endpoint) return send(res,400,{error:"invalid_subscription"});
+    DB.pushSubs=DB.pushSubs||[];
+    DB.pushSubs=DB.pushSubs.filter(s=>s.endpoint!==b.endpoint);
+    DB.pushSubs.push({endpoint:b.endpoint, keys:b.keys||{}, user:u.id, ts:Date.now()});
+    saveDB(DB); return send(res,200,{ok:true});
   }
 
   /* ----- المفضلة ----- */

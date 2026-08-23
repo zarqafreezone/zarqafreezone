@@ -97,13 +97,15 @@ function renderTopbar(){
   const el = document.getElementById("authArea");
   const langBtn = `<button class="lang-btn" onclick="setLang('${LANG==="ar"?"en":"ar"}')" title="Language">${LANG==="ar"?"EN":"ع"}</button>`;
   const chatBtn = `<button class="lang-btn chat-btn" onclick="go('chat')" title="${t("chat")}">💬<span class="chat-badge" id="chatBadge">0</span></button>`;
+  const bellBtn = savedSearches.length?`<button class="lang-btn bell-btn" onclick="openAlerts()" title="${t("alerts")}">🔔<span class="chat-badge" id="bellBadge">0</span></button>`:"";
   let userHtml = u
     ? `<button class="chip-user" onclick="go('account')"><span class="avatar" style="width:30px;height:30px;font-size:14px">${esc(userInitials(u.name))}</span><span class="cname">${esc(u.name)}</span>${u.stars?`<span class="stars-mini">${"★".repeat(u.stars)}</span>`:""}</button>`
     : `<button class="btn btn-primary" onclick="openAuth()">${t("login")}</button>`;
   const themeBtn = `<button class="lang-btn" onclick="toggleTheme()" title="${t("theme")}">${THEME==="dark"?"☀️":"🌙"}</button>`;
   const curBtn = `<select class="lang-btn cur-sel" onchange="setCurrency(this.value)" title="${t("currency")}">${["USD","JOD","SAR"].map(c=>`<option value="${c}" ${c===CUR?"selected":""}>${CUR_SYM[c]}</option>`).join("")}</select>`;
-  el.innerHTML = curBtn + themeBtn + langBtn + chatBtn + userHtml + `<button class="btn btn-ghost btn-sm" onclick="go('admin')" title="${t("nav_admin")}">⚙️</button>`;
+  el.innerHTML = curBtn + themeBtn + langBtn + chatBtn + bellBtn + userHtml + `<button id="topAdmin" class="btn btn-ghost btn-sm" onclick="go('admin')" title="${t("nav_admin")}">⚙️</button>`;
   paintBadge();
+  paintBell();
   ensureInstallFab();
 }
 function updateStaticUI(){
@@ -218,6 +220,7 @@ function viewHome(){
     <section class="section"><div class="wrap"><div class="sec-head"><h2>${t("main_sections")}</h2></div>
       <div class="cat-grid">${CATEGORIES.map(c=>{const n=allListings().filter(l=>l.section===c.id).length;
         return `<div class="cat-card" onclick="go('section',{section:'${c.id}'})"><span class="count">${n} ${t("ads_label")}</span><div class="ico">${c.icon}</div><h3>${tData(c.name)}</h3><p>${c.subs.length} ${t("sub_count")}</p></div>`;}).join("")}</div></div></section>
+    ${storiesBarHTML()}
     ${featured.length?`<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("featured")}</h2><a onclick="go('browse',{featured:'1'})">${t("view_all")}</a></div><div class="list-grid">${listCardsHTML(featured)}</div></div></section>`:""}
     <section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("latest")}</h2><a onclick="go('browse',{sort:'newest'})">${t("view_all")}</a></div><div class="list-grid">${listCardsHTML(latest)}</div></div></section>
     ${wanted.length?`<section class="section" style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>${t("wanted_section")}</h2><a onclick="go('browse',{deal:'buy'})">${t("wanted_view_all")}</a></div><div class="list-grid">${listCardsHTML(wanted)}</div></div></section>`:""}
@@ -296,8 +299,8 @@ function browseSearch(){ go("browse",{...currentBrowse(),q:document.getElementBy
 function applyFilters(){ go("browse",{...currentBrowse(),min:document.getElementById("brMin").value,max:document.getElementById("brMax").value,zone:document.getElementById("brZone").value}); }
 let savedSearches=JSON.parse(localStorage.getItem("fz_saved_searches")||"[]");
 function searchLabel(p){ const b=[]; if(p.q)b.push(p.q); if(p.section)b.push(tData(getSectionName(p.section))); if(p.deal==='sell')b.push(t("deal_sell")); if(p.deal==='buy')b.push(t("deal_buy")); return b.join(" \u2022 ")||t("all_categories"); }
-function saveSearch(){ const s={...route.params,saved:Date.now()}; savedSearches.unshift(s); savedSearches=savedSearches.slice(0,12); localStorage.setItem("fz_saved_searches",JSON.stringify(savedSearches)); notify(t("search_saved")); }
-function savedNewCount(s){ try{ const list=queryListings(s); const since=new Date(s.saved).toISOString().slice(0,10); return list.filter(l=>l.date&&l.date>=since).length; }catch(e){ return 0; } }
+function saveSearch(){ const s={...route.params,saved:Date.now()}; savedSearches.unshift(s); savedSearches=savedSearches.slice(0,12); localStorage.setItem("fz_saved_searches",JSON.stringify(savedSearches)); notify(t("search_saved")); renderTopbar(); }
+function savedNewCount(s){ try{ const list=queryListings(s); const since=s.saved||0; return list.filter(l=>{ const lt=l.ts||new Date(l.date).getTime(); return lt>since; }).length; }catch(e){ return 0; } }
 function goSaved(i){ const s=savedSearches[i]; if(!s)return; const {saved,...params}=s; go("browse",params); }
 function delSavedSearch(i){ savedSearches.splice(i,1); localStorage.setItem("fz_saved_searches",JSON.stringify(savedSearches)); render(); }
 /* عروض الأسعار (Make Offer) */
@@ -314,9 +317,10 @@ function offersCard(l,owner){ const offers=l.offers||[]; const mine=currentUser(
 function listCardsHTML(list){
   if(!list.length) return `<div class="list-empty"><div class="big">📭</div><p>${LANG==="en"?"No listings":"لا توجد إعلانات"}</p></div>`;
   return list.map(l=>{const sec=findSection(l.section);const free=isFree(l);
-    return `<div class="list-card" onclick="go('detail',{id:'${l.id}'})"><div class="thumb">
+    return `<div class="list-card ${promoActive(l)?'promo-card promo-'+l.promo:''}" onclick="go('detail',{id:'${l.id}'})"><div class="thumb">
       <img src="${thumbURL(l)}" alt=""><span class="deal-tag ${l.deal==='sell'?'deal-sell':'deal-buy'}">${locDeal(l)}</span>
       <button class="fav ${isFav(l.id)?'on':''}" onclick="event.stopPropagation();favToggle('${l.id}')">${isFav(l.id)?'❤️':'🤍'}</button>
+      ${promoActive(l)?'<span class="promo-tag promo-tag-'+l.promo+'">'+({featured:"⭐",boost:"🚀",premium:"👑"}[l.promo])+'</span>':""}
       ${free?`<span class="free-tag">⏱️ ${t("free_tag")} • ${daysLeft(l)}${t("day")}</span>`:`<span class="paid-tag">👑 ${t("paid_tag")}</span>`}
       </div><div class="body"><div class="t">${esc(l.title)}${l.owner&&l.owner.verified?'<i class="vbadge">✔</i>':""}</div><div class="p">${esc(fmtPrice(l))}</div>
       <div class="meta"><span class="loc">${l.zone==='outside'?'🔴':'🟢'} ${esc(l.location)}</span><span class="vw">👁 ${l.views||0} • ${relDate(l.date)}</span></div></div></div>`;}).join("");
@@ -360,7 +364,7 @@ function viewDetail(id){
           <a class="btn btn-ghost" href="tel:${esc(owner.phone)}">📞 ${t("call")}</a>
           <a class="btn wa-btn" href="${waLink(owner.phone,l.title)}" target="_blank" rel="noopener">✅ ${t("whatsapp")}</a>
         </div>
-        <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;color:var(--muted)" onclick="openReport('${l.id}')">${t("report_ad")}</button></div>`:""}
+        ${currentUser()&&owner&&owner.id===currentUser().id?`<button class="btn btn-primary btn-block" style="margin-top:12px" onclick="openPromote('${l.id}')">${t("promote_btn")}${promoActive(l)?" • "+t("promo_active"):""}</button>`:`<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;color:var(--muted)" onclick="openReport('${l.id}')">${t("report_ad")}</button>`}</div>`:""}
     </div></div></div></section>`;
 }
 function contactOwner(phone){
@@ -673,7 +677,7 @@ function paintBadge(){ const el=document.getElementById("chatBadge"); if(el){ el
 document.getElementById("fabAdd").addEventListener("click",()=>go("add"));
 document.querySelectorAll(".bottom-nav [data-route]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.route)));
 document.getElementById("topSearch").addEventListener("keydown",e=>{ if(e.key==="Enter"){const q=e.target.value.trim(); if(q) go("browse",{q});} });
-overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); closeReport(); closeInstallGuide(); closeOffer(); } });
+overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); closeReport(); closeInstallGuide(); closeOffer(); closePromote(); closeStory(); closeAlerts(); } });
 
 /* انطلاق */
 (async function init(){
@@ -739,3 +743,101 @@ window.addEventListener("appinstalled", () => { hideInstallUI(); deferredPrompt=
 if("serviceWorker" in navigator){
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 }
+/* =========================================================================
+   13) قصص فيديو + باقات الترقية + تنبيهات ذكية (المرحلة 2 — تكملة)
+   ========================================================================= */
+const PROMO_PACKAGES=[
+  {id:"featured",price:9,days:90,ico:"⭐",name:"promo_featured",desc:"promo_feat_d",color:"#f59e0b"},
+  {id:"boost",price:5,days:7,ico:"🚀",name:"promo_boost",desc:"promo_boost_d",color:"#dc2626"},
+  {id:"premium",price:19,days:180,ico:"👑",name:"promo_premium",desc:"promo_prem_d",color:"#9333ea"}
+];
+/* ---- باقات الترقية (Promote) ---- */
+function openPromote(id){
+  const l=findListing(id); if(!l) return;
+  overlay.classList.add("show");
+  overlay.innerHTML=`<div class="modal modal-wrap"><button class="modal-close" onclick="closePromote()">×</button>
+    <h2 style="text-align:center">${t("promo_title")}</h2>
+    <p class="muted center" style="margin-bottom:16px;font-size:13px">${t("promo_desc")}</p>
+    ${PROMO_PACKAGES.map(p=>`<div class="promo-pkg ${promoActive(l)&&l.promo===p.id?"cur":""}" onclick="buyPromo('${id}','${p.id}')">
+      <div class="promo-ico" style="background:${p.color}22;color:${p.color}">${p.ico}</div>
+      <div style="flex:1;min-width:0"><b>${t(p.name)}</b><div class="muted" style="font-size:12px">${t(p.desc)}</div></div>
+      <div class="promo-price">$${p.price}<small style="display:block;font-size:10px;opacity:.7">/${p.days} ${t("days")}</small></div></div>`).join("")}
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="closePromote()">${t("got_it")}</button></div>`;
+}
+function closePromote(){ overlay.classList.remove("show"); overlay.innerHTML=""; }
+async function buyPromote(id,pkgId){
+  const p=PROMO_PACKAGES.find(x=>x.id===pkgId); if(!p) return;
+  if(!currentUser()){notify(t("r_login"));openAuth();return;}
+  const m=overlay.querySelector(".modal"); if(m) m.innerHTML=`<div class="center" style="padding:40px 0"><div style="font-size:40px">💳</div><p class="muted">${t("processing")}</p></div>`;
+  if(stripeCfg&&stripeCfg.stripePK){ try{ await fetch("/api/create-payment-intent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({amount:p.price,plan:"promo_"+pkgId})}); }catch(e){} await new Promise(r=>setTimeout(r,1400)); }
+  else { await new Promise(r=>setTimeout(r,1300)); }
+  try{ await store.promoteListing(id,pkgId); closePromote(); notify(t("promo_success")); render(); }
+  catch(e){ closePromote(); notify(LANG=="en"?"Failed":"تعذّر"); }
+}
+/* ---- قصص فيديو (Stories) ---- */
+function storyListNow(){ return queryListings({}).filter(l=>l.video||l.featured).sort((a,b)=>(promoRank(b)-promoRank(a))||((b.date<a.date)?-1:1)).slice(0,14); }
+function storiesBarHTML(){
+  const stories=storyListNow();
+  const bubbles=`<div class="story-item" onclick="go('add')"><div class="story-bubble add"><span>＋</span></div><small>${t("add_story")}</small></div>`
+    + stories.map((l,i)=>`<div class="story-item" onclick="openStoryViewer(${i})"><div class="story-bubble ${l.video?"has-video":""}"><img src="${thumbURL(l)}" alt="">${l.video?'<span class="story-play">▶</span>':""}</div><small>${esc((l.title||"").slice(0,14))}</small></div>`).join("");
+  return `<section class="stories-bar"><div class="stories-scroll">${bubbles}</div></section>`;
+}
+let storyList=[], storyIdx=0;
+function openStoryViewer(i){ storyList=storyListNow(); storyIdx=i; if(storyList.length) drawStory(); }
+function drawStory(){
+  const l=storyList[storyIdx]; if(!l){closeStory();return;}
+  overlay.classList.add("show");
+  overlay.innerHTML=`<div class="story-viewer" onclick="storyNext()">
+    <button class="story-close" onclick="event.stopPropagation();closeStory()">×</button>
+    <div class="story-progress"><i></i></div>
+    <div class="story-media">${l.video?`<video src="${l.video}" autoplay muted playsinline onended="storyNext()">`:`<img src="${thumbURL(l)}">`}</div>
+    <div class="story-foot" onclick="event.stopPropagation();closeStory();go('detail',{id:'${l.id}'})">
+      <div style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.title)}</b><span style="opacity:.95">${esc(fmtPrice(l))}</span></div>
+      <button class="btn btn-primary btn-sm">${t("story_tap")}</button></div>
+    <button class="story-nav prev" onclick="event.stopPropagation();storyPrev()">‹</button>
+    <button class="story-nav next" onclick="event.stopPropagation();storyNext()">›</button>
+  </div>`;
+  const bar=overlay.querySelector(".story-progress>i"); if(bar) bar.style.animation="storyProg 6s linear forwards";
+}
+function storyNext(){ storyIdx++; if(storyIdx>=storyList.length) closeStory(); else drawStory(); }
+function storyPrev(){ storyIdx=Math.max(0,storyIdx-1); drawStory(); }
+function closeStory(){ overlay.classList.remove("show"); overlay.innerHTML=""; }
+/* ---- تنبيهات ذكية (Smart Alerts) ---- */
+function alertsNewCount(){
+  if(!savedSearches.length) return 0;
+  const seen=Number(localStorage.getItem("fz_alerts_seen")||0);
+  let n=0;
+  savedSearches.forEach(s=>{ const since=Math.max(s.saved||0,seen); const list=queryListings(s); n+=list.filter(l=>{ const lt=l.ts||new Date(l.date).getTime(); return lt>since; }).length; });
+  return n;
+}
+function paintBell(){ const b=document.getElementById("bellBadge"); if(!b) return; const n=alertsNewCount(); b.style.display=n?"inline-flex":"none"; b.textContent=n>99?"99+":n; }
+function openAlerts(){
+  const prevSeen=Number(localStorage.getItem("fz_alerts_seen")||0);
+  let rows="";
+  if(savedSearches.length){
+    savedSearches.forEach(s=>{ const list=queryListings(s); const since=Math.max(s.saved||0,prevSeen); const fresh=list.filter(l=>{ const lt=l.ts||new Date(l.date).getTime(); return lt>since; });
+      if(!fresh.length) return;
+      rows+=`<div class="alert-search"><div class="alert-shead"><b>${esc(searchLabel(s))}</b><span class="ci-badge" style="background:var(--green)">${fresh.length}</span></div>${fresh.slice(0,6).map(l=>`<div class="alert-item" onclick="closeAlerts();go('detail',{id:'${l.id}'})"><img class="alert-thumb" src="${thumbURL(l)}"><div style="flex:1;min-width:0"><div class="alert-t">${esc(l.title)}</div><div class="alert-p">${esc(fmtPrice(l))}</div></div><span class="muted" style="font-size:11px;white-space:nowrap">${relDate(l.date)}</span></div>`).join("")}</div>`;
+    });
+  }
+  localStorage.setItem("fz_alerts_seen", Date.now());
+  paintBell();
+  overlay.classList.add("show");
+  overlay.innerHTML=`<div class="modal modal-wrap" style="max-width:520px"><button class="modal-close" onclick="closeAlerts()">×</button>
+    <h2>🔔 ${t("alerts")}</h2>
+    <p class="muted" style="font-size:13px;margin-bottom:14px">${t("alerts_sub")}</p>
+    ${rows||`<div class="center muted" style="padding:30px">${t("no_alerts")}</div>`}
+    <button class="btn btn-ghost btn-block btn-sm" style="margin-top:12px" onclick="enableNotifications()">🔔 ${t("enable_notif")}</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeAlerts()">${t("got_it")}</button></div>`;
+}
+function closeAlerts(){ overlay.classList.remove("show"); overlay.innerHTML=""; }
+async function enableNotifications(){
+  if(!("Notification" in window)){ notify(LANG=="en"?"Not supported":"غير مدعوم"); return; }
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){ notify(LANG=="en"?"Permission denied":"تم رفض الإذن"); return; }
+    if("serviceWorker" in navigator){ try{ const reg=await navigator.serviceWorker.ready; const sub=await reg.pushManager.subscribe({userVisibleOnly:true}); if(sub) await store.subscribePush({endpoint:sub.endpoint, keys:(sub.toJSON&&sub.toJSON().keys)||{}}); }catch(e){} }
+    notify(t("notif_on"));
+  }catch(e){ notify(LANG=="en"?"Failed":"تعذّر"); }
+}
+

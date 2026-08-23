@@ -295,6 +295,33 @@ const STR = {
   search_saved:     { ar:"تم حفظ البحث ✓", en:"Search saved ✓" },
   no_saved_search:  { ar:"لم تحفظ أي بحث بعد", en:"No saved searches yet" },
   new_results:      { ar:"نتائج جديدة", en:"new results" },
+
+  /* قصص فيديو */
+  stories:          { ar:"قصص", en:"Stories" },
+  add_story:        { ar:"أضف إعلانك", en:"Add your ad" },
+  story_tap:        { ar:"انقر للعرض", en:"Tap to view" },
+
+  /* باقات الترقية */
+  promote_btn:      { ar:"🚀 ترقية الإعلان", en:"🚀 Promote ad" },
+  promo_title:      { ar:"باقات الترقية", en:"Promotion packages" },
+  promo_desc:       { ar:"اجعل إعلانك يظهر أولاً ويصل لعدد أكبر من المشترين", en:"Get your ad shown first and reach more buyers" },
+  promo_featured:   { ar:"⭐ مميز", en:"⭐ Featured" },
+  promo_boost:      { ar:"🚀 حملة مشاهدات", en:"🚀 Boost campaign" },
+  promo_premium:    { ar:"👑 مميز بلس", en:"👑 Premium" },
+  promo_feat_d:     { ar:"إطار ذهبي + أولوية في القوائم — 90 يوماً", en:"Gold border + list priority — 90 days" },
+  promo_boost_d:    { ar:"في القمة لمدة 7 أيام + شارة مميزة", en:"Top spot for 7 days + special badge" },
+  promo_prem_d:     { ar:"مميز + بطاقة أكبر + شارة ملكية — 180 يوماً", en:"Featured + bigger card + royal badge — 180 days" },
+  days:             { ar:"يوماً", en:"days" },
+  promo_success:    { ar:"تم تفعيل الباقة! إعلانك الآن في المقدمة 🎉", en:"Package activated! Your ad is now on top 🎉" },
+  promo_active:     { ar:"الباقة الحالية", en:"Current package" },
+  promo_pick:       { ar:"اختر باقة", en:"Choose a package" },
+
+  /* تنبيهات ذكية */
+  alerts:           { ar:"التنبيهات", en:"Alerts" },
+  no_alerts:        { ar:"لا توجد تنبيهات جديدة", en:"No new alerts" },
+  alerts_sub:       { ar:"نتائج جديدة مطابقة لعمليات بحثك المحفوظة", en:"New results matching your saved searches" },
+  enable_notif:     { ar:"تفعيل إشعارات المتصفح", en:"Enable browser notifications" },
+  notif_on:         { ar:"تم تفعيل الإشعارات ✓", en:"Notifications enabled ✓" },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */

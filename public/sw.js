@@ -5,7 +5,7 @@
    - الملفات الثابتة (css/js/icons): stale-while-revalidate
    - الـAPI والرفعات: شبكة فقط (دائماً أحدث البيانات)
    ========================================================================= */
-const CACHE = "zfz-v14";
+const CACHE = "zfz-v15";
 const SHELL = [
   "/",
   "/index.html",
@@ -75,3 +75,11 @@ self.addEventListener("fetch", e => {
     );
   }
 });
+
+/* ===== إشعارات Web Push (جاهز — يتفعّل عند ضبط مفاتيح VAPID على الخادم) ===== */
+self.addEventListener("push", e => {
+  let d = { title: "إشعار جديد", body: "" };
+  try { d = e.data ? e.data.json() : d; } catch (err) { d = { title: "إشعار", body: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(d.title || "🔔", { body: d.body || "", icon: "/images/icon-192.png", badge: "/images/icon-192.png", data: d.url || "/" }));
+});
+self.addEventListener("notificationclick", e => { e.notification.close(); e.waitUntil(clients.matchAll({ type: "window" }).then(cs => { for (const c of cs) { if ("focus" in c) return c.focus(); } if (clients.openWindow) return clients.openWindow(e.notification.data || "/"); })); });

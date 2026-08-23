@@ -94,6 +94,8 @@ const store = {
   },
   async deleteListing(id){ await jdel("/api/listings/"+id); state.listings=state.listings.filter(l=>l.id!==id); },
   async toggleFeatured(id){ const d=await jpatch("/api/listings/"+id+"/feature"); if(d.listing){ const i=state.listings.findIndex(l=>l.id===id); if(i>=0) state.listings[i]=d.listing; } },
+  async promoteListing(id, pkg){ const d=await jpost("/api/listings/"+id+"/promote",{pkg}); if(d.listing){ const i=state.listings.findIndex(l=>l.id===id); if(i>=0) state.listings[i]=d.listing; } return d.listing; },
+  async subscribePush(sub){ try{ await jpost("/api/push/subscribe", sub); }catch(e){} },
   async viewListing(id){ try{ const d=await jpost("/api/listings/"+id+"/view"); const l=state.listings.find(x=>x.id===id); if(l&&d.views!=null) l.views=d.views; }catch(e){} },
   async reportListing(id, reason){ return jpost("/api/listings/"+id+"/report", {reason}); },
 
@@ -131,6 +133,8 @@ function isAdmin(){ return !!state.adminToken; }
 function isFree(l){ if(!l||!l.date) return true; return (Date.now()-new Date(l.date).getTime())/86400000 <= FREE_DAYS; }
 function daysLeft(l){ return Math.max(0, Math.round(FREE_DAYS-(Date.now()-new Date(l.date).getTime())/86400000)); }
 
+function promoActive(l){ return l.promo && l.promoUntil && l.promoUntil>=new Date().toISOString().slice(0,10); }
+function promoRank(l){ if(!promoActive(l)) return 0; return {premium:3,boost:2,featured:1}[l.promo]||0; }
 function queryListings({section,sub,deal,q,featured,sort,min,max,zone}={}){
   let r = state.listings.slice();
   if(section)  r=r.filter(l=>l.section===section);
@@ -144,7 +148,7 @@ function queryListings({section,sub,deal,q,featured,sort,min,max,zone}={}){
   if(sort==="price_asc") r.sort((a,b)=>a.price-b.price);
   else if(sort==="price_desc") r.sort((a,b)=>b.price-a.price);
   else if(sort==="popular") r.sort((a,b)=>(b.views||0)-(a.views||0));
-  else r.sort((a,b)=>(b.date<a.date?-1:1));
+  else { /* الأحدث، مع إعلانات الباقات المدفوعة في المقدمة */ r.sort((a,b)=>{ const pa=promoRank(b)-promoRank(a); if(pa) return pa; return (b.date<a.date?-1:1); }); }
   return r;
 }
 function locSection(id){ return tData(getSectionName(id)); }
