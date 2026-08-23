@@ -409,3 +409,75 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
   .form-card{padding:18px}
   .info-card{padding:18px}
 }
+
+/* =========================================================================
+   v3 (المرحلة 1) — الوضع الليلي + محوّل العملة + واتساب + المشاهدات
+   ========================================================================= */
+/* محوّل العملة في الشريط العلوي */
+.cur-sel{width:auto;min-width:46px;padding:0 8px;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:center;font-weight:800}
+.cur-sel option{font-weight:800}
+/* زر واتساب */
+.wa-btn{background:#25D366;color:#fff!important;box-shadow:0 6px 16px rgba(37,211,102,.35)}
+.wa-btn:hover{background:#1ebe5b}
+/* شارة موثّق على البطاقة */
+.list-card .vbadge{color:#1d4ed8;background:#dbeafe;font-style:normal;font-size:11px;padding:1px 5px;border-radius:6px;margin-inline-start:5px;font-weight:800}
+/* المشاهدات في ميتا البطاقة */
+.vw{white-space:nowrap;opacity:.92}
+/* أزرار تفاصيل الإعلان تلتف على الجوال */
+.detail-cta{flex-wrap:wrap}
+.detail-cta .btn{flex:0 0 auto}
+.detail-cta .btn:first-child{flex:1 1 140px}
+
+/* ===== الوضع الليلي (Dark Mode) ===== */
+[data-theme="dark"]{
+  --ink:#e6edf6; --muted:#94a3b8; --line:#273449; --bg:#0b1220; --card:#141c2e;
+  --shadow:0 1px 3px rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.35);
+}
+[data-theme="dark"] body{color-scheme:dark;background:var(--bg);color:var(--ink)}
+[data-theme="dark"] .topbar,
+[data-theme="dark"] .list-card,
+[data-theme="dark"] .sub-card,
+[data-theme="dark"] .cat-card,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .stat-box,
+[data-theme="dark"] .modal,
+[data-theme="dark"] .bottom-nav,
+[data-theme="dark"] .field input,
+[data-theme="dark"] .field select,
+[data-theme="dark"] .field textarea,
+[data-theme="dark"] .fab-row select,
+[data-theme="dark"] .fab-row input,
+[data-theme="dark"] .admin-row,
+[data-theme="dark"] .modal-close,
+[data-theme="dark"] .chat-input-row,
+[data-theme="dark"] .chat-inbox-item,
+[data-theme="dark"] .lang-btn,
+[data-theme="dark"] .chip-user,
+[data-theme="dark"] .top-search input,
+[data-theme="dark"] .btn-ghost,
+[data-theme="dark"] .tabs,
+[data-theme="dark"] .install-guide,
+[data-theme="dark"] .checkout-plan,
+[data-theme="dark"] .rating-legend,
+[data-theme="dark"] .form-card,
+[data-theme="dark"] .type-chip{background:var(--card)}
+[data-theme="dark"] .field input,
+[data-theme="dark"] .field select,
+[data-theme="dark"] .field textarea,
+[data-theme="dark"] .fab-row input,
+[data-theme="dark"] .top-search input,
+[data-theme="dark"] .otp-row input,
+[data-theme="dark"] .cur-sel{color:var(--ink)}
+[data-theme="dark"] select option,
+[data-theme="dark"] .cur-sel option{background:#141c2e;color:#e6edf6}
+[data-theme="dark"] .chat-thread{background:#0e1626}
+[data-theme="dark"] .toast{background:#273449}
+[data-theme="dark"] .desc{color:#cbd5e1}
+[data-theme="dark"] .side-card{background:repeating-linear-gradient(45deg,#0e1626,#0e1626 10px,#141c2e 10px,#141c2e 20px);border-color:#273449;color:#64748b}
+[data-theme="dark"] .hero-search select,
+[data-theme="dark"] .hero-search input{color:#fff;background:rgba(255,255,255,.12)}
+[data-theme="dark"] .chat-msg.mine .cm-bubble{background:#1e3a5f;color:#dbeafe}
+[data-theme="dark"] .type-chip:hover{background:#1e293b;color:#60a5fa}
+[data-theme="dark"] .note-free,
+[data-theme="dark"] .pay-note{background:#0c2a3a;border-color:#155e75;color:#7dd3fc}
+[data-theme="dark"] .splash{background:linear-gradient(160deg,#0b1220,#141c2e 60%,#0d2a2a)}

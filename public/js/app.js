@@ -6,6 +6,12 @@ const app = document.getElementById("app");
 const overlay = document.getElementById("overlay");
 const toastEl = document.getElementById("toast");
 
+/* ---------- الوضع الليلي (Dark Mode) ---------- */
+let THEME = localStorage.getItem("fz_theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme:dark)").matches ? "dark":"light");
+function applyTheme(){ document.documentElement.setAttribute("data-theme", THEME); const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content", THEME==="dark"?"#0b1220":"#1e3a8a"); }
+function toggleTheme(){ THEME = THEME==="dark"?"light":"dark"; localStorage.setItem("fz_theme",THEME); applyTheme(); render(); }
+applyTheme();
+
 let route = { name:"home", params:{} };
 let pendingAuth = {};
 let stripeCfg = { demo:true };
@@ -25,6 +31,33 @@ function thumbURL(l){
   return l.images ? placeholderImg(l.id, sec?sec.icon:"🛃", sec?sec.color:"#2563eb") : placeholderImg(l.id,"📷","#94a3b8");
 }
 function locDeal(l){ return l.deal==="sell"? t("for_sale"): t("wanted"); }
+
+/* ---------- واتساب + إبلاغ ---------- */
+function waLink(phone, title){
+  const digits = String(phone||"").replace(/\D/g,"");
+  const msg = encodeURIComponent((LANG=="en"?"Hello, I'm interested in: ":"مرحباً، أنا مهتم بـ: ") + (title||""));
+  return "https://wa.me/"+digits+"?text="+msg;
+}
+let reportTarget=null;
+function openReport(id){
+  if(!currentUser()){notify(t("r_login"));openAuth();return;}
+  reportTarget=id;
+  const opts=[["r_scam"],["r_dup"],["r_wrong"],["r_prohibited"],["r_other"]].map(([k],i)=>`<option value="${k}" ${i===0?"selected":""}>${t(k)}</option>`).join("");
+  overlay.classList.add("show");
+  overlay.innerHTML=`<div class="modal modal-wrap"><button class="modal-close" onclick="closeReport()">×</button>
+    <div style="font-size:44px;text-align:center">🚩</div>
+    <h2 style="text-align:center">${t("report_title")}</h2>
+    <p class="muted center" style="margin-bottom:14px">${t("report_desc")}</p>
+    <div class="field"><select id="reportReason" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;background:#fff">${opts}</select></div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="submitReport()">${t("report_ad")}</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeReport()">${t("got_it")}</button></div>`;
+}
+function closeReport(){ overlay.classList.remove("show"); overlay.innerHTML=""; reportTarget=null; }
+async function submitReport(){
+  if(!reportTarget) return;
+  const reason=document.getElementById("reportReason").value;
+  try{ await store.reportListing(reportTarget, reason); closeReport(); notify(t("r_sent")); }catch(e){ notify(LANG=="en"?"Failed":"تعذّر"); }
+}
 
 /* =========================================================================
    الموجّه
@@ -67,7 +100,9 @@ function renderTopbar(){
   let userHtml = u
     ? `<button class="chip-user" onclick="go('account')"><span class="avatar" style="width:30px;height:30px;font-size:14px">${esc(userInitials(u.name))}</span><span class="cname">${esc(u.name)}</span>${u.stars?`<span class="stars-mini">${"★".repeat(u.stars)}</span>`:""}</button>`
     : `<button class="btn btn-primary" onclick="openAuth()">${t("login")}</button>`;
-  el.innerHTML = langBtn + chatBtn + userHtml + `<button class="btn btn-ghost btn-sm" onclick="go('admin')" title="${t("nav_admin")}">⚙️</button>`;
+  const themeBtn = `<button class="lang-btn" onclick="toggleTheme()" title="${t("theme")}">${THEME==="dark"?"☀️":"🌙"}</button>`;
+  const curBtn = `<select class="lang-btn cur-sel" onchange="setCurrency(this.value)" title="${t("currency")}">${["USD","JOD","SAR"].map(c=>`<option value="${c}" ${c===CUR?"selected":""}>${CUR_SYM[c]}</option>`).join("")}</select>`;
+  el.innerHTML = curBtn + themeBtn + langBtn + chatBtn + userHtml + `<button class="btn btn-ghost btn-sm" onclick="go('admin')" title="${t("nav_admin")}">⚙️</button>`;
   paintBadge();
   ensureInstallFab();
 }
@@ -267,8 +302,8 @@ function listCardsHTML(list){
       <img src="${thumbURL(l)}" alt=""><span class="deal-tag ${l.deal==='sell'?'deal-sell':'deal-buy'}">${locDeal(l)}</span>
       <button class="fav ${isFav(l.id)?'on':''}" onclick="event.stopPropagation();favToggle('${l.id}')">${isFav(l.id)?'❤️':'🤍'}</button>
       ${free?`<span class="free-tag">⏱️ ${t("free_tag")} • ${daysLeft(l)}${t("day")}</span>`:`<span class="paid-tag">👑 ${t("paid_tag")}</span>`}
-      </div><div class="body"><div class="t">${esc(l.title)}</div><div class="p">${esc(fmtPrice(l))}</div>
-      <div class="meta"><span class="loc">${l.zone==='outside'?'🔴':'🟢'} ${esc(l.location)}</span><span>${relDate(l.date)}</span></div></div></div>`;}).join("");
+      </div><div class="body"><div class="t">${esc(l.title)}${l.owner&&l.owner.verified?'<i class="vbadge">✔</i>':""}</div><div class="p">${esc(fmtPrice(l))}</div>
+      <div class="meta"><span class="loc">${l.zone==='outside'?'🔴':'🟢'} ${esc(l.location)}</span><span class="vw">👁 ${l.views||0} • ${relDate(l.date)}</span></div></div></div>`;}).join("");
 }
 async function favToggle(id){
   if(!currentUser()){ notify(LANG==="en"?"Login to save favorites":"سجّل الدخول لحفظ المفضلة"); openAuth(); return; }
@@ -279,8 +314,11 @@ async function favToggle(id){
 /* =========================================================================
    6) تفاصيل الإعلان
    ========================================================================= */
+let _viewLog={};
+function logView(id){ const now=Date.now(); if(_viewLog[id] && now-_viewLog[id]<30000) return; _viewLog[id]=now; store.viewListing(id); const x=findListing(id); if(x) x.views=(x.views||0)+1; }
 function viewDetail(id){
   const l=findListing(id); if(!l){go("home");return;}
+  logView(id);
   const owner=l.owner||{}, sec=findSection(l.section), sub=findSub(l.section,l.sub), free=isFree(l);
   app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">${t("back")}</span>
     <div class="detail-grid"><div>
@@ -294,7 +332,7 @@ function viewDetail(id){
       </div><h1>${esc(l.title)}</h1><div class="price">${esc(fmtPrice(l))}</div>
       <div class="tags"><span class="pill">${sec.icon} ${tData(sec.name)}</span>${sub?`<span class="pill">${sub.icon} ${tData(sub.name)}</span>`:""}${l.zone==='outside'?`<span class="pill" style="background:#dbeafe;color:#1d4ed8">🌐 ${t("zone_outside")}</span>`:`<span class="pill" style="background:#d1fae5;color:#047857">📍 ${t("zone_inside")}</span>`}${l.type?`<span class="pill">🏷️ ${tData(l.type)}</span>`:""}${l.brand?`<span class="pill">🏢 ${tData(l.brand)}</span>`:""}${l.model?`<span class="pill">🔢 ${esc(l.model)}</span>`:""}</div></div>
       <div class="info-card"><h3 style="margin-bottom:8px">${t("description")}</h3><p class="desc">${esc(l.desc||t("no_desc"))}</p>
-        <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:14px"><span>📍 ${esc(l.location)}</span><span>🕒 ${relDate(l.date)}</span></div></div>
+        <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:14px"><span>📍 ${esc(l.location)}</span><span>👁 ${l.views||0} ${t("views")}</span><span>🕒 ${relDate(l.date)}</span></div></div>
       ${owner.name?`<div class="info-card"><h3 style="margin-bottom:12px">${t("publisher")}</h3>
         <div class="seller"><span class="avatar">${esc(userInitials(owner.name))}</span><div style="flex:1"><div class="nm">${esc(owner.name)}</div>
           <div class="stars">${starsHTML(owner.stars||0)} <span class="muted" style="font-size:12px">(${owner.deals||0} ${t("deals_count")})</span></div>
@@ -302,8 +340,10 @@ function viewDetail(id){
         <p class="muted" style="font-size:13px;margin-top:10px">🌐 ${esc(showCountry(owner.country))}</p>
         <div class="detail-cta">
           <button class="btn btn-primary" style="flex:1" onclick="openChatFromListing('${esc(owner.phone)}','${esc(owner.name).replace(/'/g,"")}')">${t("chat_now")}</button>
-          <button class="btn btn-ghost" onclick="contactOwner('${esc(owner.phone)}')">${t("call_seller")}</button>
-        </div></div>`:""}
+          <a class="btn btn-ghost" href="tel:${esc(owner.phone)}">📞 ${t("call")}</a>
+          <a class="btn wa-btn" href="${waLink(owner.phone,l.title)}" target="_blank" rel="noopener">✅ ${t("whatsapp")}</a>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;color:var(--muted)" onclick="openReport('${l.id}')">${t("report_ad")}</button></div>`:""}
     </div></div></div></section>`;
 }
 function contactOwner(phone){
@@ -612,7 +652,7 @@ function paintBadge(){ const el=document.getElementById("chatBadge"); if(el){ el
 document.getElementById("fabAdd").addEventListener("click",()=>go("add"));
 document.querySelectorAll(".bottom-nav [data-route]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.route)));
 document.getElementById("topSearch").addEventListener("keydown",e=>{ if(e.key==="Enter"){const q=e.target.value.trim(); if(q) go("browse",{q});} });
-overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); } });
+overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); closeReport(); closeInstallGuide(); } });
 
 /* انطلاق */
 (async function init(){

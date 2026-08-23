@@ -81,6 +81,8 @@ const store = {
   },
   async deleteListing(id){ await jdel("/api/listings/"+id); state.listings=state.listings.filter(l=>l.id!==id); },
   async toggleFeatured(id){ const d=await jpatch("/api/listings/"+id+"/feature"); if(d.listing){ const i=state.listings.findIndex(l=>l.id===id); if(i>=0) state.listings[i]=d.listing; } },
+  async viewListing(id){ try{ const d=await jpost("/api/listings/"+id+"/view"); const l=state.listings.find(x=>x.id===id); if(l&&d.views!=null) l.views=d.views; }catch(e){} },
+  async reportListing(id, reason){ return jpost("/api/listings/"+id+"/report", {reason}); },
 
   /* المفضلة */
   async setFav(id, on){ if(on){ await jpost("/api/favorites/"+id); state.favorites.add(id); } else { await jdel("/api/favorites/"+id); state.favorites.delete(id); } },
@@ -130,7 +132,12 @@ function queryListings({section,sub,deal,q,featured,sort}={}){
 }
 function locSection(id){ return tData(getSectionName(id)); }
 function locSub(sec,sub){ return tData(getSubName(sec,sub)); }
-function fmtPrice(l){ if(l.deal==="buy") return t("buyer_label"); if(l.price===0) return t("at_call"); return Number(l.price).toLocaleString("en-US")+" "+l.currency; }
+/* تعدد العملات (تحويل من قاعدة USD) */
+let CUR = localStorage.getItem("fz_currency") || "USD";
+const RATES = { USD:1, JOD:0.709, SAR:3.75 };
+const CUR_SYM = { USD:"$", JOD:"د.أ", SAR:"ر.س" };
+function setCurrency(c){ CUR=c; localStorage.setItem("fz_currency",c); if(window.render) render(); }
+function fmtPrice(l){ if(l.deal==="buy") return t("buyer_label"); if(!l.price||l.price===0) return t("at_call"); const v=(Number(l.price)*RATES[CUR]).toLocaleString("en-US",{maximumFractionDigits:0}); return v+" "+CUR_SYM[CUR]; }
 function relDate(d){ const days=Math.floor((Date.now()-new Date(d).getTime())/86400000); const en=LANG==="en";
   if(days<=0) return en?"Today":"اليوم"; if(days===1) return en?"Yesterday":"أمس";
   if(days<7) return en?`${days} days ago`:`قبل ${days} أيام`;

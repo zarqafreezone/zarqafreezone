@@ -249,6 +249,24 @@ const STR = {
   apk_download:     { ar:"⬇️ تحميل تطبيق أندرويد (APK)", en:"⬇️ Download Android App (APK)" },
   apk_short:        { ar:"🤖 تحميل أندرويد APK", en:"🤖 Android APK" },
   apk_hint:         { ar:"ملف تثبيت لأجهزة أندرويد — فعّل «تثبيت من مصادر غير معروفة» إن طُلب منك.", en:"Android installer — enable 'Install from unknown sources' if prompted." },
+
+  /* المرحلة 1: عملة + وضع ليلي + مشاهدات + واتساب + إبلاغ */
+  currency:         { ar:"العملة", en:"Currency" },
+  theme:            { ar:"الوضع الليلي", en:"Theme" },
+  views:            { ar:"مشاهدة", en:"views" },
+  call:             { ar:"اتصال", en:"Call" },
+  whatsapp:         { ar:"واتساب", en:"WhatsApp" },
+  verified_badge:   { ar:"موثّق", en:"Verified" },
+  report_ad:        { ar:"🚩 إبلاغ عن الإعلان", en:"🚩 Report listing" },
+  report_title:     { ar:"الإبلاغ عن إعلان", en:"Report a listing" },
+  report_desc:      { ar:"ساعدنا في حماية المنصة. اختر سبب البلاغ:", en:"Help us keep the platform safe. Choose a reason:" },
+  r_scam:           { ar:"احتيال أو نصب", en:"Scam or fraud" },
+  r_dup:            { ar:"إعلان مكرّر", en:"Duplicate listing" },
+  r_wrong:          { ar:"معلومات خاطئة", en:"Misleading info" },
+  r_prohibited:     { ar:"منتج/خدمة ممنوعة", en:"Prohibited item/service" },
+  r_other:          { ar:"سبب آخر", en:"Other" },
+  r_sent:           { ar:"شكراً لك، تم استلام البلاغ وسيتم مراجعته ✓", en:"Thank you, your report was received and will be reviewed ✓" },
+  r_login:          { ar:"سجّل الدخول للإبلاغ عن إعلان", en:"Login to report a listing" },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */
