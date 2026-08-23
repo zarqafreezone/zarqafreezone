@@ -58,8 +58,8 @@ async function initDB(){
   const ok = await connectMongo();
   if(ok && stateCol){
     const doc = await stateCol.findOne({_id:"main"});
-    if(doc && doc.data && Array.isArray(doc.data.users)){ DB = doc.data; console.log("📥 DB محمّلة من MongoDB"); }
-    else { DB = freshSeed(); saveDB(DB); console.log("🌱 تمت زرع بيانات أولية في MongoDB"); }
+    if(doc && doc.data && Array.isArray(doc.data.users)){ DB = migrateDB(doc.data); saveDB(DB); console.log("📥 DB محمّلة من MongoDB"); }
+    else { DB = migrateDB(freshSeed()); saveDB(DB); console.log("🌱 تمت زرع بيانات أولية في MongoDB"); }
   } else {
     DB = loadDBFile(); console.log("📄 DB من ملف db.json (محلي)");
   }
