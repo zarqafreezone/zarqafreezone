@@ -116,16 +116,18 @@ function renderTopbar(){
    الشريط الإخباري المتحرك (مصدر أخباره: لوحة المدير)
    ========================================================================= */
 let _tickerSig="";
+function newsTime(ts){ const d=new Date(ts||Date.now()); const p=n=>String(n).padStart(2,"0"); return p(d.getDate())+"/"+p(d.getMonth()+1)+" "+p(d.getHours())+":"+p(d.getMinutes()); }
 function renderTicker(){
   const el=document.getElementById("newsTicker"); if(!el) return;
   const items=(state.news||[]).filter(n=>n.active!==false && (n.text||"").trim());
-  const sig=items.map(n=>n.id+"|"+(n.text||"")+"|"+(n.link||"")).join("§")+(LANG==="en"?"_en":"_ar");
+  const sig=items.map(n=>n.id+"|"+(n.text||"")+"|"+(n.link||"")+"|"+newsTime(n.ts)).join("§")+(LANG==="en"?"_en":"_ar");
   if(sig===_tickerSig) return;          // لم يتغير — حافظ على استمرار الحركة
   _tickerSig=sig;
   if(!items.length){ el.innerHTML=""; el.style.display="none"; return; }
-  el.style.display="";
-  const one=`<div class="ticker-items">${items.map(n=>`<span class="ticker-item">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`}</span><span class="ticker-sep">◆</span>`).join("")}</div>`;
-  const total=items.reduce((a,n)=>a+(n.text||"").length,0);
+  el.style.display="flex";
+  const itemHTML=n=>`<span class="ticker-item">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`}<span class="ticker-time">· ${newsTime(n.ts)}</span></span>`;
+  const one=`<div class="ticker-items">${items.map(itemHTML).join('<span class="ticker-sep">◆</span>')}</div>`;
+  const total=items.reduce((a,n)=>a+(n.text||"").length+14,0);
   const dur=Math.max(22, total/3);
   el.innerHTML=`<span class="ticker-label">${t("news_label")}</span><div class="ticker-viewport"><div class="ticker-track" style="animation-duration:${dur}s">${one}${one}</div></div>`;
 }
@@ -644,7 +646,7 @@ function adminNews(){
     </div>
     <button class="btn btn-primary" style="margin-top:10px" onclick="doAddNews()">➕ ${t("add_news")}</button>
     <div class="admin-table" style="margin-top:20px">
-      ${list.length?list.map(n=>`<div class="admin-row"><div class="ar-main"><b>📰 ${esc(n.text)}</b>${n.link?`<span class="muted" style="font-size:12px">🔗 ${esc(n.link)}</span>`:""}<span class="muted" style="font-size:12px">${relDate(new Date(n.ts).toISOString())}</span></div>
+      ${list.length?list.map(n=>`<div class="admin-row"><div class="ar-main"><b>📰 ${esc(n.text)}</b>${n.link?`<span class="muted" style="font-size:12px">🔗 ${esc(n.link)}</span>`:""}<span class="muted" style="font-size:12px">🕐 ${newsTime(n.ts)} • ${t("news_ttl")}</span></div>
         <div class="ar-actions"><button class="btn btn-ghost btn-sm" onclick="doToggleNews('${n.id}')">${n.active!==false?"🟢 "+t("admin_active"):"⚫ "+t("admin_inactive")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelNews('${n.id}')">🗑 ${t("admin_delete")}</button></div></div>`).join(""):`<p class="muted center" style="padding:20px">${t("news_empty")}</p>`}
     </div>
   </div>`;

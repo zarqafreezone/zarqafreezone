@@ -379,6 +379,7 @@ const STR = {
   news_deleted:     { ar:"تم حذف الخبر", en:"News deleted" },
   news_empty:       { ar:"لا توجد أخبار بعد — أضف أول خبر أعلاه.", en:"No news yet — add your first item above." },
   news_admin_hint:  { ar:"اكتب نص الخبر ليظهر فوراً في الشريط المتحرك أعلى الموقع. يمكنك لصق خبر من صفحة الهيئة عند صدوره.", en:"Type news to show instantly in the scrolling ticker at the top. You can paste updates from the Authority's page." },
+  news_ttl:         { ar:"تُحذف تلقائياً بعد 5 أيام", en:"Auto-deleted after 5 days" },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */

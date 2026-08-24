@@ -669,6 +669,7 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 .ticker-item{padding:0 6px}
 .ticker-item a{color:#fff;text-decoration:none}
 .ticker-item a:hover{text-decoration:underline}
+.ticker-time{opacity:.7;font-weight:600;font-size:.82em;padding-inline-start:6px;white-space:nowrap}
 .ticker-sep{opacity:.45;padding:0 10px;font-size:9px}
 @keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .news-ticker:hover .ticker-track{animation-play-state:paused}

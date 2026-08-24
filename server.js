@@ -29,7 +29,8 @@ const DEFAULT_BANNERS = [
   { id:"square", active:true, text_ar:"🏭 مستودعات وأراضٍ متاحة للإيجار داخل المنطقة الحرة", text_en:"🏭 Warehouses & land available for lease in the Free Zone", link:"#browse" }
 ];
 
-/* أخبار الشريط الإخباري المتحرك (يديرها المدير) */
+/* أخبار الشريط الإخباري المتحرك (يديرها المدير) — تُحذف تلقائياً بعد 5 أيام */
+const NEWS_TTL_DAYS = 5;
 const DEFAULT_NEWS = [
   { id:"n1", text:"مرحباً بكم في المنطقة الحرة الزرقاء — بوابة التجارة الحرة بلا جمارك", link:"", active:true, ts:Date.now()-86400000 },
   { id:"n2", text:"للاستفسار عن عضوية هيئة مستثمري المناطق الحرة: 053826871", link:"", active:true, ts:Date.now()-43200000 }
@@ -101,6 +102,7 @@ function migrateDB(db){
   db.users.forEach(u=>{ if(!u.type){ u.type=(u.deals>=20 && u.verified)?"dealer":"individual"; } if(!u.storeName && u.type==="dealer"){ u.storeName=u.name; } if(u.storeDesc===undefined){ u.storeDesc=u.bio||""; } });
   db.listings.forEach(l=>{ if(!l.comments) l.comments=[]; if(!Array.isArray(l.images)){ l.images = l.img ? [l.img] : []; } if(!l.img && l.images[0]) l.img=l.images[0]; });
   if(!Array.isArray(db.news) || !db.news.length) db.news = DEFAULT_NEWS.slice();
+  if(Array.isArray(db.news) && db.news.length){ const now=Date.now(); db.news=db.news.filter(n=>!n.ts || (now-n.ts)<NEWS_TTL_DAYS*86400000); }
   return db;
 }
 
@@ -376,7 +378,10 @@ const server = http.createServer(async (req,res)=>{
   }
 
   /* ----- الشريط الإخباري المتحرك (يديره المدير) ----- */
-  if(p==="/api/news" && M==="GET") return send(res,200,{news:DB.news||[]});
+  if(p==="/api/news" && M==="GET"){
+    if(Array.isArray(DB.news) && DB.news.length){ const now=Date.now(), before=DB.news.length; DB.news=DB.news.filter(n=>!n.ts || (now-n.ts)<NEWS_TTL_DAYS*86400000); if(DB.news.length!==before) saveDB(DB); }
+    return send(res,200,{news:DB.news||[]});
+  }
   if(p==="/api/admin/news" && M==="POST"){
     if(!isAdmin(req)) return send(res,403,{error:"forbidden"});
     const b=await readBody(req);
