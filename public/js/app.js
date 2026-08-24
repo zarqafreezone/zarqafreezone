@@ -125,10 +125,10 @@ function renderTicker(){
   _tickerSig=sig;
   if(!items.length){ el.innerHTML=""; el.style.display="none"; return; }
   el.style.display="flex";
-  const itemHTML=n=>`<span class="ticker-item">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`}<span class="ticker-time">· ${newsTime(n.ts)}</span></span>`;
-  const one=`<div class="ticker-items">${items.map(itemHTML).join('<span class="ticker-sep">◆</span>')}</div>`;
-  const total=items.reduce((a,n)=>a+(n.text||"").length+14,0);
-  const dur=Math.max(22, total/3);
+  const itemHTML=n=>`<span class="ticker-item">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`}<span class="ticker-time">· ${newsTime(n.ts)}</span></span><span class="ticker-sep">◆</span>`;
+  const one=`<div class="ticker-items">${items.map(itemHTML).join("")}</div>`;
+  const total=items.reduce((a,n)=>a+(n.text||"").length+16,0);
+  const dur=Math.max(15, total/4);
   el.innerHTML=`<span class="ticker-label">${t("news_label")}</span><div class="ticker-viewport"><div class="ticker-track" style="animation-duration:${dur}s">${one}${one}</div></div>`;
 }
 
