@@ -664,7 +664,7 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 .ticker-label{background:#ef4444;color:#fff;padding:0 14px;display:flex;align-items:center;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:.3px;position:relative;z-index:2}
 .ticker-label::after{content:"";position:absolute;inset-inline-start:100%;top:0;bottom:0;width:0;border-style:solid;border-width:0 0 26px 12px;border-color:transparent transparent transparent #ef4444}
 .ticker-viewport{flex:1;overflow:hidden;position:relative}
-.ticker-track{display:inline-flex;white-space:nowrap;will-change:transform;animation:tickerScroll linear infinite;direction:ltr}
+.ticker-track{display:inline-flex;white-space:nowrap;will-change:transform;direction:ltr}
 .ticker-items{display:inline-flex;align-items:center;padding:8px 0}
 .ticker-item{padding:0 6px}
 .ticker-item a{color:#fff;text-decoration:none}

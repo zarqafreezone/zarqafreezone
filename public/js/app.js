@@ -127,9 +127,10 @@ function renderTicker(){
   el.style.display="flex";
   const itemHTML=n=>`<span class="ticker-item">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`}<span class="ticker-time">· ${newsTime(n.ts)}</span></span><span class="ticker-sep">◆</span>`;
   const one=`<div class="ticker-items">${items.map(itemHTML).join("")}</div>`;
-  const total=items.reduce((a,n)=>a+(n.text||"").length+16,0);
-  const dur=Math.max(15, total/4);
-  el.innerHTML=`<span class="ticker-label">${t("news_label")}</span><div class="ticker-viewport"><div class="ticker-track" style="animation-duration:${dur}s">${one}${one}</div></div>`;
+  el.innerHTML=`<span class="ticker-label">${t("news_label")}</span><div class="ticker-viewport"><div class="ticker-track">${one}${one}</div></div>`;
+  // حركة بسرعة ثابتة (~50px/ث) تتكيّف مع عرض المحتوى الفعلي — تكرار لا نهائي سلس
+  const track=el.querySelector(".ticker-track");
+  if(track){ const w=track.scrollWidth||600; const d=Math.max(10, w/100); track.style.animation="tickerScroll "+d.toFixed(1)+"s linear infinite"; }
 }
 
 function updateStaticUI(){
