@@ -23,6 +23,7 @@ let ADMIN_SESSION = "";
 
 const SEED_USERS = DATA.SEED_USERS;
 const SEED_LISTINGS = DATA.SEED_LISTINGS;
+const DB_SCHEMA_VERSION = 2;   // يُزاد عند تغيّر هيكل التصنيف لمسح الإعلانات وإعادة بذرها
 const DEFAULT_BANNERS = [
   { id:"long",   active:true, text_ar:"🚢 استيراد وتصدير المركبات والآليات — أسعار تنافسية بلا جمارك داخل المنطقة الحرة الزرقاء", text_en:"🚢 Import & export of vehicles & machinery — duty-free competitive prices inside the Zarqa Free Zone", link:"#browse" },
   { id:"square", active:true, text_ar:"🏭 مستودعات وأراضٍ متاحة للإيجار داخل المنطقة الحرة", text_en:"🏭 Warehouses & land available for lease in the Free Zone", link:"#browse" }
@@ -72,6 +73,14 @@ async function initDB(){
     else if(sl.img && !ex.img){ ex.img = sl.img; _seedSynced = true; }  // تعبئة صورة ناقصة
   }
   if(_seedSynced){ saveDB(DB); console.log("🧩 تمت مزامنة الإعلانات النموذجية (إضافة/صور)"); }
+  // إعادة ضبط كاملة للإعلانات عند تغيّر هيكل التصنيف: مسح الكل + إعادة البذرة (مرة واحدة لكل نسخة)
+  DB.meta = DB.meta || {};
+  if ((DB.meta.schemaVer||0) !== DB_SCHEMA_VERSION) {
+    console.log("🔄 إعادة ضبط الإعلانات لمطابقة هيكل التصنيف الجديد (نسخة "+DB_SCHEMA_VERSION+") — تم مسح الإعلانات وإعادة بذرها");
+    DB.listings = migrateDB({users:[], listings:SEED_LISTINGS.map(s=>({...s}))}).listings;
+    DB.meta.schemaVer = DB_SCHEMA_VERSION;
+    saveDB(DB);
+  }
   // تحميل المحادثات
   if(chatCol){
     const cdoc = await chatCol.findOne({_id:"main"});
