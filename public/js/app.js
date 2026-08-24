@@ -101,7 +101,7 @@ function renderTopbar(){
   const bellBtn = savedSearches.length?`<button class="lang-btn bell-btn" onclick="openAlerts()" title="${t("alerts")}">🔔<span class="chat-badge" id="bellBadge">0</span></button>`:"";
   let userHtml = u
     ? `<button class="chip-user" onclick="go('account')"><span class="avatar" style="width:30px;height:30px;font-size:14px">${esc(userInitials(u.name))}</span><span class="cname">${esc(u.name)}</span>${u.stars?`<span class="stars-mini">${"★".repeat(u.stars)}</span>`:""}</button>`
-    : `<button class="btn btn-primary" onclick="openAuth()">${t("login")}</button>`;
+    : `<button class="btn btn-primary login-btn" onclick="openAuth()"><span class="login-ico">👤</span><span class="login-txt">${t("login")}</span></button>`;
   const themeBtn = `<button class="lang-btn" onclick="toggleTheme()" title="${t("theme")}">${THEME==="dark"?"☀️":"🌙"}</button>`;
   const curBtn = `<select class="lang-btn cur-sel" onchange="setCurrency(this.value)" title="${t("currency")}">${["USD","JOD","SAR"].map(c=>`<option value="${c}" ${c===CUR?"selected":""}>${CUR_SYM[c]}</option>`).join("")}</select>`;
   el.innerHTML = curBtn + themeBtn + langBtn + chatBtn + bellBtn + userHtml + `<button id="topAdmin" class="btn btn-ghost btn-sm" onclick="go('admin')" title="${t("nav_admin")}">⚙️</button>`;

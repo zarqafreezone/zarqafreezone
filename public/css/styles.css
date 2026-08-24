@@ -392,6 +392,15 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
    ========================================================================= */
 /* السماح للعناصر المرنة/الشبكية بالنقصان والتفاف النص بدل توسيع العرض */
 .detail-info,.detail-grid,.detail-grid>*,.list-card .body,.list-card .body .meta,.ci-main,.wrap,.info-card{min-width:0}
+/* صفحة التصفّح والنتائج + كل الحاويات الشبكية/المرنة */
+.browse-layout,.browse-main,.browse-side,.list-grid,.list-card,.list-card .thumb,
+.fab-row,.fab-row>*,.filter-bar,.filter-bar>*,.tabs,.tabs>*,
+.stories-bar,.stories-scroll,.story-item,.story-bubble,.story-viewer,.story-media,.story-foot,
+.store-head,.store-head>*,.comment,.cmt-body,.comment-box,
+.gallery,.gallery .main,.sec-head,.breadcrumb,.hero-search,.ad-banner{min-width:0}
+/* مدخلات الفلاتر والبحث لا تتوسّع أبعد من الحاوية */
+.fab-row input,.fab-row select,.filter-bar input,.filter-bar select,.hero-search input,.hero-search select,
+.field input,.field select,.field textarea,.comment-box textarea,.reply-input{max-width:100%;min-width:0}
 /* التفاف أي نص طويل (عنوان، سعر، وصف، موقع) بدل تجاوز الحافة */
 .info-card h1,.info-card .price,.desc,
 .list-card .body .t,.list-card .body .p,.list-card .body .meta .loc,
@@ -401,6 +410,20 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 .gallery .main{max-width:100%}
 .cm-bubble{max-width:100%}
 
+/* زر تسجيل الدخول: أيقونة فقط على الجوال */
+.login-ico{display:none}
+.login-btn{white-space:nowrap}
+@media(max-width:480px){
+  .login-txt{display:none}
+  .login-ico{display:inline}
+  .login-btn{padding:8px 12px}
+}
+@media(max-width:360px){
+  .lang-btn{width:34px;height:34px;font-size:13px}
+  .cur-sel{min-width:40px;padding:0 6px}
+  .topbar .wrap{gap:5px}
+  .chip-user{padding:5px 9px}
+}
 /* الجوال فقط: أزرار موقع العرض / بيع-شراء تأخذ كامل العرض وتلتف بدل التوسّع */
 @media(max-width:720px){
   .deal-toggle{display:flex;width:100%}
