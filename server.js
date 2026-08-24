@@ -118,14 +118,29 @@ function getIndexHtml(){
   if(_INDEX_HTML==null){ try{ _INDEX_HTML=fs.readFileSync(path.join(PUBLIC,"index.html"),"utf8"); }catch{ _INDEX_HTML="<!doctype html><meta charset=utf-8><title>Zarqa Free Zone</title><body>loading…"; } }
   return _INDEX_HTML;
 }
+function escS(s){ return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function newsTimeS(ts){ try{ const d=new Date(ts||Date.now()); const p=n=>String(n).padStart(2,"0"); return p(d.getDate())+"/"+p(d.getMonth()+1)+" "+p(d.getHours())+":"+p(d.getMinutes()); }catch{ return ""; } }
 function serveIndex(res){
   const now=Date.now();
   const news=(DB.news||[]).filter(n=>n.active!==false && (!n.ts || (now-n.ts)<NEWS_TTL_DAYS*86400000)).sort((a,b)=>(a.ts||0)-(b.ts||0)).slice(0,40);
   const banners=(DB.banners||[]).filter(b=>b.active!==false);
   const inject=`<script>window.__BOOT_NEWS__=${JSON.stringify(JSON.stringify(news))};window.__BOOT_BANNERS__=${JSON.stringify(JSON.stringify(banners))};</script>`;
+  // keyframes مضمونة الوجود داخل HTML (ضد CSS قديم/مفقود)
+  const kfStyle=`<style>@keyframes tickerScroll{from{transform:translateX(-50%)}to{transform:translateX(0)}}</style>`;
+  // بناء الشريط الإخباري داخل HTML نفسه — يعمل حتى بدون JavaScript نهائياً
+  let tickerHtml;
+  if(news.length){
+    const itemHTML=n=>`<span class="ticker-item">📰 ${escS(n.text)}<span class="ticker-time">· ${newsTimeS(n.ts)}</span></span><span class="ticker-sep">◆</span>`;
+    const one=`<div class="ticker-items">${news.map(itemHTML).join("")}</div>`;
+    const dur=Math.max(20, news.length*7);   // تقدير سرعة معقولة (JS يضبطها لاحقاً)
+    tickerHtml=`<div class="news-ticker" id="newsTicker" style="display:flex"><span class="ticker-label">الأخبار</span><div class="ticker-viewport"><div class="ticker-track" style="animation:tickerScroll ${dur}s linear infinite">${one}${one}</div></div></div>`;
+  } else {
+    tickerHtml=`<div class="news-ticker" id="newsTicker"></div>`;
+  }
   let html=getIndexHtml();
-  if(html.indexOf("__BOOT_NEWS__")>=0){ html=html.replace(/<script>window\.__BOOT_NEWS__[\s\S]*?<\/script>/, inject); }
-  else { html=html.replace("</head>", inject+"</head>"); }
+  html=html.replace(/<div class="news-ticker" id="newsTicker">\s*<\/div>/, tickerHtml);
+  if(html.indexOf("__BOOT_NEWS__")>=0){ html=html.replace(/<script>window\.__BOOT_NEWS__[\s\S]*?<\/script>/, inject+kfStyle); }
+  else { html=html.replace("</head>", inject+kfStyle+"</head>"); }
   send(res,200,html,MIME[".html"]);
 }
 function readBody(req){ return new Promise(res=>{ let d=""; req.on("data",c=>d+=c); req.on("end",()=>{ try{res(JSON.parse(d||"{}"))}catch{res({})} }); }); }
