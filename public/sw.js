@@ -5,7 +5,7 @@
    - الملفات الثابتة (css/js/icons): stale-while-revalidate
    - الـAPI والرفعات: شبكة فقط (دائماً أحدث البيانات)
    ========================================================================= */
-const CACHE = "zfz-v25";
+const CACHE = "zfz-v26";
 const SHELL = [
   "/",
   "/index.html",
@@ -59,8 +59,16 @@ self.addEventListener("fetch", e => {
     return;
   }
 
-  // الملفات الثابتة من نفس المصدر: stale-while-revalidate
+  // الملفات الثابتة من نفس المصدر: الكود (js/css/json) شبكة-أولاً (دائماً طازج)، الصور stale-while-revalidate
   if (url.origin === self.location.origin) {
+    const isCode = /\.(js|css|json)$/.test(url.pathname);
+    if (isCode) {
+      e.respondWith(
+        fetch(req).then(res => { if (res && res.ok) { const c = res.clone(); caches.open(CACHE).then(cc => cc.put(req, c)); } return res; })
+          .catch(() => caches.match(req).then(r => r || Response.error()))
+      );
+      return;
+    }
     e.respondWith(
       caches.match(req).then(cached => {
         const network = fetch(req).then(res => {
