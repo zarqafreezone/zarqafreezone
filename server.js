@@ -108,7 +108,7 @@ try { fs.mkdirSync(UPLOAD_DIR, {recursive:true}); } catch {}
 function saveDataURI(dataURI, id){
   try{
     const m = String(dataURI).match(/^data:image\/(\w+);base64,(.*)$/);
-    if(!m || m[2].length>4*1024*1024) return null;
+    if(!m || m[2].length>8*1024*1024) return null;
     const ext = m[1]==="jpeg"?"jpg":m[1];
     try { fs.writeFileSync(path.join(UPLOAD_DIR, id+"."+ext), Buffer.from(m[2],"base64")); } catch {}
     if(imgCol){ imgCol.updateOne({_id:id}, {$set:{data:dataURI, ext, updatedAt:new Date()}}, {upsert:true}).catch(()=>{}); }

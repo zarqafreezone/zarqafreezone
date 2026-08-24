@@ -411,7 +411,7 @@ function drawAdd(){
       }
       <div class="field full"><label>${t("f_model")}</label><input id="fModel" placeholder="${t("f_model_ph")}"></div>
       <div class="field full"><label>${t("f_desc")}</label><textarea id="fDesc" placeholder="${t("f_desc_ph")}"></textarea></div>
-      <div class="field full"><label>${t("f_image")}</label><input id="fImg" type="file" accept="image/*"></div>
+      <div class="field full"><label>${t("f_image")}</label><input id="fImg" type="file" accept="image/jpeg,image/png,image/webp,image/*"></div>
       <div class="field full"><label>${t("video_field")}</label><input id="fVideo" type="file" accept="video/*"></div>
       <button class="btn btn-primary btn-block btn-lg" id="publishBtn" onclick="submitListing()">${t("publish_free")}</button>
     </div></div></section>`;
@@ -435,6 +435,7 @@ async function submitListing(){
       model:document.getElementById("fModel").value.trim(),title,price:document.getElementById("fPrice").value,
       zone:addForm.zone,location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),file,videoFile:vfile});
     notify(LANG==="en"?"Published ✓ (free 3 months)":"تم نشر إعلانك بنجاح ✓ (مجاني 3 أشهر)");
+    if(l&&l._imgFailed){ setTimeout(()=>notify(LANG=="en"?"Image upload failed (try JPG)":"تعذّر رفع الصورة — جرّب صيغة JPG"),900); }
     go("detail",{id:l.id});
   }catch(e){ btn.disabled=false; btn.textContent=t("publish_free"); notify(LANG==="en"?"Failed to publish":"تعذّر النشر"); }
 }
@@ -629,7 +630,7 @@ async function openConvo(peer, name){
     <div class="chat-input-row"><button class="chat-attach" onclick="document.getElementById('chatImg').click()" title="${LANG==="en"?"Send image":"إرسال صورة"}">📎</button>
       <input id="chatInput" placeholder="${t("type_msg")}" onkeydown="if(event.key==='Enter')sendChat()" autocomplete="off">
       <button class="btn btn-primary" onclick="sendChat()">${t("send")}</button>
-      <input id="chatImg" type="file" accept="image/*" style="display:none" onchange="sendChatImage(this)"></div></div></section>`;
+      <input id="chatImg" type="file" accept="image/jpeg,image/png,image/webp,image/*" style="display:none" onchange="sendChatImage(this)"></div></div></section>`;
   convoLoaded=false; lastSeenIncomingTs=0; await refreshConvo();
   stopChatPoll(); chatPoll=setInterval(refreshConvo,2500); document.getElementById("chatInput")?.focus();
 }

@@ -71,12 +71,12 @@ const store = {
 
   /* الإعلانات */
   async createListing(data){
-    let img="", video="";
-    if(data.file){ try{ const url=await this.uploadImage(data.file); img=url; }catch(e){} }
+    let img="", video="", imgFailed=false;
+    if(data.file){ try{ img=await this.uploadImage(data.file); }catch(e){ imgFailed=true; } }
     if(data.videoFile){ try{ const url=await this.uploadVideo(data.videoFile); video=url; }catch(e){} }
     const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,zone:data.zone||"inside",location:data.location,desc:data.desc,img,video};
     const d=await jpost("/api/listings", body);
-    if(d.listing){ state.listings.unshift(d.listing); }
+    if(d.listing){ state.listings.unshift(d.listing); d.listing._imgFailed=imgFailed; }
     return d.listing;
   },
   async uploadVideo(file){
@@ -90,7 +90,9 @@ const store = {
   async getUserProfile(id){ return jget("/api/users/"+id+"/profile"); },
   async updateMyProfile(patch){ const d=await jpatch("/api/me", patch); if(d.user){ state.user=d.user; } return d.user; },
   async uploadImage(file){
-    const dataURL = typeof file==="string" ? file : await resizeImageToDataURL(file);
+    let dataURL;
+    try { dataURL = typeof file==="string" ? file : await resizeImageToDataURL(file); }
+    catch(e){ /* صيغة غير مدعومة (HEIC) أو فشل التصغير — جرّب الرفع الأصلي */ dataURL = await fileToDataURL(file); }
     const d=await jpost("/api/upload",{data:dataURL});
     if(!d.url) throw new Error("upload_failed");
     return d.url;
