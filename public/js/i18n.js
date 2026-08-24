@@ -365,6 +365,20 @@ const STR = {
   save_edit:        { ar:"💾 حفظ التعديلات", en:"💾 Save changes" },
   edited_ok:        { ar:"تم حفظ التعديلات ✓", en:"Changes saved ✓" },
   edit_only_owner:  { ar:"يمكنك تعديل إعلاناتك فقط", en:"You can only edit your own listings" },
+
+  /* الشريط الإخباري المتحرك */
+  news_label:       { ar:"📰 أخبار", en:"📰 NEWS" },
+  manage_news:      { ar:"الشريط الإخباري", en:"News Ticker" },
+  admin_tab_news:   { ar:"الأخبار", en:"News" },
+  news_text:        { ar:"نص الخبر", en:"News text" },
+  news_text_ph:     { ar:"اكتب الخبر هنا…", en:"Type news here…" },
+  news_link:        { ar:"الرابط (اختياري)", en:"Link (optional)" },
+  news_link_ph:     { ar:"https://…", en:"https://…" },
+  add_news:         { ar:"إضافة خبر للشريط", en:"Add to ticker" },
+  news_added:       { ar:"تمت إضافة الخبر إلى الشريط ✓", en:"News added to ticker ✓" },
+  news_deleted:     { ar:"تم حذف الخبر", en:"News deleted" },
+  news_empty:       { ar:"لا توجد أخبار بعد — أضف أول خبر أعلاه.", en:"No news yet — add your first item above." },
+  news_admin_hint:  { ar:"اكتب نص الخبر ليظهر فوراً في الشريط المتحرك أعلى الموقع. يمكنك لصق خبر من صفحة الهيئة عند صدوره.", en:"Type news to show instantly in the scrolling ticker at the top. You can paste updates from the Authority's page." },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */

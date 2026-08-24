@@ -656,3 +656,21 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 
 [data-theme="dark"] .img-slot{background:#1e293b}
 [data-theme="dark"] .gal-thumbs{background:var(--card)}
+
+/* =========================================================================
+   الشريط الإخباري المتحرك (News Ticker) — يديره المدير
+   ========================================================================= */
+.news-ticker{display:none;align-items:stretch;background:linear-gradient(90deg,#1e3a8a,#2563eb);color:#fff;overflow:hidden;font-size:14px;font-weight:700;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.ticker-label{background:#ef4444;color:#fff;padding:0 14px;display:flex;align-items:center;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:.3px;position:relative;z-index:2}
+.ticker-label::after{content:"";position:absolute;inset-inline-start:100%;top:0;bottom:0;width:0;border-style:solid;border-width:0 0 26px 12px;border-color:transparent transparent transparent #ef4444}
+.ticker-viewport{flex:1;overflow:hidden;position:relative}
+.ticker-track{display:inline-flex;white-space:nowrap;will-change:transform;animation:tickerScroll linear infinite}
+.ticker-items{display:inline-flex;align-items:center;padding:8px 0}
+.ticker-item{padding:0 6px}
+.ticker-item a{color:#fff;text-decoration:none}
+.ticker-item a:hover{text-decoration:underline}
+.ticker-sep{opacity:.45;padding:0 10px;font-size:9px}
+@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.news-ticker:hover .ticker-track{animation-play-state:paused}
+@media(max-width:600px){.news-ticker{font-size:12.5px}.ticker-label{padding:0 10px;font-size:12px}}
+[data-theme="dark"] .news-ticker{background:linear-gradient(90deg,#0b1220,#111c33);box-shadow:0 2px 10px rgba(0,0,0,.5)}

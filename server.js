@@ -29,11 +29,17 @@ const DEFAULT_BANNERS = [
   { id:"square", active:true, text_ar:"🏭 مستودعات وأراضٍ متاحة للإيجار داخل المنطقة الحرة", text_en:"🏭 Warehouses & land available for lease in the Free Zone", link:"#browse" }
 ];
 
+/* أخبار الشريط الإخباري المتحرك (يديرها المدير) */
+const DEFAULT_NEWS = [
+  { id:"n1", text:"مرحباً بكم في المنطقة الحرة الزرقاء — بوابة التجارة الحرة بلا جمارك", link:"", active:true, ts:Date.now()-86400000 },
+  { id:"n2", text:"للاستفسار عن عضوية هيئة مستثمري المناطق الحرة: 053826871", link:"", active:true, ts:Date.now()-43200000 }
+];
+
 const MIME = { ".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".json":"application/json",".jpg":"image/jpeg",".jpeg":"image/jpeg",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".mp4":"video/mp4",".webm":"video/webm",".apk":"application/vnd.android.package-archive",".woff2":"font/woff2" };
 
 /* ---------- قاعدة البيانات (MongoDB Atlas دائمة + db.json احتياطي محلي) ---------- */
 let mongoClient=null, stateCol=null, chatCol=null, imgCol=null, MONGO_ERR="";
-function freshSeed(){ return { users:SEED_USERS.map(u=>({...u,token:"",favorites:[]})), listings:SEED_LISTINGS.slice(), banners:DEFAULT_BANNERS.slice(), payments:[], revenue:0, meta:{created:Date.now()} }; }
+function freshSeed(){ return { users:SEED_USERS.map(u=>({...u,token:"",favorites:[]})), listings:SEED_LISTINGS.slice(), banners:DEFAULT_BANNERS.slice(), news:DEFAULT_NEWS.slice(), payments:[], revenue:0, meta:{created:Date.now()} }; }
 function loadDBFile(){ try { return migrateDB(JSON.parse(fs.readFileSync(DB_FILE))); } catch { const db=migrateDB(freshSeed()); try{fs.writeFileSync(DB_FILE,JSON.stringify(db));}catch{} return db; } }
 async function connectMongo(){
   if(!MONGO_URI) return false;
@@ -94,6 +100,7 @@ function withOwner(l){ return Object.assign({views:0, reports:0, offers:[], comm
 function migrateDB(db){
   db.users.forEach(u=>{ if(!u.type){ u.type=(u.deals>=20 && u.verified)?"dealer":"individual"; } if(!u.storeName && u.type==="dealer"){ u.storeName=u.name; } if(u.storeDesc===undefined){ u.storeDesc=u.bio||""; } });
   db.listings.forEach(l=>{ if(!l.comments) l.comments=[]; if(!Array.isArray(l.images)){ l.images = l.img ? [l.img] : []; } if(!l.img && l.images[0]) l.img=l.images[0]; });
+  if(!Array.isArray(db.news) || !db.news.length) db.news = DEFAULT_NEWS.slice();
   return db;
 }
 
@@ -366,6 +373,21 @@ const server = http.createServer(async (req,res)=>{
     if(!isAdmin(req)) return send(res,403,{error:"forbidden"});
     const id=p.split("/")[4], b=DB.banners.find(x=>x.id===id); if(!b) return send(res,404);
     const patch=await readBody(req); Object.assign(b,patch); saveDB(DB); return send(res,200,{banner:b});
+  }
+
+  /* ----- الشريط الإخباري المتحرك (يديره المدير) ----- */
+  if(p==="/api/news" && M==="GET") return send(res,200,{news:DB.news||[]});
+  if(p==="/api/admin/news" && M==="POST"){
+    if(!isAdmin(req)) return send(res,403,{error:"forbidden"});
+    const b=await readBody(req);
+    const item={id:"n"+Date.now(), text:String(b.text||"").slice(0,300), link:String(b.link||"").slice(0,300), active:true, ts:Date.now()};
+    DB.news.unshift(item); saveDB(DB); return send(res,200,{news:DB.news});
+  }
+  if(m(/^\/api\/admin\/news\/([^/]+)$/)){
+    if(!isAdmin(req)) return send(res,403,{error:"forbidden"});
+    const id=p.split("/")[4], item=(DB.news||[]).find(x=>x.id===id); if(!item) return send(res,404,{error:"not_found"});
+    if(M==="DELETE"){ DB.news=DB.news.filter(x=>x.id!==id); saveDB(DB); return send(res,200,{news:DB.news}); }
+    if(M==="PATCH"){ const patch=await readBody(req); if("active" in patch) item.active=!!patch.active; if("text" in patch) item.text=String(patch.text).slice(0,300); if("link" in patch) item.link=String(patch.link).slice(0,300); saveDB(DB); return send(res,200,{news:DB.news}); }
   }
 
   /* ----- الإدارة ----- */

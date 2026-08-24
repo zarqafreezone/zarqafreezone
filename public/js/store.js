@@ -13,6 +13,7 @@ const state = {
   banners: [],
   favorites: new Set(),
   users: [],                          // قائمة المستخدمين (للإدارة)
+  news: [],                           // أخبار الشريط الإخباري
   token: localStorage.getItem("fz_token") || "",
   adminToken: localStorage.getItem("fz_admin") || ""
 };
@@ -50,7 +51,7 @@ function fileToDataURL(file){
 const store = {
   /* تحميل أولي لكل البيانات */
   async bootstrap(){
-    await Promise.all([this.refreshBanners(), this.refreshListings()]);
+    await Promise.all([this.refreshBanners(), this.refreshListings(), this.refreshNews()]);
     if(state.token){
       try { await this.me(); await this.refreshFavorites(); }
       catch(e){ state.token=""; localStorage.removeItem("fz_token"); state.user=null; }
@@ -58,6 +59,7 @@ const store = {
   },
   async refreshListings(){ const d=await jget("/api/listings"); state.listings=d.listings||[]; return state.listings; },
   async refreshBanners(){ const d=await jget("/api/banners"); state.banners=d.banners||[]; return state.banners; },
+  async refreshNews(){ const d=await jget("/api/news"); state.news=d.news||[]; return state.news; },
   async refreshFavorites(){ if(!state.token) return; const d=await jget("/api/favorites"); state.favorites=new Set(d.favorites||[]); },
   async me(){ const d=await jget("/api/me"); state.user=d.user||null; return state.user; },
 
@@ -118,6 +120,11 @@ const store = {
   /* البنرات */
   async updateBanner(id, patch){ const d=await jpatch("/api/admin/banners/"+id, patch); if(d.banner){ const i=state.banners.findIndex(b=>b.id===id); if(i>=0) state.banners[i]=d.banner; } },
 
+  /* الشريط الإخباري */
+  async addNews(text, link){ const d=await jpost("/api/admin/news",{text,link}); if(d.news) state.news=d.news; return d.news; },
+  async deleteNews(id){ const d=await jdel("/api/admin/news/"+id); if(d.news) state.news=d.news; },
+  async toggleNews(id){ const n=state.news.find(x=>x.id===id); const v=!(n && n.active!==false); const d=await jpatch("/api/admin/news/"+id,{active:v}); if(d.news) state.news=d.news; },
+
   /* المدفوعات */
   async recordPayment(plan, amount){ await jpost("/api/payments",{plan,amount}); },
 
@@ -140,6 +147,7 @@ function findListing(id){ return state.listings.find(l=>l.id===id) || null; }
 function userListings(uid){ const id=uid||(state.user&&state.user.id); return state.listings.filter(l=>l.user===id); }
 function allBanners(){ return state.banners; }
 function getBanner(id){ return state.banners.find(b=>b.id===id); }
+function allNews(){ return state.news; }
 function isFav(id){ return state.favorites.has(id); }
 function isAdmin(){ return !!state.adminToken; }
 

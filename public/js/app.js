@@ -73,6 +73,7 @@ function highlightNav(){ document.querySelectorAll(".bottom-nav [data-route]").f
 
 function render(){
   renderTopbar();
+  renderTicker();
   updateStaticUI();
   switch(route.name){
     case "home":       return viewHome();
@@ -111,6 +112,24 @@ function renderTopbar(){
   paintBell();
   ensureInstallFab();
 }
+/* =========================================================================
+   الشريط الإخباري المتحرك (مصدر أخباره: لوحة المدير)
+   ========================================================================= */
+let _tickerSig="";
+function renderTicker(){
+  const el=document.getElementById("newsTicker"); if(!el) return;
+  const items=(state.news||[]).filter(n=>n.active!==false && (n.text||"").trim());
+  const sig=items.map(n=>n.id+"|"+(n.text||"")+"|"+(n.link||"")).join("§")+(LANG==="en"?"_en":"_ar");
+  if(sig===_tickerSig) return;          // لم يتغير — حافظ على استمرار الحركة
+  _tickerSig=sig;
+  if(!items.length){ el.innerHTML=""; el.style.display="none"; return; }
+  el.style.display="";
+  const one=`<div class="ticker-items">${items.map(n=>`<span class="ticker-item">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`}</span><span class="ticker-sep">◆</span>`).join("")}</div>`;
+  const total=items.reduce((a,n)=>a+(n.text||"").length,0);
+  const dur=Math.max(22, total/3);
+  el.innerHTML=`<span class="ticker-label">${t("news_label")}</span><div class="ticker-viewport"><div class="ticker-track" style="animation-duration:${dur}s">${one}${one}</div></div>`;
+}
+
 function updateStaticUI(){
   document.getElementById("topSearch").placeholder = t("search_ph");
   const bT1=document.getElementById("brandText1"), bT2=document.getElementById("brandText2");
@@ -555,6 +574,7 @@ async function viewAdmin(){
   let stats={listings:0,users:0,featured:0,revenue:0};
   try{ stats=await store.adminStats(); }catch(e){}
   if(tab==="users"){ try{ await store.refreshUsers(); }catch(e){} }
+  if(tab==="news"){ try{ await store.refreshNews(); }catch(e){} }
   app.innerHTML=`<section class="section"><div class="wrap">
     <div class="sec-head"><h2>${t("admin_title")}</h2><button class="btn btn-ghost" onclick="doAdminLogout()">${t("logout")}</button></div>
     <div class="stat-row">
@@ -567,8 +587,9 @@ async function viewAdmin(){
       <button class="${tab==='listings'?'active':''}" onclick="go('admin',{tab:'listings'})">${t("admin_tab_listings")}</button>
       <button class="${tab==='users'?'active':''}" onclick="go('admin',{tab:'users'})">${t("admin_tab_users")}</button>
       <button class="${tab==='banners'?'active':''}" onclick="go('admin',{tab:'banners'})">${t("admin_tab_banners")}</button>
+      <button class="${tab==='news'?'active':''}" onclick="go('admin',{tab:'news'})">${t("admin_tab_news")}</button>
     </div>
-    ${tab==="listings"?adminListings():tab==="users"?adminUsers():adminBanners()}
+    ${tab==="listings"?adminListings():tab==="users"?adminUsers():tab==="news"?adminNews():adminBanners()}
   </div></section>`;
 }
 function adminLoginView(){
@@ -611,6 +632,27 @@ function adminBanners(){
       <button class="btn btn-ghost" style="margin-inline-start:8px" onclick="doToggleBanner('square')">${S.active?t("admin_inactive"):t("admin_active")}</button></div>
   </div>`;
 }
+/* ---- الشريط الإخباري (إدارة المدير) ---- */
+function adminNews(){
+  const list=state.news||[];
+  return `<div class="info-card" style="max-width:none">
+    <h3 style="margin-bottom:6px">📰 ${t("manage_news")}</h3>
+    <p class="muted" style="font-size:13px;margin-bottom:14px">${t("news_admin_hint")}</p>
+    <div class="form-grid">
+      <div class="field" style="flex:2"><label>${t("news_text")} <span class="req">${t("req")}</span></label><input id="nwText" placeholder="${t("news_text_ph")}" onkeydown="if(event.key==='Enter')document.getElementById('nwLink').focus()"></div>
+      <div class="field" style="flex:1"><label>${t("news_link")}</label><input id="nwLink" placeholder="${t("news_link_ph")}" onkeydown="if(event.key==='Enter')doAddNews()"></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:10px" onclick="doAddNews()">➕ ${t("add_news")}</button>
+    <div class="admin-table" style="margin-top:20px">
+      ${list.length?list.map(n=>`<div class="admin-row"><div class="ar-main"><b>📰 ${esc(n.text)}</b>${n.link?`<span class="muted" style="font-size:12px">🔗 ${esc(n.link)}</span>`:""}<span class="muted" style="font-size:12px">${relDate(new Date(n.ts).toISOString())}</span></div>
+        <div class="ar-actions"><button class="btn btn-ghost btn-sm" onclick="doToggleNews('${n.id}')">${n.active!==false?"🟢 "+t("admin_active"):"⚫ "+t("admin_inactive")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelNews('${n.id}')">🗑 ${t("admin_delete")}</button></div></div>`).join(""):`<p class="muted center" style="padding:20px">${t("news_empty")}</p>`}
+    </div>
+  </div>`;
+}
+async function doAddNews(){ const text=document.getElementById("nwText").value.trim(); if(!text){notify(t("news_text"));return;} const link=document.getElementById("nwLink").value.trim(); try{ await store.addNews(text,link); notify(t("news_added")); _tickerSig=""; renderTicker(); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
+async function doDelNews(id){ try{ await store.deleteNews(id); notify(t("news_deleted")); _tickerSig=""; renderTicker(); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
+async function doToggleNews(id){ try{ await store.toggleNews(id); _tickerSig=""; renderTicker(); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
+
 /* إجراءات الإدارة (غير متزامنة) */
 async function doToggleFeature(id){ try{ await store.toggleFeatured(id); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
 async function doDelListing(id){ try{ await store.deleteListing(id); render(); notify(LANG==="en"?"Deleted":"تم الحذف"); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
