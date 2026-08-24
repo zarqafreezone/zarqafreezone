@@ -26,9 +26,10 @@ function starsHTML(n){ let h=""; for(let i=1;i<=5;i++) h+= i<=n?"★":`<span cla
 function notify(msg){ toastEl.textContent=msg; toastEl.classList.add("show"); clearTimeout(notify._t); notify._t=setTimeout(()=>toastEl.classList.remove("show"),2400); }
 function userInitials(name){ return (name||"؟").trim().slice(0,1); }
 function thumbURL(l){
+  if(l.images&&l.images.length) return l.images[0];
   if(l.img) return l.img;
   const sec=findSection(l.section);
-  return l.images ? placeholderImg(l.id, sec?sec.icon:"🛃", sec?sec.color:"#2563eb") : placeholderImg(l.id,"📷","#94a3b8");
+  return placeholderImg(l.id, sec?sec.icon:"🛃", sec?sec.color:"#2563eb");
 }
 function locDeal(l){ return l.deal==="sell"? t("for_sale"): t("wanted"); }
 
@@ -85,6 +86,7 @@ function render(){
     case "favorites":  return viewFavorites();
     case "chat":       return viewChat(route.params);
     case "store":      return viewStore(route.params.id);
+    case "edit":       return viewEdit(route.params.id);
     case "admin":      return viewAdmin();
     default:           return viewHome();
   }
@@ -343,7 +345,7 @@ function viewDetail(id){
   const owner=l.owner||{}, sec=findSection(l.section), sub=findSub(l.section,l.sub), free=isFree(l);
   app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">${t("back")}</span>
     <div class="detail-grid"><div>
-      <div class="gallery"><div class="main">${l.video?`<video src="${l.video}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;background:#000"></video>`:`<img src="${thumbURL(l)}" alt="">`}</div></div>
+      ${galleryHTML(l)}
       ${bannerLong()}
       ${sub&&sub.types.length?`<div class="info-card" style="margin-top:16px"><h3 style="margin-bottom:10px">${t("related_types")}</h3><div class="type-list">${sub.types.map(ty=>`<span class="type-chip" onclick="go('browse',{section:'${l.section}',sub:'${l.sub}',q:'${ty.replace(/'/g,"")}'}">${tData(ty)}</span>`).join("")}</div></div>`:""}
     </div><div class="detail-info">
@@ -367,7 +369,7 @@ function viewDetail(id){
           <a class="btn btn-ghost" href="tel:${esc(owner.phone)}">📞 ${t("call")}</a>
           <a class="btn wa-btn" href="${waLink(owner.phone,l.title)}" target="_blank" rel="noopener">✅ ${t("whatsapp")}</a>
         </div>
-        ${currentUser()&&owner&&owner.id===currentUser().id?`<button class="btn btn-primary btn-block" style="margin-top:12px" onclick="openPromote('${l.id}')">${t("promote_btn")}${promoActive(l)?" • "+t("promo_active"):""}</button>`:`<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;color:var(--muted)" onclick="openReport('${l.id}')">${t("report_ad")}</button>`}</div>`:""}
+        ${currentUser()&&owner&&owner.id===currentUser().id?`<button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="go('edit',{id:'${l.id}'})">${t("edit_btn")}</button><button class="btn btn-primary btn-block" style="margin-top:8px" onclick="openPromote('${l.id}')">${t("promote_btn")}${promoActive(l)?" • "+t("promo_active"):""}</button>`:`<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;color:var(--muted)" onclick="openReport('${l.id}')">${t("report_ad")}</button>`}</div>`:""}
     </div></div></div></section>`;
 }
 function contactOwner(phone){
@@ -379,11 +381,14 @@ function contactOwner(phone){
    7) إضافة إعلان
    ========================================================================= */
 let addForm={deal:"sell",section:"",sub:"",zone:"inside"};
-function viewAdd(){ if(!currentUser()){notify(LANG==="en"?"Login to add":"سجّل الدخول لإضافة إعلان");openAuth();return;} addForm={deal:"sell",section:"",sub:"",zone:"inside"};drawAdd(); }
+let editTarget=null, imagePicks=[];
+function viewEdit(id){ const l=findListing(id); if(!l){go("home");return;} if(!currentUser()||currentUser().id!==l.user){notify(t("edit_only_owner"));return;} editTarget=id; addForm={deal:l.deal||"sell",section:l.section||"",sub:l.sub||"",zone:l.zone||"inside"}; imagePicks=(l.images&&l.images.length?l.images:(l.img?[l.img]:[])).map(u=>({url:u,preview:u})); drawAdd(); }
+function viewAdd(){ if(!currentUser()){notify(LANG==="en"?"Login to add":"سجّل الدخول لإضافة إعلان");openAuth();return;} editTarget=null; addForm={deal:"sell",section:"",sub:"",zone:"inside"}; imagePicks=[]; drawAdd(); }
 function drawAdd(){
+  const _draft=document.getElementById("fTitle")?_preserveFields():null;
   const sec=findSection(addForm.section), sub=addForm.sub?findSub(addForm.section,addForm.sub):null;
   app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">${t("back")}</span>
-    <div class="form-card"><h2 style="margin-bottom:6px">${t("add_title")}</h2><p class="muted" style="margin-bottom:18px">${t("add_note")}</p>
+    <div class="form-card"><h2 style="margin-bottom:6px">${editTarget?t("edit_listing"):t("add_title")}</h2><p class="muted" style="margin-bottom:18px">${t("add_note")}</p>
       <div class="note-free">${t("add_banner_note")}</div>
       <div class="field full"><label>${t("deal_type")} <span class="req">${t("req")}</span></label>
         <div class="deal-toggle" style="background:#f1f5f9">
@@ -411,11 +416,69 @@ function drawAdd(){
       }
       <div class="field full"><label>${t("f_model")}</label><input id="fModel" placeholder="${t("f_model_ph")}"></div>
       <div class="field full"><label>${t("f_desc")}</label><textarea id="fDesc" placeholder="${t("f_desc_ph")}"></textarea></div>
-      <div class="field full"><label>${t("f_image")}</label><input id="fImg" type="file" accept="image/jpeg,image/png,image/webp,image/*"></div>
+      <div class="field full"><label>${t("f_images")} <span class="muted" style="font-weight:400">(<span id="imgCount">${imagePicks.length}</span>/4)</span></label>
+        <div id="imgSlots" class="img-slots"></div>
+        <input id="fImg" type="file" accept="image/jpeg,image/png,image/webp,image/*" multiple style="display:none" onchange="onImgPick(this)">
+        <button type="button" id="addImgBtn" class="btn btn-ghost btn-sm" onclick="document.getElementById('fImg').click()">${t("add_image")}</button>
+        <p class="muted" style="font-size:12px;margin-top:6px">${t("images_hint")}</p></div>
       <div class="field full"><label>${t("video_field")}</label><input id="fVideo" type="file" accept="video/*"></div>
-      <button class="btn btn-primary btn-block btn-lg" id="publishBtn" onclick="submitListing()">${t("publish_free")}</button>
+      <button class="btn btn-primary btn-block btn-lg" id="publishBtn" onclick="${editTarget?("submitEdit('"+editTarget+"')"):"submitListing()"}">${editTarget?t("save_edit"):t("publish_free")}</button>
     </div></div></section>`;
+  if(_draft){ _restoreFields(_draft); }
+  else if(editTarget){ const e=findListing(editTarget); const set=(id,v)=>{const el=document.getElementById(id); if(el) el.value=v;};
+    set("fTitle",e.title||""); set("fPrice",e.price||""); set("fModel",e.model||""); set("fDesc",e.desc||""); set("fLoc",e.location||"");
+    const tt=document.getElementById("fType"); if(tt&&e.type) tt.value=e.type;
+    const bb=document.getElementById("fBrand"); if(bb&&e.brand) bb.value=e.brand; }
+  renderImgSlots();
 }
+function _preserveFields(){ const g=id=>{const e=document.getElementById(id);return e?e.value:"";}; return {fTitle:g("fTitle"),fPrice:g("fPrice"),fModel:g("fModel"),fDesc:g("fDesc"),fLoc:g("fLoc"),fType:g("fType"),fBrand:g("fBrand")}; }
+function _restoreFields(v){ const s=(id,val)=>{const e=document.getElementById(id); if(e&&val!=null)e.value=val;}; s("fTitle",v.fTitle);s("fPrice",v.fPrice);s("fModel",v.fModel);s("fDesc",v.fDesc);s("fLoc",v.fLoc);s("fType",v.fType);s("fBrand",v.fBrand); }
+
+/* صور متعددة + معرض + تعديل */
+function onImgPick(input){
+  const remaining=4-imagePicks.length; if(remaining<=0){ notify(t("img_max")); return; }
+  const files=[...input.files].slice(0,remaining);
+  for(const f of files){ imagePicks.push({file:f, preview:URL.createObjectURL(f)}); }
+  input.value=""; renderImgSlots();
+}
+function renderImgSlots(){
+  const c=document.getElementById("imgSlots"); if(!c) return;
+  c.innerHTML=imagePicks.map((p,i)=>`<div class="img-slot"><img src="${p.preview||p.url||""}" alt=""><span class="img-slot-n">${i+1}</span>${i===0?`<span class="main-tag">${t("main_img")}</span>`:""}${i>0?`<button type="button" class="img-slot-act" onclick="setMainImg(${i})" title="${t("make_main")}">⭐</button>`:""}<button type="button" class="img-slot-del" onclick="removeImg(${i})">×</button></div>`).join("");
+  const cn=document.getElementById("imgCount"); if(cn) cn.textContent=imagePicks.length;
+  const ab=document.getElementById("addImgBtn"); if(ab) ab.style.display=imagePicks.length<4?"":"none";
+}
+function removeImg(i){ imagePicks.splice(i,1); renderImgSlots(); }
+function setMainImg(i){ if(i<=0) return; const [it]=imagePicks.splice(i,1); imagePicks.unshift(it); renderImgSlots(); }
+function drawAdd_keepPicks(){ /* re-render form keeping current imagePicks + addForm state without resetting */ drawAdd(); }
+async function resolvePicks(){ const out=[]; for(const p of imagePicks){ if(p.url) out.push(p.url); else if(p.file){ try{ out.push(await store.uploadImage(p.file)); }catch(e){} } } return out; }
+async function submitEdit(id){
+  const title=document.getElementById("fTitle").value.trim();
+  if(!title){notify(t("f_title"));return;}
+  const btn=document.getElementById("publishBtn"); btn.disabled=true; btn.textContent=LANG=="en"?"Saving…":"جارٍ الحفظ…";
+  const vidEl=document.getElementById("fVideo"), vfile=vidEl&&vidEl.files&&vidEl.files[0];
+  if(vfile && vfile.size>8*1024*1024){ btn.disabled=false; btn.textContent=t("save_edit"); notify(t("video_too_big")); return; }
+  let images=[]; try{ images=await resolvePicks(); }catch(e){}
+  try{
+    await store.updateListing(id,{deal:addForm.deal,section:addForm.section,sub:addForm.sub,
+      type:document.getElementById("fType")?.value||"",brand:document.getElementById("fBrand")?.value||"",
+      model:document.getElementById("fModel").value.trim(),title,price:document.getElementById("fPrice").value,
+      zone:addForm.zone,location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),images,videoFile:vfile});
+    notify(t("edited_ok")); editTarget=null; imagePicks=[]; go("detail",{id});
+  }catch(e){ btn.disabled=false; btn.textContent=t("save_edit"); notify(LANG=="en"?"Failed":"تعذّر الحفظ"); }
+}
+/* معرض متعدد الصور */
+let _galImgs=[], _galIdx=0;
+function galleryHTML(l){
+  const imgs=(l.images&&l.images.length)?l.images.slice():(l.img?[l.img]:[]);
+  window._galImgs=imgs; window._galIdx=0;
+  if(l.video){ return `<div class="gallery"><div class="main"><video src="${l.video}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;background:#000"></video></div>${imgs.length?`<div class="gal-thumbs">${imgs.map((s,i)=>`<img class="gal-thumb" src="${s}" onclick="galSelect(${i})">`).join("")}</div>`:""}</div>`; }
+  if(!imgs.length){ return `<div class="gallery"><div class="main"><img src="${thumbURL(l)}" alt=""></div></div>`; }
+  return `<div class="gallery"><div class="main"><img id="galMain" src="${imgs[0]}" alt="">${imgs.length>1?`<span class="gal-count">1/${imgs.length}</span><button class="gal-arrow prev" onclick="galStep(-1)">‹</button><button class="gal-arrow next" onclick="galStep(1)">›</button>`:""}</div>${imgs.length>1?`<div class="gal-thumbs">${imgs.map((s,i)=>`<img class="gal-thumb ${i===0?"active":""}" src="${s}" onclick="galSelect(${i})">`).join("")}</div>`:""}</div>`;
+}
+function galSelect(i){ _galIdx=i; _galRender(); }
+function galStep(d){ if(!_galImgs.length) return; _galIdx=(_galIdx+d+_galImgs.length)%_galImgs.length; _galRender(); }
+function _galRender(){ const m=document.getElementById("galMain"); if(m) m.src=_galImgs[_galIdx]; const c=document.querySelector(".gal-count"); if(c) c.textContent=(_galIdx+1)+"/"+_galImgs.length; document.querySelectorAll(".gal-thumb").forEach((th,i)=>th.classList.toggle("active",i===_galIdx)); }
+
 function setDeal(d){addForm.deal=d;drawAdd();}
 function setSection(id){addForm.section=id;addForm.sub="";drawAdd();}
 function setZone(z){addForm.zone=z;drawAdd();}
@@ -426,16 +489,18 @@ async function submitListing(){
   if(!title){notify(t("f_title"));return;}
   if(addForm.zone==="outside"&&!document.getElementById("fLoc").value.trim()){notify(t("offer_address"));return;}
   const btn=document.getElementById("publishBtn"); btn.disabled=true; btn.textContent=LANG==="en"?"Publishing…":"جارٍ النشر…";
-  const imgEl=document.getElementById("fImg"), file=imgEl&&imgEl.files&&imgEl.files[0];
   const vidEl=document.getElementById("fVideo"), vfile=vidEl&&vidEl.files&&vidEl.files[0];
   if(vfile && vfile.size>8*1024*1024){ btn.disabled=false; btn.textContent=t("publish_free"); notify(t("video_too_big")); return; }
+  let images=[], imgFailed=false;
+  try{ images=await resolvePicks(); if(imagePicks.length && images.length<imagePicks.length) imgFailed=true; }catch(e){ imgFailed=true; }
   try{
     const l=await store.createListing({deal:addForm.deal,section:addForm.section,sub:addForm.sub,
       type:document.getElementById("fType")?.value||"",brand:document.getElementById("fBrand")?.value||"",
       model:document.getElementById("fModel").value.trim(),title,price:document.getElementById("fPrice").value,
-      zone:addForm.zone,location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),file,videoFile:vfile});
+      zone:addForm.zone,location:document.getElementById("fLoc").value.trim(),desc:document.getElementById("fDesc").value.trim(),images,videoFile:vfile});
     notify(LANG==="en"?"Published ✓ (free 3 months)":"تم نشر إعلانك بنجاح ✓ (مجاني 3 أشهر)");
     if(l&&l._imgFailed){ setTimeout(()=>notify(LANG=="en"?"Image upload failed (try JPG)":"تعذّر رفع الصورة — جرّب صيغة JPG"),900); }
+    imagePicks=[]; editTarget=null;
     go("detail",{id:l.id});
   }catch(e){ btn.disabled=false; btn.textContent=t("publish_free"); notify(LANG==="en"?"Failed to publish":"تعذّر النشر"); }
 }

@@ -27,6 +27,7 @@ function headers(extra){
 async function jget(url){ const r=await fetch(url,{headers:headers()}); if(!r.ok) throw new Error(r.status); return r.json(); }
 async function jpost(url,body){ const r=await fetch(url,{method:"POST",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{})}); return r.json(); }
 async function jpatch(url,body){ const r=await fetch(url,{method:"PATCH",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{})}); return r.json(); }
+async function jput(url,body){ const r=await fetch(url,{method:"PUT",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{})}); return r.json(); }
 async function jdel(url){ const r=await fetch(url,{method:"DELETE",headers:headers()}); return r.json(); }
 
 /* تصغير الصورة قبل الرفع */
@@ -71,12 +72,19 @@ const store = {
 
   /* الإعلانات */
   async createListing(data){
-    let img="", video="", imgFailed=false;
-    if(data.file){ try{ img=await this.uploadImage(data.file); }catch(e){ imgFailed=true; } }
-    if(data.videoFile){ try{ const url=await this.uploadVideo(data.videoFile); video=url; }catch(e){} }
-    const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,zone:data.zone||"inside",location:data.location,desc:data.desc,img,video};
+    const images=Array.isArray(data.images)?data.images.filter(Boolean).slice(0,4):(data.img?[data.img]:[]);
+    let video="";
+    if(data.videoFile){ try{ video=await this.uploadVideo(data.videoFile); }catch(e){} }
+    const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,zone:data.zone||"inside",location:data.location,desc:data.desc,images,img:images[0]||"",video};
     const d=await jpost("/api/listings", body);
-    if(d.listing){ state.listings.unshift(d.listing); d.listing._imgFailed=imgFailed; }
+    if(d.listing){ state.listings.unshift(d.listing); }
+    return d.listing;
+  },
+  async updateListing(id, data){
+    const body={deal:data.deal,section:data.section,sub:data.sub,type:data.type,brand:data.brand,model:data.model,title:data.title,price:data.price,currency:data.currency,zone:data.zone,location:data.location,desc:data.desc,images: Array.isArray(data.images)?data.images.filter(Boolean).slice(0,4):[]};
+    if(data.videoFile){ try{ body.video=await this.uploadVideo(data.videoFile); }catch(e){} }
+    const d=await jput("/api/listings/"+id, body);
+    if(d.listing){ const i=state.listings.findIndex(l=>l.id===id); if(i>=0) state.listings[i]=d.listing; }
     return d.listing;
   },
   async uploadVideo(file){

@@ -352,6 +352,19 @@ const STR = {
   comment_send:     { ar:"إرسال", en:"Send" },
   comment_posted:   { ar:"تم نشر تعليقك ✓", en:"Your comment was posted ✓" },
   login_comment:    { ar:"سجّل الدخول للتعليق", en:"Login to comment" },
+
+  /* صور متعددة + تعديل الإعلان */
+  f_images:         { ar:"الصور", en:"Images" },
+  add_image:        { ar:"➕ إضافة صورة", en:"➕ Add image" },
+  images_hint:      { ar:"الصورة الأولى هي صورة العرض الرئيسية — حتى 4 صور (JPG/PNG)", en:"First image is the main display photo — up to 4 images (JPG/PNG)" },
+  main_img:         { ar:"رئيسية", en:"Main" },
+  make_main:        { ar:"اجعلها رئيسية", en:"Make main" },
+  img_max:          { ar:"الحد الأقصى 4 صور", en:"Maximum 4 images" },
+  edit_listing:     { ar:"تعديل الإعلان", en:"Edit listing" },
+  edit_btn:         { ar:"✏️ تعديل الإعلان", en:"✏️ Edit" },
+  save_edit:        { ar:"💾 حفظ التعديلات", en:"💾 Save changes" },
+  edited_ok:        { ar:"تم حفظ التعديلات ✓", en:"Changes saved ✓" },
+  edit_only_owner:  { ar:"يمكنك تعديل إعلاناتك فقط", en:"You can only edit your own listings" },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */

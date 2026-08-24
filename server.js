@@ -84,7 +84,7 @@ function pubUser(u){ return u ? {id:u.id,name:u.name,phone:u.phone,country:u.cou
 function withOwner(l){ return Object.assign({views:0, reports:0, offers:[], comments:[]}, l, { owner: pubUser(DB.users.find(u=>u.id===l.user)) }); }
 function migrateDB(db){
   db.users.forEach(u=>{ if(!u.type){ u.type=(u.deals>=20 && u.verified)?"dealer":"individual"; } if(!u.storeName && u.type==="dealer"){ u.storeName=u.name; } if(u.storeDesc===undefined){ u.storeDesc=u.bio||""; } });
-  db.listings.forEach(l=>{ if(!l.comments) l.comments=[]; });
+  db.listings.forEach(l=>{ if(!l.comments) l.comments=[]; if(!Array.isArray(l.images)){ l.images = l.img ? [l.img] : []; } if(!l.img && l.images[0]) l.img=l.images[0]; });
   return db;
 }
 
@@ -255,7 +255,8 @@ const server = http.createServer(async (req,res)=>{
   if(p==="/api/listings" && M==="POST"){
     const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
     const b=await readBody(req);
-    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", zone:b.zone||"inside", location:b.location||"", images:b.img?1:0, img:b.img||"", video:b.video||"", user:u.id, date:new Date().toISOString().slice(0,10), ts:Date.now(), featured:false, desc:(b.desc||"").slice(0,2000) };
+    const imgs = Array.isArray(b.images) ? b.images.filter(Boolean).slice(0,4) : (b.img ? [b.img] : []);
+    const l={ id:"l"+Date.now(), deal:b.deal||"sell", section:b.section, sub:b.sub, type:b.type||"", brand:b.brand||"", model:b.model||"", title:(b.title||"").slice(0,200), price:Number(b.price)||0, currency:b.currency||"USD", zone:b.zone||"inside", location:b.location||"", images:imgs, img:imgs[0]||"", video:b.video||"", user:u.id, date:new Date().toISOString().slice(0,10), ts:Date.now(), featured:false, desc:(b.desc||"").slice(0,2000) };
     DB.listings.unshift(l); saveDB(DB);
     return send(res,200,{listing:withOwner(l)});
   }
@@ -264,6 +265,19 @@ const server = http.createServer(async (req,res)=>{
     const id=rm[1], l=DB.listings.find(x=>x.id===id);
     if(!l) return send(res,404,{error:"not_found"});
     if(M==="GET") return send(res,200,{listing:withOwner(l)});
+    if(M==="PUT"){
+      const u=authUser(req); if(!u) return send(res,401,{error:"unauthorized"});
+      if(!(u.id===l.user || isAdmin(req))) return send(res,403,{error:"forbidden"});
+      const b=await readBody(req);
+      const STRF={deal:"deal",section:"section",sub:"sub",type:"type",brand:"brand",model:"model",zone:"zone",location:"location",currency:"currency"};
+      for(const k in STRF){ if(b[k]!==undefined) l[STRF[k]]=String(b[k]).slice(0,k==="model"?80:k==="location"?120:40); }
+      if(b.title!==undefined) l.title=String(b.title).slice(0,200);
+      if(b.desc!==undefined) l.desc=String(b.desc).slice(0,2000);
+      if(b.price!==undefined) l.price=Number(b.price)||0;
+      if(Array.isArray(b.images)){ l.images=b.images.filter(Boolean).slice(0,4); l.img=l.images[0]||""; }
+      if(b.video!==undefined) l.video=String(b.video);
+      saveDB(DB); return send(res,200,{listing:withOwner(l)});
+    }
     if(M==="DELETE"){ const u=authUser(req); if(!(u && (u.id===l.user || isAdmin(req)))) return send(res,403,{error:"forbidden"}); DB.listings=DB.listings.filter(x=>x.id!==id); saveDB(DB); return send(res,200,{ok:true}); }
   }
   if(m(/^\/api\/listings\/([^/]+)\/feature$/) && M==="PATCH"){
