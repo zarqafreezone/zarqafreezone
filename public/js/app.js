@@ -651,9 +651,10 @@ function adminNews(){
     </div>
   </div>`;
 }
-async function doAddNews(){ const text=document.getElementById("nwText").value.trim(); if(!text){notify(t("news_text"));return;} const link=document.getElementById("nwLink").value.trim(); try{ await store.addNews(text,link); notify(t("news_added")); _tickerSig=""; renderTicker(); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
-async function doDelNews(id){ try{ await store.deleteNews(id); notify(t("news_deleted")); _tickerSig=""; renderTicker(); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
-async function doToggleNews(id){ try{ await store.toggleNews(id); _tickerSig=""; renderTicker(); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }
+function newsOpFail(e){ if(e&&e.status===403){ store.adminLogout(); notify(t("admin_expired")); go("admin"); } else notify(t("news_op_fail")); }
+async function doAddNews(){ const text=document.getElementById("nwText").value.trim(); if(!text){notify(t("news_text"));return;} const link=document.getElementById("nwLink").value.trim(); try{ await store.addNews(text,link); notify(t("news_added")); _tickerSig=""; renderTicker(); render(); }catch(e){ newsOpFail(e); } }
+async function doDelNews(id){ try{ await store.deleteNews(id); notify(t("news_deleted")); _tickerSig=""; renderTicker(); render(); }catch(e){ newsOpFail(e); } }
+async function doToggleNews(id){ try{ await store.toggleNews(id); _tickerSig=""; renderTicker(); render(); }catch(e){ newsOpFail(e); } }
 
 /* إجراءات الإدارة (غير متزامنة) */
 async function doToggleFeature(id){ try{ await store.toggleFeatured(id); render(); }catch(e){ notify(LANG==="en"?"Failed":"تعذّر"); } }

@@ -120,10 +120,11 @@ const store = {
   /* البنرات */
   async updateBanner(id, patch){ const d=await jpatch("/api/admin/banners/"+id, patch); if(d.banner){ const i=state.banners.findIndex(b=>b.id===id); if(i>=0) state.banners[i]=d.banner; } },
 
-  /* الشريط الإخباري */
-  async addNews(text, link){ const d=await jpost("/api/admin/news",{text,link}); if(d.news) state.news=d.news; return d.news; },
-  async deleteNews(id){ const d=await jdel("/api/admin/news/"+id); if(d.news) state.news=d.news; },
-  async toggleNews(id){ const n=state.news.find(x=>x.id===id); const v=!(n && n.active!==false); const d=await jpatch("/api/admin/news/"+id,{active:v}); if(d.news) state.news=d.news; },
+  /* الشريط الإخباري (مع كشف أخطاء الصلاحيات — 403 يُطلق استثناء) */
+  async _newsReq(method, url, body){ const opt={method,headers:headers(body?{"Content-Type":"application/json"}:{})}; if(body) opt.body=JSON.stringify(body); const r=await fetch(url,opt); const d=await r.json().catch(()=>({})); if(!r.ok){const e=new Error("http_"+r.status);e.status=r.status;throw e;} return d; },
+  async addNews(text, link){ const d=await this._newsReq("POST","/api/admin/news",{text,link}); if(d.news) state.news=d.news; return d.news; },
+  async deleteNews(id){ const d=await this._newsReq("DELETE","/api/admin/news/"+id); if(d.news) state.news=d.news; },
+  async toggleNews(id){ const n=state.news.find(x=>x.id===id); const v=!(n && n.active!==false); const d=await this._newsReq("PATCH","/api/admin/news/"+id,{active:v}); if(d.news) state.news=d.news; },
 
   /* المدفوعات */
   async recordPayment(plan, amount){ await jpost("/api/payments",{plan,amount}); },

@@ -380,6 +380,8 @@ const STR = {
   news_empty:       { ar:"لا توجد أخبار بعد — أضف أول خبر أعلاه.", en:"No news yet — add your first item above." },
   news_admin_hint:  { ar:"اكتب نص الخبر ليظهر فوراً في الشريط المتحرك أعلى الموقع. يمكنك لصق خبر من صفحة الهيئة عند صدوره.", en:"Type news to show instantly in the scrolling ticker at the top. You can paste updates from the Authority's page." },
   news_ttl:         { ar:"تُحذف تلقائياً بعد 5 أيام", en:"Auto-deleted after 5 days" },
+  admin_expired:    { ar:"انتهت جلسة المدير — سجّل الدخول مجدداً ثم أعد المحاولة", en:"Admin session expired — please log in again and retry" },
+  news_op_fail:     { ar:"تعذّرت العملية — حاول مجدداً", en:"Operation failed — try again" },
 };
 
 /* قاموس ترجمة بيانات التصنيفات (عربي → إنجليزي) */
