@@ -25,11 +25,11 @@ function headers(extra){
   if(state.adminToken) h["x-admin-token"] = state.adminToken;
   return h;
 }
-async function jget(url){ const r=await fetch(url,{headers:headers()}); if(!r.ok) throw new Error(r.status); return r.json(); }
-async function jpost(url,body){ const r=await fetch(url,{method:"POST",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{})}); return r.json(); }
-async function jpatch(url,body){ const r=await fetch(url,{method:"PATCH",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{})}); return r.json(); }
-async function jput(url,body){ const r=await fetch(url,{method:"PUT",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{})}); return r.json(); }
-async function jdel(url){ const r=await fetch(url,{method:"DELETE",headers:headers()}); return r.json(); }
+async function jget(url){ const s=url.indexOf("?")<0?"?":"&"; const r=await fetch(url+s+"_="+(Date.now()%1e9),{headers:headers(),cache:"no-store"}); if(!r.ok) throw new Error(r.status); return r.json(); }
+async function jpost(url,body){ const r=await fetch(url,{method:"POST",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{}),cache:"no-store"}); return r.json(); }
+async function jpatch(url,body){ const r=await fetch(url,{method:"PATCH",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{}),cache:"no-store"}); return r.json(); }
+async function jput(url,body){ const r=await fetch(url,{method:"PUT",headers:headers({"Content-Type":"application/json"}),body:JSON.stringify(body||{}),cache:"no-store"}); return r.json(); }
+async function jdel(url){ const r=await fetch(url,{method:"DELETE",headers:headers(),cache:"no-store"}); return r.json(); }
 
 /* تصغير الصورة قبل الرفع */
 function resizeImageToDataURL(file, maxW=1000){
@@ -51,6 +51,11 @@ function fileToDataURL(file){
 const store = {
   /* تحميل أولي لكل البيانات */
   async bootstrap(){
+    // بيانات مبدئية مضمونة من الخادم (SSR) — الشريط لا يكون فارغاً أبداً
+    try{
+      const bn=window.__BOOT_NEWS__; if(bn){ state.news=(typeof bn==="string"?JSON.parse(bn):bn)||[]; }
+      const bb=window.__BOOT_BANNERS__; if(bb){ state.banners=(typeof bb==="string"?JSON.parse(bb):bb)||[]; }
+    }catch(e){}
     await Promise.all([this.refreshBanners(), this.refreshListings(), this.refreshNews()]);
     if(state.token){
       try { await this.me(); await this.refreshFavorites(); }

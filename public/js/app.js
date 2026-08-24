@@ -804,6 +804,8 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
   checkApk();
   setInterval(refreshChatBadge, 6000);
   document.addEventListener("pointerdown", initAudio, { once:true });
+  // ضمان إضافي: إن بقي الشريط فارغاً (بيانات مفقودة)، أعد الجلب بعد لحظات
+  setTimeout(async ()=>{ if(!(state.news||[]).length){ try{ await store.refreshNews(); }catch(e){} _tickerSig=""; renderTicker(); } }, 2500);
 })();
 function hideSplash(){ const sp=document.getElementById("splash"); if(!sp) return; setTimeout(()=>{ sp.classList.add("hide"); setTimeout(()=>sp.remove(),600); }, 650); }
 

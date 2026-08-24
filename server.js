@@ -108,8 +108,25 @@ function migrateDB(db){
 
 /* ---------- مساعدات الرد والاستقبال ---------- */
 function send(res, code, body, type="application/json"){
-  res.writeHead(code, {"Content-Type":type, "Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"Content-Type, Authorization, x-admin-token"});
+  res.writeHead(code, {"Content-Type":type, "Cache-Control":"no-store, no-cache, must-revalidate", "Access-Control-Allow-Origin":"*", "Access-Control-Allow-Headers":"Content-Type, Authorization, x-admin-token"});
   res.end(typeof body==="string"||Buffer.isBuffer(body)?body:JSON.stringify(body));
+}
+
+/* ===== حقن بيانات مبدئية في صفحة HTML (SSR) لضمان ظهور الشريط دائماً ===== */
+let _INDEX_HTML = null;
+function getIndexHtml(){
+  if(_INDEX_HTML==null){ try{ _INDEX_HTML=fs.readFileSync(path.join(PUBLIC,"index.html"),"utf8"); }catch{ _INDEX_HTML="<!doctype html><meta charset=utf-8><title>Zarqa Free Zone</title><body>loading…"; } }
+  return _INDEX_HTML;
+}
+function serveIndex(res){
+  const now=Date.now();
+  const news=(DB.news||[]).filter(n=>n.active!==false && (!n.ts || (now-n.ts)<NEWS_TTL_DAYS*86400000)).sort((a,b)=>(a.ts||0)-(b.ts||0)).slice(0,40);
+  const banners=(DB.banners||[]).filter(b=>b.active!==false);
+  const inject=`<script>window.__BOOT_NEWS__=${JSON.stringify(JSON.stringify(news))};window.__BOOT_BANNERS__=${JSON.stringify(JSON.stringify(banners))};</script>`;
+  let html=getIndexHtml();
+  if(html.indexOf("__BOOT_NEWS__")>=0){ html=html.replace(/<script>window\.__BOOT_NEWS__[\s\S]*?<\/script>/, inject); }
+  else { html=html.replace("</head>", inject+"</head>"); }
+  send(res,200,html,MIME[".html"]);
 }
 function readBody(req){ return new Promise(res=>{ let d=""; req.on("data",c=>d+=c); req.on("end",()=>{ try{res(JSON.parse(d||"{}"))}catch{res({})} }); }); }
 function authUser(req){
@@ -445,11 +462,12 @@ const server = http.createServer(async (req,res)=>{
 
   /* ----- ملفات ثابتة ----- */
   }catch(e){ console.error("⚠️ API error:", e && e.message); return send(res,500,{error:"server_error",detail:String(e&&e.message)}); }
-  let fp=decodeURIComponent(p); if(fp==="/"||fp==="") fp="/index.html";
+  let fp=decodeURIComponent(p);
+  if(fp==="/"||fp==="/index.html"){ return serveIndex(res); }   // صفحة رئيسية بحقن الأخبار (SSR)
   fp=path.join(PUBLIC, fp);
   if(!fp.startsWith(PUBLIC)) return send(res,403,"Forbidden","text/plain");
   fs.readFile(fp,(err,data)=>{
-    if(err){ fs.readFile(path.join(PUBLIC,"index.html"),(e2,d2)=>{ if(e2) return send(res,404,"Not Found","text/plain"); send(res,200,d2,MIME[".html"]); }); return; }
+    if(err){ return serveIndex(res); }   // مسارات العميل (SPA) → الصفحة بحقن الأخبار
     send(res,200,data,MIME[path.extname(fp).toLowerCase()]||"application/octet-stream");
   });
 });
