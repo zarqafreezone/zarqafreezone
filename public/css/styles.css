@@ -55,7 +55,7 @@ input,select,textarea{font-family:inherit;font-size:15px}
 
 /* ===== البطل ===== */
 /* المقدمة: صورة حقيقية حية + تظليل متدرج يحافظ على وضوح النص */
-.hero{background-color:#a8cbe8;background-image:url("../images/hero-bg.jpg");background-size:cover;background-position:center;background-repeat:no-repeat;color:#0b2440;position:relative;overflow:hidden}
+.hero{background-color:#a8cbe8;background-image:url("../images/hero-bg.jpg");background-size:cover;background-position:center;background-repeat:no-repeat;color:#1450d2;position:relative;overflow:hidden}
 .hero .wrap{position:relative;z-index:1;padding:56px 16px}
 .hero h1{font-size:34px;line-height:1.3;margin-bottom:12px}
 .hero p{font-size:18px;opacity:.92;max-width:620px;margin-bottom:24px}
@@ -66,8 +66,9 @@ input,select,textarea{font-family:inherit;font-size:15px}
 .hero-search .btn{box-shadow:0 8px 20px rgba(0,0,0,.25)}
 .hero-stats{display:flex;gap:34px;margin-top:34px;flex-wrap:wrap}
 .hero-stats div b{display:block;font-size:26px}
-.hero-stats div span{opacity:.85;font-size:14px}
-.badge-free{display:inline-flex;align-items:center;gap:6px;background:#0b2440;color:#fff;
+.hero-stats div b,.hero-stats div span{color:#0d2f8f}
+.hero-stats div span{font-size:14px}
+.badge-free{display:inline-flex;align-items:center;gap:6px;background:#1450d2;color:#fff;
   padding:6px 14px;border-radius:30px;font-size:13px;font-weight:700;margin-bottom:18px}
 
 /* تبويب بيع/شراء في البطل */
