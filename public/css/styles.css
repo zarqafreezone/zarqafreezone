@@ -363,7 +363,16 @@ input,select,textarea{font-family:inherit;font-size:15px}
 .foot-links{display:flex;flex-direction:column;gap:10px}
 .foot-links a{cursor:pointer;color:#cbd5e1;font-size:14px;transition:.15s}
 .foot-links a:hover{color:#fff}
-.foot-bottom{text-align:center;padding-top:18px;font-size:13px;color:#64748b;font-weight:700}
+.foot-bottom{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding-top:18px;padding-bottom:6px;font-size:13px;color:#64748b;font-weight:700;text-align:center}
+.foot-social{display:flex;align-items:center;gap:9px}
+.foot-social a{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#1e293b;color:#cbd5e1;transition:transform .18s ease,background .18s ease,color .18s ease}
+.foot-social a svg{width:17px;height:17px}
+.foot-social a:hover{transform:translateY(-3px)}
+.foot-social a.wa:hover{background:#25d366;color:#fff}
+.foot-social a.fb:hover{background:#1877f2;color:#fff}
+.foot-social a.x:hover{background:#000;color:#fff}
+.foot-social a.yt:hover{background:#f00;color:#fff}
+.foot-social a.ig:hover{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff}
 .foot-bottom b{color:#94a3b8}
 
 /* ===== لوحة الإدارة ===== */
