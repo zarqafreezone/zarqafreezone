@@ -247,6 +247,19 @@ const STR = {
   admin_banner_splash: { ar:"إعلان الافتتاح (Splash) — شاشة كاملة عند الفتح", en:"Opening ad (Splash) — full screen on open" },
   splash_note: { ar:"يظهر مرة واحدة لكل زيارة لمدة 4 ثوانٍ — تصميم إعلان مجموعة البستنجي", en:"Shows once per visit for 4s — Bustanji Group ad creative" },
   powered_by: { ar:"© جميع الحقوق محفوظة: شبكة نشوان للتسويق", en:"© All rights reserved: Nashwan Marketing Network" },
+  /* المشاركة */
+  share_btn:   { ar:"مشاركة", en:"Share" },
+  share_ad:    { ar:"مشاركة الإعلان", en:"Share this ad" },
+  share_sub:   { ar:"شارك الإعلان مع من يهمه الأمر — عبر منصتك المفضلة أو انسخ الرابط المباشر", en:"Share this ad with whoever needs it — via your favorite platform or copy the direct link" },
+  sh_wa:       { ar:"واتساب", en:"WhatsApp" },
+  sh_fb:       { ar:"فيسبوك", en:"Facebook" },
+  sh_tg:       { ar:"تيليغرام", en:"Telegram" },
+  sh_x:        { ar:"إكس", en:"X" },
+  copy_link:   { ar:"نسخ الرابط", en:"Copy link" },
+  copied_ok:   { ar:"✓ تم النسخ", en:"✓ Copied" },
+  link_copied: { ar:"تم نسخ رابط الإعلان ✓", en:"Ad link copied ✓" },
+  copy_fail:   { ar:"تعذّر النسخ — انسخ الرابط يدوياً", en:"Copy failed — copy the link manually" },
+  share_more:  { ar:"مشاركة عبر الجهاز…", en:"Share via device…" },
 
   /* المحادثات */
   chat:             { ar:"💬 المحادثات", en:"💬 Chats" },

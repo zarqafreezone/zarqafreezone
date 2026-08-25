@@ -61,9 +61,78 @@ async function submitReport(){
 }
 
 /* =========================================================================
+   مشاركة الإعلانات — روابط مباشرة (#/l/ID) + لوحة مشاركة المنصات
+   ========================================================================= */
+function listingURL(l){ return location.origin+location.pathname+"#/l/"+l.id; }
+function shareText(l){
+  return LANG==="en" ? l.title+" — "+fmtPrice(l)+"\nZarqa Free Zone Marketplace" : l.title+" — "+fmtPrice(l)+"\nمنصة إعلانات المنطقة الحرة الزرقاء 🏭";
+}
+const SHARE_SVGS={
+  wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>',
+  fb:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
+  tg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="m8 7 4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>'
+};
+let shareTarget=null;
+function openShare(id){
+  const l=findListing(id); if(!l) return;
+  shareTarget=id;
+  const url=listingURL(l), txt=shareText(l), enc=encodeURIComponent;
+  const full=txt+"\n"+url;
+  overlay.classList.add("show");
+  overlay.innerHTML=`<div class="modal modal-wrap sh-sheet">
+    <button class="modal-close" onclick="closeShare()">×</button>
+    <h2>🔗 ${t("share_ad")}</h2>
+    <p class="muted" style="margin-bottom:14px;font-size:13px">${t("share_sub")}</p>
+    <div class="sh-preview"><img src="${thumbURL(l)}" alt=""><div style="flex:1;min-width:0"><div class="t">${esc(l.title)}</div><div class="p">${esc(fmtPrice(l))}</div></div></div>
+    ${navigator.share?`<button class="sh-native" onclick="shareNative()">${SHARE_SVGS.share} ${t("share_more")}</button>`:""}
+    <div class="sh-grid">
+      <a class="sh-btn sh-wa" href="https://wa.me/?text=${enc(full)}" target="_blank" rel="noopener"><span class="ic">${SHARE_SVGS.wa}</span>${t("sh_wa")}</a>
+      <a class="sh-btn sh-fb" href="https://www.facebook.com/sharer/sharer.php?u=${enc(url)}" target="_blank" rel="noopener"><span class="ic">${SHARE_SVGS.fb}</span>${t("sh_fb")}</a>
+      <a class="sh-btn sh-tg" href="https://t.me/share/url?url=${enc(url)}&text=${enc(txt)}" target="_blank" rel="noopener"><span class="ic">${SHARE_SVGS.tg}</span>${t("sh_tg")}</a>
+      <a class="sh-btn sh-x" href="https://twitter.com/intent/tweet?text=${enc(txt)}&url=${enc(url)}" target="_blank" rel="noopener"><span class="ic">${SHARE_SVGS.x}</span>${t("sh_x")}</a>
+    </div>
+    <div class="sh-url"><input id="shUrlInput" readonly dir="ltr" value="${esc(url)}" onclick="this.select()"><button class="btn btn-primary" onclick="shareCopy()">📋 <span class="sh-copy-label">${t("copy_link")}</span></button></div>
+  </div>`;
+}
+function closeShare(){ overlay.classList.remove("show"); overlay.innerHTML=""; shareTarget=null; }
+async function shareCopy(){
+  const input=document.getElementById("shUrlInput");
+  const url=input?input.value:(shareTarget?listingURL(findListing(shareTarget)):"");
+  let ok=false;
+  try{ await navigator.clipboard.writeText(url); ok=true; }catch(e){}
+  if(!ok && input){ try{ input.select(); document.execCommand("copy"); ok=true; }catch(e){} }
+  document.querySelectorAll(".sh-copy-label").forEach(el=>{ if(ok) el.textContent=t("copied_ok"); });
+  notify(ok?t("link_copied"):t("copy_fail"));
+  if(ok) setTimeout(closeShare, 1000);
+}
+async function shareNative(){
+  const l=findListing(shareTarget); if(!l) return;
+  try{ await navigator.share({ title:l.title, text:shareText(l), url:listingURL(l) }); closeShare(); }catch(e){}
+}
+/* تحديث رابط الصفحة حسب العرض الحالي (detail/store) */
+function updateHashFor(name,params){
+  try{
+    let h="";
+    if(name==="detail"&&params&&params.id) h="#/l/"+params.id;
+    else if(name==="store"&&params&&params.id) h="#/store/"+params.id;
+    if(h){ if(location.hash!==h) history.replaceState(null,"",h); }
+    else if(location.hash) history.replaceState(null,"",location.pathname+location.search);
+  }catch(e){}
+}
+window.addEventListener("hashchange",()=>{
+  const m=location.hash.match(/^#\/l\/([\w-]+)/);
+  if(m){ if(!(route&&route.name==="detail"&&route.params&&route.params.id===m[1])) go("detail",{id:m[1]}); return; }
+  const st=location.hash.match(/^#\/store\/([\w-]+)/);
+  if(st){ if(!(route&&route.name==="store"&&route.params&&route.params.id===st[1])) go("store",{id:st[1]}); }
+});
+
+/* =========================================================================
    الموجّه
    ========================================================================= */
-async function go(name, params={}){ stopChatPoll(); route={name,params}; window.scrollTo(0,0); await maybeRefresh(name); render(); highlightNav(); }
+async function go(name, params={}){ stopChatPoll(); route={name,params}; window.scrollTo(0,0); await maybeRefresh(name); render(); highlightNav(); updateHashFor(name,params); }
 let _lastListingsRefresh=0;
 async function maybeRefresh(name){
   const needs=["home","categories","section","sub","browse","detail","favorites","account"].includes(name);
@@ -475,6 +544,7 @@ function listCardsHTML(list){
     return `<div class="list-card ${promoActive(l)?'promo-card promo-'+l.promo:''}" onclick="go('detail',{id:'${l.id}'})"><div class="thumb">
       <img src="${thumbURL(l)}" alt=""><span class="deal-tag ${l.deal==='sell'?'deal-sell':'deal-buy'}">${locDeal(l)}</span>
       <button class="fav ${isFav(l.id)?'on':''}" onclick="event.stopPropagation();favToggle('${l.id}')">${isFav(l.id)?'❤️':'🤍'}</button>
+      <button class="cshare" onclick="event.stopPropagation();openShare('${l.id}')" aria-label="${t("share_btn")}" title="${t("share_btn")}">${SHARE_SVGS.share}</button>
       ${promoActive(l)?'<span class="promo-tag promo-tag-'+l.promo+'">'+({featured:"⭐",boost:"🚀",premium:"👑"}[l.promo])+'</span>':""}
       ${free?`<span class="free-tag">⏱️ ${t("free_tag")} • ${daysLeft(l)}${t("day")}</span>`:`<span class="paid-tag">👑 ${t("paid_tag")}</span>`}
       </div><div class="body"><div class="t">${esc(l.title)}${l.owner&&l.owner.verified?'<i class="vbadge">✔</i>':""}</div><div class="p">${esc(fmtPrice(l))}</div>
@@ -520,6 +590,7 @@ function viewDetail(id){
           <button class="btn btn-primary" style="flex:1" onclick="openChatFromListing('${esc(owner.phone)}','${esc(owner.name).replace(/'/g,"")}')">${t("chat_now")}</button>
           <a class="btn btn-ghost" href="tel:${esc(owner.phone)}">📞 ${t("call")}</a>
           <a class="btn wa-btn" href="${waLink(owner.phone,l.title)}" target="_blank" rel="noopener">✅ ${t("whatsapp")}</a>
+          <button class="btn btn-ghost" onclick="openShare('${l.id}')">🔗 ${t("share_btn")}</button>
         </div>
         ${currentUser()&&owner&&owner.id===currentUser().id?`<button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="go('edit',{id:'${l.id}'})">${t("edit_btn")}</button><button class="btn btn-primary btn-block" style="margin-top:8px" onclick="openPromote('${l.id}')">${t("promote_btn")}${promoActive(l)?" • "+t("promo_active"):""}</button>`:`<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;color:var(--muted)" onclick="openReport('${l.id}')">${t("report_ad")}</button>`}</div>`:""}
     </div></div></div></section>`;
@@ -935,12 +1006,14 @@ function paintBadge(){ const el=document.getElementById("chatBadge"); if(el){ el
 document.getElementById("fabAdd").addEventListener("click",()=>go("add"));
 document.querySelectorAll(".bottom-nav [data-route]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.route)));
 document.getElementById("topSearch").addEventListener("keydown",e=>{ if(e.key==="Enter"){const q=e.target.value.trim(); if(q) go("browse",{q});} });
-overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); closeReport(); closeInstallGuide(); closeOffer(); closePromote(); closeStory(); closeAlerts(); } });
+overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); closeCheckout(); closeReport(); closeInstallGuide(); closeOffer(); closePromote(); closeStory(); closeAlerts(); closeShare(); } });
 
 /* انطلاق */
 (async function init(){
   try{ await store.bootstrap(); }catch(e){}
   render();
+  const _dl=location.hash.match(/^#\/l\/([\w-]+)/); if(_dl) go("detail",{id:_dl[1]});
+  else { const _ds=location.hash.match(/^#\/store\/([\w-]+)/); if(_ds) go("store",{id:_ds[1]}); }
   hideSplash();
   refreshChatBadge();
   checkApk();
