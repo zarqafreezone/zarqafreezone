@@ -815,7 +815,7 @@ function adminListings(){
 }
 function adminUsers(){
   return `<div class="admin-table">${state.users.map(u=>`
-    <div class="admin-row"><div class="ar-main"><b>${esc(u.name)} ${u.verified?'✔':''}</b><span class="muted">${esc(showCountry(u.country))} • ${esc(u.phone)}</span><span class="muted" style="font-size:12px">${u.deals} ${t("deals_count")}</span></div>
+    <div class="admin-row"><div class="ar-main"><b>${esc(u.name)} ${u.verified?'✔':''} <span class="joined-badge" title="${t("joined_date")}">📅 ${esc(u.joined||"—")}</span></b><span class="muted">${esc(showCountry(u.country))} • ${esc(u.phone)}</span><span class="muted" style="font-size:12px">${u.deals} ${t("deals_count")}</span></div>
       <div class="ar-actions"><div class="star-input">${[1,2,3,4,5].map(n=>`<span class="${n<=u.stars?'on':''}" onclick="doSetStars('${u.id}',${n})">★</span>`).join("")}</div>
         <button class="btn btn-ghost btn-sm" onclick="doToggleVerified('${u.id}')">${u.verified?t("admin_inactive"):t("admin_active")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelUser('${u.id}')">🗑</button></div></div>`).join("")}</div>`;
 }

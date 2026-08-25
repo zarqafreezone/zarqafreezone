@@ -248,6 +248,7 @@ const STR = {
   splash_note: { ar:"يظهر مرة واحدة لكل زيارة لمدة 4 ثوانٍ — تصميم إعلان مجموعة البستنجي", en:"Shows once per visit for 4s — Bustanji Group ad creative" },
   powered_by: { ar:"© جميع الحقوق محفوظة: شبكة نشوان للتسويق", en:"© All rights reserved: Nashwan Marketing Network" },
   /* المشاركة */
+  joined_date: { ar:"تاريخ الاشتراك", en:"Subscription date" },
   share_btn:   { ar:"مشاركة", en:"Share" },
   share_ad:    { ar:"مشاركة الإعلان", en:"Share this ad" },
   share_sub:   { ar:"شارك الإعلان مع من يهمه الأمر — عبر منصتك المفضلة أو انسخ الرابط المباشر", en:"Share this ad with whoever needs it — via your favorite platform or copy the direct link" },
