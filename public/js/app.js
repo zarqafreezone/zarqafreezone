@@ -234,11 +234,19 @@ function updateStaticUI(){
   document.getElementById("navFav").querySelector(".lbl").textContent = t("nav_fav");
   document.getElementById("navAcc").querySelector(".lbl").textContent = t("nav_account");
   document.getElementById("logoLink").onclick = ()=>go("home");
-  document.getElementById("footLinks").innerHTML =
-    [["advertise",t("advertise_link")],["home",t("nav_home")],["categories",t("nav_cats")],["add",t("add_listing")],["admin",t("nav_admin")]]
-    .map(([r,lbl])=>`<a onclick="go('${r}')">${lbl}</a>`).join("") +
+  document.getElementById("footNavLinks").innerHTML =
+    [["home",t("nav_home")],["categories",t("nav_cats")],["add",t("add_listing")],["admin",t("nav_admin")]]
+    .map(([r,lbl])=>`<a onclick="go('${r}')">${lbl}</a>`).join("");
+  document.getElementById("footAdvLinks").innerHTML =
     (pwaStandalone()?'':`<a onclick="installApp()">${t("install_app")}</a>`) +
     (window.__APK_READY?`<a href="${APK_URL}" download>${t("apk_short")}</a>`:'');
+  document.getElementById("footCtaAdv").innerHTML = "📢 <b>" + t("advertise_link").replace("📢 ","") + "</b>";
+  document.getElementById("footColNav").textContent = t("foot_explore");
+  document.getElementById("footColAdv").textContent = t("foot_adv_col");
+  document.getElementById("footColContact").textContent = t("foot_contact_col");
+  document.getElementById("footWaDirect").textContent = t("foot_wa_direct");
+  document.getElementById("footLoc").textContent = t("foot_loc");
+  document.getElementById("footZoneTag").textContent = t("foot_zone_tag");
 }
 
 /* =========================================================================

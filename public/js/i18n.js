@@ -250,6 +250,12 @@ const STR = {
   /* المشاركة */
   joined_date: { ar:"تاريخ الاشتراك", en:"Subscription date" },
   advertise_link: { ar:"📢 أعلن/اشترك معنا", en:"📢 Advertise with us" },
+  foot_explore:     { ar:"🧭 استكشف المنصة", en:"🧭 Explore" },
+  foot_adv_col:     { ar:"📣 للمعلنين والتطبيق", en:"📣 Advertisers & App" },
+  foot_contact_col: { ar:"📞 تواصل معنا", en:"📞 Contact us" },
+  foot_wa_direct:   { ar:"واتساب مباشر", en:"Direct WhatsApp" },
+  foot_loc:         { ar:"المنطقة الحرة الزرقاء — الأردن", en:"Zarqa Free Zone — Jordan" },
+  foot_zone_tag:    { ar:"بوابة التجارة الحرة في الأردن", en:"Jordan's free-trade gateway" },
   sorted_newest: { ar:"مرتّبون حسب الأحدث اشتراكاً", en:"Sorted by newest subscription first" },
   user_ads:      { ar:"عدد إعلانات المستخدم", en:"User listings count" },
   share_btn:   { ar:"مشاركة", en:"Share" },
