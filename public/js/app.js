@@ -231,10 +231,19 @@ function bzCountUp(){
       if(p<1) requestAnimationFrame(step); })(t0);
   });
 }
+/* رابط إعلان مدفوع: خارجي (https) أو داخلي لمتجر بالموقع app:store:<معرف> */
+function bzLinkAttrs(b, fallback, close){
+  const raw=String((b&&b.link)||fallback||"").trim();
+  const m=raw.match(/^app:store:([\w-]+)$/);
+  if(m) return {href:"javascript:void(0)", attrs:` onclick="closeSplashAd();go('store',{id:'${m[1]}'})"`};
+  const url=/^https?:\/\//.test(raw)?raw:(raw?("https://"+raw):"");
+  return {href:url||"#", attrs:(close?` onclick="closeSplashAd()"`:"")+` target="_blank" rel="sponsored noopener"`};
+}
 function bannerLong(){
   const b=getBanner("long"); if(!b||!b.active) return "";
   setTimeout(bzCountUp,80);
-  return `<a class="bz-banner" href="https://bustanjimotors.com" target="_blank" rel="sponsored noopener">
+  const A=bzLinkAttrs(b,"https://bustanjimotors.com");
+  return `<a class="bz-banner" href="${esc(A.href)}"${A.attrs}>
     <span class="ad-label">${t("paid_ad")}</span>
     <div class="bz-bg"></div>
     <div class="bz-speeds"><i></i><i></i><i></i><i></i><i></i></div>
@@ -268,7 +277,8 @@ function bannerLong(){
 function bannerSquare(){
   const b=getBanner("square"); if(!b||!b.active) return "";
   setTimeout(bzCountUp,80);
-  return `<a class="bzs-banner" href="https://bustanjimotors.com" target="_blank" rel="sponsored noopener">
+  const A=bzLinkAttrs(b,"https://bustanjimotors.com");
+  return `<a class="bzs-banner" href="${esc(A.href)}"${A.attrs}>
     <span class="ad-label">${t("paid_ad")}</span>
     <div class="bzs-bg"></div>
     <div class="bz-speeds"><i></i><i></i><i></i></div>
@@ -299,7 +309,7 @@ function showSplashAd(){
     if(sessionStorage.getItem("fz_splash_ad")==="1") return;
     const b=getBanner("splash"); if(!b||!b.active) return;
     sessionStorage.setItem("fz_splash_ad","1");
-    const link=b.link||"https://bustanjimotors.com";
+    const A=bzLinkAttrs(b,"https://bustanjimotors.com",true);
     const ov=document.createElement("div"); ov.id="splashAd"; ov.className="sa-overlay";
     ov.innerHTML=`
       <div class="sa-speeds"><i></i><i></i><i></i><i></i></div>
@@ -317,7 +327,7 @@ function showSplashAd(){
           <div class="bz-stat"><b class="bz-num" data-n="15000">15K+</b><span>${t("bz_cars")}</span></div>
           <div class="bz-stat"><b class="bz-num" data-n="8">8</b><span>${t("bz_showrooms")}</span></div>
         </div>
-        <a class="sa-cta" href="${esc(link)}" target="_blank" rel="sponsored noopener" onclick="closeSplashAd()">${t("bz_cta")}</a>
+        <a class="sa-cta" href="${esc(A.href)}"${A.attrs}>${t("bz_cta")}</a>
         <div class="sa-foot">${t("bz_loc")}</div>
       </div>`;
     document.body.appendChild(ov);
@@ -744,17 +754,20 @@ function adminBanners(){
       <div class="field"><label>${LANG==="en"?"Text (AR)":"النص (عربي)"}</label><input id="bn_long_ar" value="${esc(L.text_ar)}"></div>
       <div class="field"><label>${LANG==="en"?"Text (EN)":"النص (إنجليزي)"}</label><input id="bn_long_en" value="${esc(L.text_en)}"></div>
       <div class="field"><label>${t("admin_link")}</label><input id="bn_long_link" value="${esc(L.link)}"></div>
+      <p class="muted" style="font-size:11.5px;margin-top:4px">${LANG==="en"?"Link to a store inside the site: app:store:STORE_ID":"لربط الإعلان بمتجر داخل الموقع: app:store:معرف_المتجر"}</p>
       <button class="btn btn-primary" onclick="doSaveBanner('long')">${t("admin_save")}</button>
       <button class="btn btn-ghost" style="margin-inline-start:8px" onclick="doToggleBanner('long')">${L.active?t("admin_inactive"):t("admin_active")}</button></div>
     <div class="info-card"><h3 style="margin-bottom:12px">${t("admin_banner_square")}</h3>
       <div class="field"><label>${LANG==="en"?"Text (AR)":"النص (عربي)"}</label><input id="bn_square_ar" value="${esc(S.text_ar)}"></div>
       <div class="field"><label>${LANG==="en"?"Text (EN)":"النص (إنجليزي)"}</label><input id="bn_square_en" value="${esc(S.text_en)}"></div>
       <div class="field"><label>${t("admin_link")}</label><input id="bn_square_link" value="${esc(S.link)}"></div>
+      <p class="muted" style="font-size:11.5px;margin-top:4px">${LANG==="en"?"Link to a store inside the site: app:store:STORE_ID":"لربط الإعلان بمتجر داخل الموقع: app:store:معرف_المتجر"}</p>
       <button class="btn btn-primary" onclick="doSaveBanner('square')">${t("admin_save")}</button>
       <button class="btn btn-ghost" style="margin-inline-start:8px" onclick="doToggleBanner('square')">${S.active?t("admin_inactive"):t("admin_active")}</button></div>
     <div class="info-card"><h3 style="margin-bottom:12px">${t("admin_banner_splash")}</h3>
       <p class="muted" style="font-size:12.5px;margin-bottom:10px">${t("splash_note")}</p>
       <div class="field"><label>${t("admin_link")}</label><input id="bn_splash_link" value="${esc(SP.link)}"></div>
+      <p class="muted" style="font-size:11.5px;margin-top:4px">${LANG==="en"?"Link to a store inside the site: app:store:STORE_ID":"لربط الإعلان بمتجر داخل الموقع: app:store:معرف_المتجر"}</p>
       <button class="btn btn-primary" onclick="doSaveBanner('splash')">${t("admin_save")}</button>
       <button class="btn btn-ghost" style="margin-inline-start:8px" onclick="doToggleBanner('splash')">${SP.active?t("admin_inactive"):t("admin_active")}</button></div>
   </div>`;
