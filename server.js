@@ -115,6 +115,19 @@ function migrateDB(db){
   db.listings.forEach(l=>{ if(!l.comments) l.comments=[]; if(!Array.isArray(l.images)){ l.images = l.img ? [l.img] : []; } if(!l.img && l.images[0]) l.img=l.images[0]; });
   if(!Array.isArray(db.news) || !db.news.length) db.news = DEFAULT_NEWS.slice();
   if(Array.isArray(db.news) && db.news.length){ const now=Date.now(); db.news=db.news.filter(n=>!n.ts || (now-n.ts)<NEWS_TTL_DAYS*86400000); }
+  // استبدال الصور المولّدة اصطناعياً بصور حقيقية (مرة واحدة — v49)
+  if(!db._realImgs){
+    const REAL = {
+      "l1787652588884":"images/ads/l1787652588884.jpg","l1787652588809":"images/ads/l1787652588809.jpg",
+      "l1787652588749":"images/ads/l1787652588749.jpg","l1787652588691":"images/ads/l1787652588691.jpg",
+      "l1787652588607":"images/ads/l1787652588607.jpg","l1787652588541":"images/ads/l1787652588541.jpg",
+      "l1787652588481":"images/ads/l1787652588481.jpg","l1787652588417":"images/ads/l1787652588417.jpg",
+      "l1787650650725":"images/ads/l1787650650725.jpg","l1787650650551":"images/ads/l1787650650551.jpg",
+      "l1787650650520":"images/ads/l1787650650520.jpg"
+    };
+    let n=0; db.listings.forEach(l=>{ const p=REAL[l.id]; if(p){ l.images=[p]; l.img=p; n++; } });
+    db._realImgs=1; if(n) console.log("🖼️ تم استبدال "+n+" صورة بصور حقيقية");
+  }
   return db;
 }
 
