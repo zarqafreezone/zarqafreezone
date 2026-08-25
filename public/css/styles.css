@@ -55,34 +55,19 @@ input,select,textarea{font-family:inherit;font-size:15px}
 
 /* ===== البطل ===== */
 /* المقدمة: صورة حقيقية حية + تظليل متدرج يحافظ على وضوح النص */
-.hero{background-color:#0d2140;background-image:url("../images/hero-bg.jpg");background-size:cover;background-position:center;background-repeat:no-repeat;color:#fff;position:relative;overflow:hidden}
-[dir="rtl"] .hero::after{content:"";position:absolute;inset:0;background:
-  radial-gradient(620px 210px at 88% 0,rgba(255,255,255,.16),transparent),
-  linear-gradient(180deg, rgba(7,19,42,0) 0%, rgba(7,19,42,.28) 13%, rgba(7,19,42,.28) 74%, rgba(7,19,42,.12) 100%),
-  linear-gradient(270deg, rgba(7,19,42,.55) 0%, rgba(7,19,42,.28) 45%, rgba(7,19,42,.05) 100%)}
-[dir="ltr"] .hero::after{content:"";position:absolute;inset:0;background:
-  radial-gradient(620px 210px at 12% 0,rgba(255,255,255,.16),transparent),
-  linear-gradient(180deg, rgba(7,19,42,0) 0%, rgba(7,19,42,.28) 13%, rgba(7,19,42,.28) 74%, rgba(7,19,42,.12) 100%),
-  linear-gradient(90deg, rgba(7,19,42,.55) 0%, rgba(7,19,42,.28) 45%, rgba(7,19,42,.05) 100%)}
-.hero h1,.hero p{text-shadow:0 2px 18px rgba(2,8,20,.65),0 1px 4px rgba(2,8,20,.5)}
-@media(max-width:720px){
-  [dir="rtl"] .hero::after,[dir="ltr"] .hero::after{background:
-    radial-gradient(480px 170px at 82% 0,rgba(255,255,255,.13),transparent),
-    linear-gradient(180deg, rgba(7,19,42,.44) 0%, rgba(9,28,62,.66) 55%, rgba(10,32,70,.82) 100%)}
-  .hero h1,.hero p{text-shadow:0 2px 16px rgba(2,8,20,.7),0 1px 3px rgba(2,8,20,.55)}
-}
+.hero{background-color:#a8cbe8;background-image:url("../images/hero-bg.jpg");background-size:cover;background-position:center;background-repeat:no-repeat;color:#0b2440;position:relative;overflow:hidden}
 .hero .wrap{position:relative;z-index:1;padding:56px 16px}
 .hero h1{font-size:34px;line-height:1.3;margin-bottom:12px}
 .hero p{font-size:18px;opacity:.92;max-width:620px;margin-bottom:24px}
 .hero-search{display:flex;gap:10px;max-width:680px;flex-wrap:wrap}
-.hero-search select,.hero-search input{border:none;border-radius:12px;padding:14px 16px;font-size:15px}
+.hero-search select,.hero-search input{border:none;border-radius:12px;padding:14px 16px;font-size:15px;background:#fff;color:#123;box-shadow:0 2px 8px rgba(11,36,64,.12)}
 .hero-search select{width:150px}
 .hero-search input{flex:1;min-width:200px}
 .hero-search .btn{box-shadow:0 8px 20px rgba(0,0,0,.25)}
 .hero-stats{display:flex;gap:34px;margin-top:34px;flex-wrap:wrap}
 .hero-stats div b{display:block;font-size:26px}
 .hero-stats div span{opacity:.85;font-size:14px}
-.badge-free{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);
+.badge-free{display:inline-flex;align-items:center;gap:6px;background:#0b2440;color:#fff;
   padding:6px 14px;border-radius:30px;font-size:13px;font-weight:700;margin-bottom:18px}
 
 /* تبويب بيع/شراء في البطل */
@@ -612,6 +597,8 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 [data-theme="dark"] .side-card{background:repeating-linear-gradient(45deg,#0e1626,#0e1626 10px,#141c2e 10px,#141c2e 20px);border-color:#273449;color:#64748b}
 [data-theme="dark"] .hero-search select,
 [data-theme="dark"] .hero-search input{color:#fff;background:rgba(255,255,255,.12)}
+[data-theme="dark"] .hero-search select,
+[data-theme="dark"] .hero-search input{color:#123;background:#fff}
 [data-theme="dark"] .chat-msg.mine .cm-bubble{background:#1e3a5f;color:#dbeafe}
 [data-theme="dark"] .type-chip:hover{background:#1e293b;color:#60a5fa}
 [data-theme="dark"] .note-free,
