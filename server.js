@@ -128,6 +128,21 @@ function migrateDB(db){
     let n=0; db.listings.forEach(l=>{ const p=REAL[l.id]; if(p){ l.images=[p]; l.img=p; n++; } });
     db._realImgs=1; if(n) console.log("🖼️ تم استبدال "+n+" صورة بصور حقيقية");
   }
+  // المرحلة الثانية: بقية الإعلانات (ZEEKR، لينك آند كو، الشاحنات والمعدات) — v50
+  if(!db._realImgs2){
+    const REAL2 = {
+      "l1787652588318":"images/ads/l1787652588318.jpg","l1787652587989":"images/ads/l1787652587989.jpg",
+      "l1787652587847":"images/ads/l1787652587847.jpg","l1787652587545":"images/ads/l1787652587545.jpg",
+      "l1787652587246":"images/ads/l1787652587246.jpg","l1787652586732":"images/ads/l1787652586732.jpg",
+      "l1787652586402":"images/ads/l1787652586402.jpg","l1787652586019":"images/ads/l1787652586019.jpg",
+      "l1787650650921":"images/ads/l1787650650921.jpg","l1787650650886":"images/ads/l1787650650886.jpg",
+      "l1787650650696":"images/ads/l1787650650696.jpg","l1787650650669":"images/ads/l1787650650669.jpg",
+      "l1787650650639":"images/ads/l1787650650639.jpg","l1787650650610":"images/ads/l1787650650610.jpg",
+      "l1787650650581":"images/ads/l1787650650581.jpg","l1787650650488":"images/ads/l1787650650488.jpg"
+    };
+    let n2=0; db.listings.forEach(l=>{ const p=REAL2[l.id]; if(p){ l.images=[p]; l.img=p; n2++; } });
+    db._realImgs2=1; if(n2) console.log("🖼️ مرحلة 2: استبدال "+n2+" صورة إضافية");
+  }
   return db;
 }
 
