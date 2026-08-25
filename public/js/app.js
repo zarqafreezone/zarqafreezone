@@ -115,22 +115,36 @@ function renderTopbar(){
 /* =========================================================================
    الشريط الإخباري المتحرك (مصدر أخباره: لوحة المدير)
    ========================================================================= */
-let _tickerSig="";
+let _tickerSig="", _tickerRAF=null;
 function newsTime(ts){ const d=new Date(ts||Date.now()); const p=n=>String(n).padStart(2,"0"); return p(d.getDate())+"/"+p(d.getMonth()+1)+" "+p(d.getHours())+":"+p(d.getMinutes()); }
 function renderTicker(){
   const el=document.getElementById("newsTicker"); if(!el) return;
   const items=(state.news||[]).filter(n=>n.active!==false && (n.text||"").trim());
   const sig=items.map(n=>n.id+"|"+(n.text||"")+"|"+(n.link||"")+"|"+newsTime(n.ts)).join("§")+(LANG==="en"?"_en":"_ar");
-  if(sig===_tickerSig) return;          // لم يتغير — حافظ على استمرار الحركة
+  if(sig===_tickerSig){ if(items.length && el.style.display!=="flex") el.style.display="flex"; return; }  // لم يتغير — حافظ على الحركة الجارية
+  if(_tickerRAF){ cancelAnimationFrame(_tickerRAF); _tickerRAF=null; }   // تغيّر المحتوى → أوقف القديم وأعد البناء
   _tickerSig=sig;
   if(!items.length){ el.innerHTML=""; el.style.display="none"; return; }
   el.style.display="flex";
-  const itemHTML=n=>`<span class="ticker-item">${n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`}<span class="ticker-time">· ${newsTime(n.ts)}</span></span><span class="ticker-sep">◆</span>`;
-  const one=`<div class="ticker-items">${items.map(itemHTML).join("")}</div>`;
-  el.innerHTML=`<span class="ticker-label">${t("news_label")}</span><div class="ticker-viewport"><div class="ticker-track">${one}${one}</div></div>`;
-  // حركة بسرعة ثابتة (~50px/ث) تتكيّف مع عرض المحتوى الفعلي — تكرار لا نهائي سلس
-  const track=el.querySelector(".ticker-track");
-  if(track){ const w=track.scrollWidth||600; const d=Math.max(10, w/100); track.style.animation="tickerScroll "+d.toFixed(1)+"s linear infinite"; }
+  el.innerHTML=`<span class="ticker-label">${t("news_label")}</span><div class="ticker-viewport" id="tickerVp"></div>`;
+  const vp=el.querySelector("#tickerVp"); const vw=vp.clientWidth||800;
+  // كل خبر = عنصر مستقل صغير (طبقة GPU صغيرة) لتفادي حدّ الحجم الأقصى للطبقة على الأجهزة الضعيفة
+  const makeEl=n=>{ const s=document.createElement("span"); s.className="ticker-item";
+    s.style.cssText="position:absolute;top:50%;left:0;white-space:nowrap;will-change:transform;display:inline-flex;align-items:center;";
+    s.innerHTML=(n.link?`<a href="${esc(n.link)}" target="_blank" rel="noopener">📰 ${esc(n.text)}</a>`:`📰 ${esc(n.text)}`)+`<span class="ticker-time">· ${newsTime(n.ts)}</span><span class="ticker-sep">◆</span>`;
+    vp.appendChild(s); const w=s.offsetWidth+22; return {el:s,w:w}; };
+  const list=[]; let base=0, copies=0;
+  do{ for(const n of items){ const o=makeEl(n); o.base=base; base+=o.w; list.push(o); } copies++; }while(base<vw+400 && copies<6);
+  const totalW=base||1;
+  let offset=0, last=performance.now(), paused=false;
+  el.onmouseenter=()=>{paused=true;}; el.onmouseleave=()=>{paused=false;};
+  const speed=85;   // بكسل/ث نحو اليمين — تكرار لا نهائي سلس (حلقة دائرية)
+  (function frame(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    if(!paused){ offset+=speed*dt; }
+    for(const o of list){ const sx=((o.base+offset)%totalW+totalW)%totalW; o.el.style.transform="translate("+sx+"px,-50%)"; }
+    _tickerRAF=requestAnimationFrame(frame);
+  })(performance.now());
 }
 
 function updateStaticUI(){
@@ -804,6 +818,8 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
   checkApk();
   setInterval(refreshChatBadge, 6000);
   document.addEventListener("pointerdown", initAudio, { once:true });
+  // إعادة بناء الشريط عند تغيير حجم النافذة (دوران الجوال مثلاً)
+  let _rzT; window.addEventListener("resize", ()=>{ clearTimeout(_rzT); _rzT=setTimeout(()=>{ _tickerSig=""; renderTicker(); }, 250); });
   // ضمان إضافي: إن بقي الشريط فارغاً (بيانات مفقودة)، أعد الجلب بعد لحظات
   setTimeout(async ()=>{ if(!(state.news||[]).length){ try{ await store.refreshNews(); }catch(e){} _tickerSig=""; renderTicker(); } }, 2500);
 })();
