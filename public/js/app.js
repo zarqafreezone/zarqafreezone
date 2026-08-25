@@ -565,7 +565,7 @@ function viewHome(){
   const total=allListings().length; const subs=CATEGORIES.reduce((a,c)=>a+c.subs.length,0);
   const featured=queryListings({featured:true}); const latest=queryListings({sort:"newest"}).slice(0,8); const wanted=queryListings({deal:"buy"}).slice(0,4);
   app.innerHTML=`
-    <section class="hero" style="background-image:linear-gradient(135deg,rgba(30,58,138,.86),rgba(37,99,235,.78)),url('images/zone.jpg')">
+    <section class="hero">
       <div class="wrap"><div class="badge-free">${t("hero_free_badge")}</div>
         <h1>${t("hero_title")}</h1><p>${t("hero_desc")}</p>
         <div class="hero-search">

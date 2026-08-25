@@ -5,7 +5,7 @@
    - الملفات الثابتة (css/js/icons): stale-while-revalidate
    - الـAPI والرفعات: شبكة فقط (دائماً أحدث البيانات)
    ========================================================================= */
-const CACHE = "zfz-v41";
+const CACHE = "zfz-v42";
 const SHELL = [
   "/",
   "/index.html",
