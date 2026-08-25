@@ -249,6 +249,8 @@ const STR = {
   powered_by: { ar:"© جميع الحقوق محفوظة: شبكة نشوان للتسويق", en:"© All rights reserved: Nashwan Marketing Network" },
   /* المشاركة */
   joined_date: { ar:"تاريخ الاشتراك", en:"Subscription date" },
+  sorted_newest: { ar:"مرتّبون حسب الأحدث اشتراكاً", en:"Sorted by newest subscription first" },
+  user_ads:      { ar:"عدد إعلانات المستخدم", en:"User listings count" },
   share_btn:   { ar:"مشاركة", en:"Share" },
   share_ad:    { ar:"مشاركة الإعلان", en:"Share this ad" },
   share_sub:   { ar:"شارك الإعلان مع من يهمه الأمر — عبر منصتك المفضلة أو انسخ الرابط المباشر", en:"Share this ad with whoever needs it — via your favorite platform or copy the direct link" },

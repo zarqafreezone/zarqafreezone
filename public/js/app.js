@@ -813,11 +813,13 @@ function adminListings(){
     return `<div class="admin-row"><div class="ar-main"><b>${esc(l.title)}</b><span class="muted">${sec.icon} ${tData(sec.name)} • ${locDeal(l)} • ${fmtPrice(l)}</span><span class="muted" style="font-size:12px">${esc(l.owner?.name||"—")} • ${relDate(l.date)}</span></div>
       <div class="ar-actions"><button class="btn btn-ghost btn-sm" onclick="doToggleFeature('${l.id}')">${l.featured?"⭐ "+t("admin_unfeature"):"☆ "+t("admin_feature")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelListing('${l.id}')">🗑 ${t("admin_delete")}</button></div></div>`;}).join("")}</div>`;
 }
+function adsWord(n){ return LANG==="en" ? (n===1?"ad":"ads") : (n>=3&&n<=10?"إعلانات":"إعلان"); }
 function adminUsers(){
-  return `<div class="admin-table">${state.users.map(u=>`
-    <div class="admin-row"><div class="ar-main"><b>${esc(u.name)} ${u.verified?'✔':''} <span class="joined-badge" title="${t("joined_date")}">📅 ${esc(u.joined||"—")}</span></b><span class="muted">${esc(showCountry(u.country))} • ${esc(u.phone)}</span><span class="muted" style="font-size:12px">${u.deals} ${t("deals_count")}</span></div>
+  const users=[...state.users].sort((a,b)=>String(b.joined||"").localeCompare(String(a.joined||"")));
+  return `<div class="admin-table"><p class="muted" style="font-size:12px;margin-bottom:10px">↕ ${t("sorted_newest")}</p>${users.map(u=>{const nAds=(state.listings||[]).filter(l=>l.user===u.id).length;return `
+    <div class="admin-row"><div class="ar-main"><b>${esc(u.name)} ${u.verified?'✔':''} <span class="joined-badge" title="${t("joined_date")}">📅 ${esc(u.joined||"—")}</span><span class="count-badge" title="${t("user_ads")}">📢 ${nAds} ${adsWord(nAds)}</span></b><span class="muted">${esc(showCountry(u.country))} • ${esc(u.phone)}</span><span class="muted" style="font-size:12px">${u.deals} ${t("deals_count")}</span></div>
       <div class="ar-actions"><div class="star-input">${[1,2,3,4,5].map(n=>`<span class="${n<=u.stars?'on':''}" onclick="doSetStars('${u.id}',${n})">★</span>`).join("")}</div>
-        <button class="btn btn-ghost btn-sm" onclick="doToggleVerified('${u.id}')">${u.verified?t("admin_inactive"):t("admin_active")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelUser('${u.id}')">🗑</button></div></div>`).join("")}</div>`;
+        <button class="btn btn-ghost btn-sm" onclick="doToggleVerified('${u.id}')">${u.verified?t("admin_inactive"):t("admin_active")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelUser('${u.id}')">🗑</button></div></div>`;}).join("")}</div>`;
 }
 function adminBanners(){
   const L=getBanner("long"), S=getBanner("square"), SP=getBanner("splash")||{active:false,link:""};
