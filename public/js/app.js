@@ -118,6 +118,7 @@ function updateHashFor(name,params){
     let h="";
     if(name==="detail"&&params&&params.id) h="#/l/"+params.id;
     else if(name==="store"&&params&&params.id) h="#/store/"+params.id;
+    else if(name==="advertise") h="#/advertise";
     if(h){ if(location.hash!==h) history.replaceState(null,"",h); }
     else if(location.hash) history.replaceState(null,"",location.pathname+location.search);
   }catch(e){}
@@ -127,6 +128,7 @@ window.addEventListener("hashchange",()=>{
   if(m){ if(!(route&&route.name==="detail"&&route.params&&route.params.id===m[1])) go("detail",{id:m[1]}); return; }
   const st=location.hash.match(/^#\/store\/([\w-]+)/);
   if(st){ if(!(route&&route.name==="store"&&route.params&&route.params.id===st[1])) go("store",{id:st[1]}); }
+  if(location.hash==="#/advertise" && route.name!=="advertise") go("advertise");
 });
 
 /* =========================================================================
@@ -156,6 +158,7 @@ function render(){
     case "favorites":  return viewFavorites();
     case "chat":       return viewChat(route.params);
     case "store":      return viewStore(route.params.id);
+    case "advertise":  return viewAdvertise();
     case "edit":       return viewEdit(route.params.id);
     case "admin":      return viewAdmin();
     default:           return viewHome();
@@ -232,7 +235,7 @@ function updateStaticUI(){
   document.getElementById("navAcc").querySelector(".lbl").textContent = t("nav_account");
   document.getElementById("logoLink").onclick = ()=>go("home");
   document.getElementById("footLinks").innerHTML =
-    [["home",t("nav_home")],["categories",t("nav_cats")],["add",t("add_listing")],["admin",t("nav_admin")]]
+    [["advertise",t("advertise_link")],["home",t("nav_home")],["categories",t("nav_cats")],["add",t("add_listing")],["admin",t("nav_admin")]]
     .map(([r,lbl])=>`<a onclick="go('${r}')">${lbl}</a>`).join("") +
     (pwaStandalone()?'':`<a onclick="installApp()">${t("install_app")}</a>`) +
     (window.__APK_READY?`<a href="${APK_URL}" download>${t("apk_short")}</a>`:'');
@@ -414,6 +417,137 @@ function closeSplashAd(){
   const ov=document.getElementById("splashAd"); if(!ov) return;
   ov.classList.remove("show");
   setTimeout(()=>{ const o=document.getElementById("splashAd"); if(o)o.remove(); },500);
+}
+
+/* =========================================================================
+   صفحة: أعلن/اشترك معنا (عرض المساحات الإعلانية للمعلنين)
+   ========================================================================= */
+const ADV_WA = "https://wa.me/962775501100?text=" + encodeURIComponent("مرحباً، أرغب بالإعلان في منصة المنطقة الحرة الزرقاء 📣");
+function viewAdvertise(){
+  app.innerHTML=`<section class="section"><div class="wrap">
+    <span class="back" onclick="go('home')">← ${t("back")}</span>
+
+    <!-- البطل -->
+    <div class="adv-hero">
+      <span class="adv-badge">🎯 ${LANG==="en"?"For advertisers, showrooms & companies":"للمعلنين والمعارض والشركات"}</span>
+      <h1>📣 ${LANG==="en"?"Advertise with us":"أعلن / اشترك معنا"}</h1>
+      <p class="adv-sub">${LANG==="en"
+        ?"Reach importers, traders and buyers of the Zarqa Free Zone — Jordan's free-trade hub — on our website AND mobile app."
+        :"اوصل إعلانك إلى المستوردين والتجّار والمشترين في المنطقة الحرة الزرقاء — مركز التجارة الحرة في الأردن — عبر موقعنا وتطبيقنا معاً."}</p>
+      <div class="adv-hero-cta">
+        <a class="btn adv-wa" href="${ADV_WA}" target="_blank" rel="noopener">✅ ${LANG==="en"?"Get a quote on WhatsApp":"اطلب عرض سعر عبر واتساب"}</a>
+        <a class="btn btn-ghost adv-call" href="tel:00962795501100">📞 ${LANG==="en"?"Call us":"اتصل بنا"} <span dir="ltr">00962795501100</span></a>
+      </div>
+      <div class="adv-chips">
+        <span>🏭 ${LANG==="en"?"Specialized B2B audience":"جمهور تجاري متخصص"}</span>
+        <span>📱 ${LANG==="en"?"Website + mobile app":"موقع + تطبيق جوال"}</span>
+        <span>🌐 ${LANG==="en"?"Arabic & English":"عربي / إنجليزي"}</span>
+        <span>🏛️ ${LANG==="en"?"Verified stores":"متاجر موثقة"}</span>
+      </div>
+    </div>
+
+    <!-- لماذا نحن -->
+    <div class="sec-head" style="margin-top:26px"><h2>💡 ${LANG==="en"?"Why our platform?":"لماذا منصتنا؟"}</h2></div>
+    <div class="adv-grid">
+      <div class="adv-card"><div class="adv-ico" style="background:#eff6ff;color:#1d4ed8">🎯</div><b>${LANG==="en"?"Precise targeting":"استهداف دقيق"}</b><p>${LANG==="en"?"Your ad reaches free-zone traders, importers and heavy-equipment buyers — not random traffic.":"إعلانك يصل لتجار المنطقة الحرة والمستوردين ومشتري الشاحنات والمعدات — لا زيارات عشوائية."}</p></div>
+      <div class="adv-card"><div class="adv-ico" style="background:#f0fdf4;color:#16a34a">📱</div><b>${LANG==="en"?"Two channels, one price":"قناتان بسعر واحد"}</b><p>${LANG==="en"?"Every ad space appears on the website and inside the mobile app (Android) automatically.":"كل مساحة إعلانية تظهر في الموقع وداخل تطبيق الجوال (أندرويد) تلقائياً."}</p></div>
+      <div class="adv-card"><div class="adv-ico" style="background:#fffbeb;color:#b45309">🔒</div><b>${LANG==="en"?"Exclusivity":"حصرية تامة"}</b><p>${LANG==="en"?"One advertiser per space — your brand stands alone with zero competition on screen.":"معلن واحد لكل مساحة — علامتك تظهر وحدها بلا أي منافسة بصرية."}</p></div>
+      <div class="adv-card"><div class="adv-ico" style="background:#faf5ff;color:#7e22ce">🔗</div><b>${LANG==="en"?"Smart links":"روابط ذكية"}</b><p>${LANG==="en"?"Link your ad to your external site or to your verified store inside our platform.":"اربط إعلانك بموقعك الخارجي أو بمتجرك الموثق داخل المنصة ذاتها."}</p></div>
+    </div>
+
+    <!-- المساحات الإعلانية -->
+    <div class="sec-head" style="margin-top:30px"><h2>🖼️ ${LANG==="en"?"Available ad spaces":"المساحات الإعلانية المتاحة"}</h2></div>
+    <p class="muted" style="margin:0 0 14px;font-size:13.5px">${LANG==="en"?"All spaces include monthly / quarterly / yearly packages with discounts.":"جميع المساحات تُباع بباقات شهرية وربعية وسنوية مع خصومات متدرجة."}</p>
+
+    <div class="adv-space">
+      <div class="adv-mock adv-mock-splash">
+        <div class="ams-orb1"></div><div class="ams-orb2"></div>
+        <span class="ams-tag">${LANG==="en"?"Sponsored":"إعلان مدفوع"}</span>
+        <div class="ams-logo">🚘</div>
+        <div class="ams-name">${LANG==="en"?"Your Brand":"علامتك التجارية"}</div>
+        <div class="ams-cta">${LANG==="en"?"Your button":"زر الإجراء"}</div>
+        <div class="ams-bar"><i></i></div>
+      </div>
+      <div class="adv-space-body">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">🎬 ${LANG==="en"?"Opening Splash":"إعلان الافتتاح"}</h3><span class="pill" style="background:#fee2e2;color:#dc2626">${LANG==="en"?"Most powerful":"الأقوى"}</span></div>
+        <ul class="adv-list">
+          <li>${LANG==="en"?"Full-screen ad when the site/app opens — 100% attention, zero competition.":"شاشة كاملة عند فتح الموقع/التطبيق — انتباه 100% بلا منافسة."}</li>
+          <li>${LANG==="en"?"4 cinematic seconds, once per visit, with instant skip button.":"4 ثوانٍ سينمائية، مرة واحدة لكل زيارة، مع زر تخطٍّ فوري."}</li>
+          <li>${LANG==="en"?"Exclusive to ONE advertiser.":"حصري لمعلن واحد فقط."}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="adv-space">
+      <div class="adv-mock adv-mock-long">
+        <div class="aml-inner">
+          <div class="aml-logo">🚘</div>
+          <div class="aml-txt"><b>${LANG==="en"?"Your Brand":"علامتك التجارية"}</b><span>${LANG==="en"?"4 rotating marketing messages":"4 رسائل تسويقية تتبدل تلقائياً"}</span></div>
+          <div class="aml-cta">${LANG==="en"?"CTA":"زر"}</div>
+        </div>
+      </div>
+      <div class="adv-space-body">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">📏 ${LANG==="en"?"Long Banner":"البانر الطويل"}</h3><span class="pill" style="background:#dbeafe;color:#1d4ed8">${LANG==="en"?"Most seen":"الأكثر مشاهدة"}</span></div>
+        <ul class="adv-list">
+          <li>${LANG==="en"?"3 strategic placements: homepage, browse results, and inside every listing page.":"3 مواضع استراتيجية: الرئيسية + نتائج التصفح + داخل صفحة كل إعلان."}</li>
+          <li>${LANG==="en"?"Animated premium design: speed lines, gradient sweep, rotating messages, counters.":"تصميم فاخر متحرك: خطوط سرعة وتدرجات ورسائل متبدلة وعدّادات إنجازات."}</li>
+          <li>${LANG==="en"?"Accompanies the visitor through the entire journey — until purchase decision.":"يرافق الزائر طوال رحلته — حتى لحظة قرار الشراء."}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="adv-space">
+      <div class="adv-mock adv-mock-square">
+        <div class="amq-logo">🚘</div>
+        <div class="amq-name">${LANG==="en"?"Your Brand":"علامتك التجارية"}</div>
+        <div class="amq-pills"><span>+</span><span>+</span></div>
+        <div class="amq-msg">${LANG==="en"?"Rotating message":"رسالة متبدلة"}</div>
+        <div class="amq-cta">${LANG==="en"?"CTA":"زر الإجراء"}</div>
+      </div>
+      <div class="adv-space-body">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">🟨 ${LANG==="en"?"Square Banner":"البانر المربع"}</h3><span class="pill" style="background:#fef3c7;color:#b45309">${LANG==="en"?"Best value":"أفضل قيمة"}</span></div>
+        <ul class="adv-list">
+          <li>${LANG==="en"?"Sticky sidebar on the browse page — stays visible while scrolling results.":"عمود جانبي مثبّت بصفحة التصفح — يبقى ظاهراً أثناء تمرير النتائج."}</li>
+          <li>${LANG==="en"?"Luxury gold theme, brand pills, rotating messages and achievements.":"طابع ذهبي فاخر + شارات علامات + رسائل متبدلة + أرقام إنجازات."}</li>
+          <li>${LANG==="en"?"Highest impressions per dinar.":"أعلى عدد مرات ظهور مقابل الدينار."}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="adv-space">
+      <div class="adv-mock adv-mock-side">
+        <b>${LANG==="en"?"Your space here":"مساحتك هنا"}</b><span>${LANG==="en"?"Text ad card":"بطاقة إعلان نصية"}</span>
+      </div>
+      <div class="adv-space-body">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">🃏 ${LANG==="en"?"Side Card":"البطاقة الجانبية"}</h3><span class="pill" style="background:#dcfce7;color:#16a34a">${LANG==="en"?"Economy":"اقتصادية"}</span></div>
+        <ul class="adv-list">
+          <li>${LANG==="en"?"Compact text card under the square banner — perfect for services.":"بطاقة نصية مختصرة أسفل البانر المربع — مثالية للخدمات المساندة."}</li>
+          <li>${LANG==="en"?"Ideal for: customs clearance, shipping, insurance, financing offices.":"الأنسب لمكاتب: التخليص الجمركي، الشحن، التأمين، التمويل."}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- الترقيات الذاتية -->
+    <div class="sec-head" style="margin-top:30px"><h2>⭐🚀👑 ${LANG==="en"?"Boost your own listing":"رقِّ إعلانك أنت — اشتراك فوري"}</h2></div>
+    <p class="muted" style="margin:0 0 14px;font-size:13.5px">${LANG==="en"?"Self-service packages from your account, one tap, paid online:":"باقات خدمة ذاتية من داخل حسابك بضغطة واحدة والدفع أونلاين:"}</p>
+    <div class="adv-promos">
+      <div class="adv-promo"><div class="ap-ico" style="background:#fffbeb;color:#b45309">⭐</div><b>${LANG==="en"?"Featured":"مميز"}</b><p>${LANG==="en"?"Gold border + priority in lists":"إطار ذهبي + أولوية في القوائم"}</p><div class="ap-price">9$<small>/90 ${t("day_word")==="يوم"?"يوماً":"days"}</small></div></div>
+      <div class="adv-promo"><div class="ap-ico" style="background:#fef2f2;color:#dc2626">🚀</div><b>${LANG==="en"?"Boost":"صعود"}</b><p>${LANG==="en"?"Top of lists for 7 days + badge":"قمة القوائم 7 أيام + شارة"}</p><div class="ap-price">5$<small>/7 ${t("day_word")==="يوم"?"أيام":"days"}</small></div></div>
+      <div class="adv-promo"><div class="ap-ico" style="background:#faf5ff;color:#7e22ce">👑</div><b>${LANG==="en"?"Premium":"مميز بلس"}</b><p>${LANG==="en"?"Bigger card + royal top rank + stories":"بطاقة أكبر + الترتيب الأول + قصص"}</p><div class="ap-price">19$<small>/180 ${t("day_word")==="يوم"?"يوماً":"days"}</small></div></div>
+    </div>
+
+    <!-- CTA -->
+    <div class="adv-final">
+      <h2>🤝 ${LANG==="en"?"Ready to grow with us?":"جاهز تنمو معنا؟"}</h2>
+      <p>${LANG==="en"?"Our ads team at Nashwan Marketing Network will build the right package for your budget.":"فريق الإعلانات في شبكة نشوان للتسويق يجهّز لك الباقة الأنسب لميزانيتك."}</p>
+      <div class="adv-hero-cta" style="justify-content:center">
+        <a class="btn adv-wa" href="${ADV_WA}" target="_blank" rel="noopener">✅ ${LANG==="en"?"WhatsApp now":"تواصل واتساب الآن"}</a>
+        <a class="btn btn-ghost adv-call" href="tel:00962795501100">📞 <span dir="ltr">00962795501100</span></a>
+      </div>
+      <p class="muted" style="margin:14px 0 0;font-size:12.5px;color:#94a3b8">📍 ${LANG==="en"?"Zarqa Free Zone — Jordan":"المنطقة الحرة الزرقاء — الأردن"} • © شبكة نشوان للتسويق</p>
+    </div>
+  </div></section>`;
+  window.scrollTo(0,0);
 }
 
 /* =========================================================================
@@ -1015,6 +1149,7 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
   try{ await store.bootstrap(); }catch(e){}
   render();
   const _dl=location.hash.match(/^#\/l\/([\w-]+)/); if(_dl) go("detail",{id:_dl[1]});
+  else if(location.hash==="#/advertise") go("advertise");
   else { const _ds=location.hash.match(/^#\/store\/([\w-]+)/); if(_ds) go("store",{id:_ds[1]}); }
   hideSplash();
   refreshChatBadge();
