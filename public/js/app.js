@@ -566,14 +566,14 @@ function viewHome(){
   const featured=queryListings({featured:true}); const latest=queryListings({sort:"newest"}).slice(0,8); const wanted=queryListings({deal:"buy"}).slice(0,4);
   app.innerHTML=`
     <section class="hero">
-      <div class="wrap"><div class="badge-free">${t("hero_free_badge")}</div>
+      <div class="wrap"><div class="hero-card"><div class="badge-free">${t("hero_free_badge")}</div>
         <h1>${t("hero_title")}</h1><p>${t("hero_desc")}</p>
         <div class="hero-search">
           <select id="hSec"><option value="">${t("all_sections")}</option>${CATEGORIES.map(c=>`<option value="${c.id}">${c.icon} ${tData(c.name)}</option>`).join("")}</select>
           <select id="hDeal"><option value="">${t("deal_any")}</option><option value="sell">${t("deal_sell")}</option><option value="buy">${t("deal_buy")}</option></select>
           <input id="hQ" placeholder="${LANG==="en"?"Search: car, fridge...":"ابحث: سيارة، ثلاجة..."}">
           <button class="btn btn-primary" onclick="homeSearch()">${t("search_btn")}</button>
-        </div>
+        </div></div>
         <div class="hero-stats">
           <div><b>${total}+</b><span>${t("stat_listings")}</span></div>
           <div><b>${CATEGORIES.length}</b><span>${t("stat_sections")}</span></div>

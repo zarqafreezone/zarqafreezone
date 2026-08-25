@@ -64,7 +64,17 @@ input,select,textarea{font-family:inherit;font-size:15px}
 .hero-search select{width:150px}
 .hero-search input{flex:1;min-width:200px}
 .hero-search .btn{box-shadow:0 8px 20px rgba(0,0,0,.25)}
-.hero-stats{display:flex;gap:34px;margin-top:34px;flex-wrap:wrap}
+.hero-card{display:inline-block;max-width:740px;padding:20px 28px 24px;border-radius:22px;text-align:start;
+  background:rgba(255,255,255,.62);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+  border:1px solid rgba(255,255,255,.78);box-shadow:0 12px 36px rgba(13,47,143,.14)}
+.hero-card p{margin-bottom:18px}
+.hero-stats{display:inline-flex;gap:30px;margin-top:20px;flex-wrap:wrap;padding:14px 24px;border-radius:18px;
+  background:rgba(255,255,255,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.72)}
+@media(max-width:720px){
+  .hero-card{padding:14px 14px 18px;max-width:100%;border-radius:18px}
+  .hero-stats{gap:16px;padding:10px 14px;margin-top:14px}
+}
 .hero-stats div b{display:block;font-size:26px}
 .hero-stats div b,.hero-stats div span{color:#0d2f8f}
 .hero-stats div span{font-size:14px}
