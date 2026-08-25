@@ -74,6 +74,16 @@ async function initDB(){
   }
   DB.users=DB.users||[]; DB.listings=DB.listings||[]; DB.banners=DB.banners||DEFAULT_BANNERS.slice(); DB.payments=DB.payments||[]; DB.revenue=DB.revenue||0;
   for(const bb of DEFAULT_BANNERS){ if(!DB.banners.find(x=>x.id===bb.id)) DB.banners.push({...bb}); }   // ضمان وجود كل البنرات (مثل splash)
+  // (مرة واحدة) ربط إعلانات البستنجي المدفوعة الثلاثة بمتجرهم داخل الموقع
+  if(!DB.meta) DB.meta={};
+  if(!DB.meta.bzStoreLinked){
+    for(const bb of DB.banners||[]){
+      if(["long","square","splash"].includes(bb.id) && (!bb.link || bb.link.startsWith("#") || bb.link==="https://bustanjimotors.com" || bb.link==="https://bustanjigroup.com")){
+        bb.link="app:store:u1787652577416";
+      }
+    }
+    DB.meta.bzStoreLinked=1;
+  }
   // مزامنة الإعلانات النموذجية: إدراج الجديدة المفقودة + تعبئة أي صورة ناقصة (آمن، مرة واحدة)
   let _seedSynced = false;
   for(const sl of SEED_LISTINGS){

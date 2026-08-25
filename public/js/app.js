@@ -233,7 +233,8 @@ function bzCountUp(){
 }
 /* رابط إعلان مدفوع: خارجي (https) أو داخلي لمتجر بالموقع app:store:<معرف> */
 function bzLinkAttrs(b, fallback, close){
-  const raw=String((b&&b.link)||fallback||"").trim();
+  let raw=String((b&&b.link)||"").trim();
+  if(!raw || raw.startsWith("#")) raw=String(fallback||"").trim();
   const m=raw.match(/^app:store:([\w-]+)$/);
   if(m) return {href:"javascript:void(0)", attrs:` onclick="closeSplashAd();go('store',{id:'${m[1]}'})"`};
   const url=/^https?:\/\//.test(raw)?raw:(raw?("https://"+raw):"");
