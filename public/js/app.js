@@ -220,10 +220,50 @@ async function verifyOtp(){
 /* =========================================================================
    البنرات المدفوعة المتحركة
    ========================================================================= */
+/* إعلان مجموعة البستنجي المدفوع — وكيل ZEEKR و Lynk & Co (معرض داخل المنطقة الحرة) */
+function bzCountUp(){
+  document.querySelectorAll(".bz-num[data-n]:not([data-done])").forEach(el=>{
+    el.setAttribute("data-done","1");
+    const n=+el.getAttribute("data-n"), dur=1500, t0=performance.now();
+    const fmt=v=>v>=1000?(v/1000).toFixed(v>=15000?0:1)+"K+":String(v)+"+";
+    (function step(now){ const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);
+      el.textContent=fmt(Math.round(n*e));
+      if(p<1) requestAnimationFrame(step); })(t0);
+  });
+}
 function bannerLong(){
   const b=getBanner("long"); if(!b||!b.active) return "";
-  const txt = LANG==="en"? b.text_en : b.text_ar;
-  return `<a class="ad-banner ad-long" onclick="go('browse')"><span class="ad-label">${t("paid_ad")}</span><div class="ad-marquee"><span>${esc(txt)}</span><span>${esc(txt)}</span></div></a>`;
+  setTimeout(bzCountUp,80);
+  return `<a class="bz-banner" href="https://bustanjimotors.com" target="_blank" rel="sponsored noopener">
+    <span class="ad-label">${t("paid_ad")}</span>
+    <div class="bz-bg"></div>
+    <div class="bz-speeds"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="bz-parts"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="bz-inner">
+      <div class="bz-brand">
+        <div class="bz-logo">🚘<em>⚡</em></div>
+        <div class="bz-names">
+          <div class="bz-name-ar">${t("bz_brand")}</div>
+          <div class="bz-name-sub">${t("bz_tagline")}</div>
+        </div>
+      </div>
+      <div class="bz-msgs">
+        <div class="bz-msg">${t("bz_msg1")}</div>
+        <div class="bz-msg">${t("bz_msg2")}</div>
+        <div class="bz-msg">${t("bz_msg3")}</div>
+        <div class="bz-msg">${t("bz_msg4")}</div>
+      </div>
+      <div class="bz-side">
+        <div class="bz-stats">
+          <div class="bz-stat"><b class="bz-num" data-n="48">48+</b><span>${t("bz_years")}</span></div>
+          <div class="bz-stat"><b class="bz-num" data-n="15000">15K+</b><span>${t("bz_cars")}</span></div>
+          <div class="bz-stat"><b class="bz-num" data-n="8">8</b><span>${t("bz_showrooms")}</span></div>
+        </div>
+        <span class="bz-cta">${t("bz_cta")}</span>
+      </div>
+    </div>
+    <div class="bz-foot">${t("bz_loc")} <b>bustanjigroup.com</b></div>
+  </a>`;
 }
 function bannerSquare(){
   const b=getBanner("square"); if(!b||!b.active) return "";

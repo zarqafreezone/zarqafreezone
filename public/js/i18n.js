@@ -219,6 +219,20 @@ const STR = {
   free_remaining: { ar:"مجاني • متبقٍ", en:"FREE •" },
   paid_ad:    { ar:"إعلان مدفوع", en:"PAID AD" },
   ad_space:   { ar:"مساحة إعلانية متاحة", en:"Ad space available" },
+
+  /* ===== إعلان مجموعة البستنجي المدفوع ===== */
+  bz_brand:      { ar:"مجموعة البستنجي", en:"Bustanji Group" },
+  bz_brand_sub:  { ar:"BUSTANJI GROUP", en:"مجموعة البستنجي" },
+  bz_tagline:    { ar:"وكيل ZEEKR و Lynk & Co الحصري في الأردن", en:"Official ZEEKR & Lynk & Co dealer in Jordan" },
+  bz_msg1:       { ar:"⚡ ZEEKR — سيارات كهربائية بالكامل... مستقبل التنقّل الذكي", en:"⚡ ZEEKR — Fully electric... the future of smart mobility" },
+  bz_msg2:       { ar:"🚙 Lynk & Co 08 هجينة قابلة للشحن بمدى يتجاوز 1200 كم", en:"🚙 Lynk & Co 08 Plug-in Hybrid — over 1,200 km range" },
+  bz_msg3:       { ar:"🏆 48+ عاماً من الثقة والخبرة في عالم السيارات", en:"🏆 48+ years of trust & automotive excellence" },
+  bz_msg4:       { ar:"🔧 مركز صيانة معتمد + فحص Smart Check شامل", en:"🔧 Certified service center + Smart Check inspection" },
+  bz_cta:        { ar:"تصفّح السيارات ←", en:"Explore Cars →" },
+  bz_years:      { ar:"سنة خبرة", en:"years" },
+  bz_cars:       { ar:"سيارة مُبيعة", en:"cars sold" },
+  bz_showrooms:  { ar:"معارض", en:"showrooms" },
+  bz_loc:        { ar:"📍 معرضنا داخل المنطقة الحرة الزرقاء — هاتف 05 3824545", en:"📍 Our showroom inside Zarqa Free Zone — Tel 05 3824545" },
   powered_by: { ar:"© جميع الحقوق محفوظة: شبكة نشوان للتسويق", en:"© All rights reserved: Nashwan Marketing Network" },
 
   /* المحادثات */
