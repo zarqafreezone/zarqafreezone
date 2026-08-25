@@ -26,7 +26,8 @@ const SEED_LISTINGS = DATA.SEED_LISTINGS;
 const DB_SCHEMA_VERSION = 2;   // يُزاد عند تغيّر هيكل التصنيف لمسح الإعلانات وإعادة بذرها
 const DEFAULT_BANNERS = [
   { id:"long",   active:true, text_ar:"🚢 استيراد وتصدير المركبات والآليات — أسعار تنافسية بلا جمارك داخل المنطقة الحرة الزرقاء", text_en:"🚢 Import & export of vehicles & machinery — duty-free competitive prices inside the Zarqa Free Zone", link:"#browse" },
-  { id:"square", active:true, text_ar:"🏭 مستودعات وأراضٍ متاحة للإيجار داخل المنطقة الحرة", text_en:"🏭 Warehouses & land available for lease in the Free Zone", link:"#browse" }
+  { id:"square", active:true, text_ar:"🏭 مستودعات وأراضٍ متاحة للإيجار داخل المنطقة الحرة", text_en:"🏭 Warehouses & land available for lease in the Free Zone", link:"#browse" },
+  { id:"splash", active:true, text_ar:"", text_en:"", link:"https://bustanjimotors.com" }
 ];
 
 /* أخبار الشريط الإخباري المتحرك (يديرها المدير) — تُحذف تلقائياً بعد 5 أيام */
@@ -72,6 +73,7 @@ async function initDB(){
     DB = loadDBFile(); console.log("📄 DB من ملف db.json (محلي)");
   }
   DB.users=DB.users||[]; DB.listings=DB.listings||[]; DB.banners=DB.banners||DEFAULT_BANNERS.slice(); DB.payments=DB.payments||[]; DB.revenue=DB.revenue||0;
+  for(const bb of DEFAULT_BANNERS){ if(!DB.banners.find(x=>x.id===bb.id)) DB.banners.push({...bb}); }   // ضمان وجود كل البنرات (مثل splash)
   // مزامنة الإعلانات النموذجية: إدراج الجديدة المفقودة + تعبئة أي صورة ناقصة (آمن، مرة واحدة)
   let _seedSynced = false;
   for(const sl of SEED_LISTINGS){

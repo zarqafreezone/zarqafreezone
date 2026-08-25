@@ -745,3 +745,77 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 .news-ticker:hover .ticker-track{animation-play-state:paused}
 @media(max-width:600px){.news-ticker{font-size:12.5px}.ticker-label{padding:0 10px;font-size:12px}}
 [data-theme="dark"] .news-ticker{background:linear-gradient(90deg,#0b1220,#111c33);box-shadow:0 2px 10px rgba(0,0,0,.5)}
+
+/* ===== إعلان البستنجي المربع — لوحة ذهبية فاخرة (مختلفة عن الطويل الأزرق) ===== */
+.bzs-banner{display:block;position:relative;overflow:hidden;border-radius:16px;text-decoration:none;background:#1c1917;border:1px solid rgba(245,158,11,.3);box-shadow:0 8px 24px -8px rgba(245,158,11,.35)}
+.bzs-bg{position:absolute;inset:-2px;width:210%;height:calc(100% + 4px);background:linear-gradient(115deg,#1c1917 0%,#451a03 30%,#78350f 50%,#451a03 70%,#1c1917 100%);animation:bzSweep 8s ease-in-out infinite alternate;will-change:transform}
+.bzs-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 14px 16px;gap:7px}
+.bzs-logo{position:relative;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:21px;background:linear-gradient(135deg,#b45309,#f59e0b);box-shadow:0 0 18px rgba(245,158,11,.5)}
+.bzs-logo::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid rgba(251,191,36,.55);animation:bzRing 2.4s ease-out infinite}
+.bzs-logo em{position:absolute;bottom:-3px;inset-inline-end:-3px;font-style:normal;font-size:12px;animation:bounce 1.6s ease-in-out infinite;filter:drop-shadow(0 0 4px rgba(250,204,21,.8))}
+.bzs-name{font-size:19px;font-weight:900;background:linear-gradient(90deg,#fde68a 20%,#fff 50%,#fde68a 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:bzShine 3.4s linear infinite}
+.bzs-pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.bzs-pill{font-size:10px;font-weight:900;color:#fde68a;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.45);padding:3px 10px;border-radius:999px;letter-spacing:.5px}
+.bzs-msgs{position:relative;height:1.9em;width:100%}
+.bzs-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:#fff;opacity:0;animation:bzRot 13.5s linear infinite;padding:0 6px}
+.bzs-msg:nth-child(2){animation-delay:4.5s}
+.bzs-msg:nth-child(3){animation-delay:9s}
+.bzs-cta{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#451a03;font-size:12.5px;font-weight:900;padding:7px 20px;border-radius:999px;margin-top:3px;animation:bzsPulse 2.2s infinite}
+@keyframes bzsPulse{0%{box-shadow:0 0 0 0 rgba(251,191,36,.55)}70%{box-shadow:0 0 0 12px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}}
+.bzs-banner .bz-stats{gap:14px}
+.bzs-banner .bz-stat b{font-size:15px;color:#fde68a;text-shadow:0 0 12px rgba(251,191,36,.45)}
+.bzs-banner .bz-stat span{font-size:8.5px}
+
+/* ===== إعلان الافتتاح (Splash) — شاشة كاملة سينمائية ===== */
+.sa-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 140% at 50% 0%,#0f2440 0%,#0b1220 55%,#070d17 100%);opacity:0;pointer-events:none;transition:opacity .45s ease;padding:18px}
+.sa-overlay.show{opacity:1;pointer-events:auto}
+.sa-orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;will-change:transform}
+.sa-orb1{width:340px;height:340px;background:#0ea5e9;top:-90px;inset-inline-start:-80px;animation:saOrb 7s ease-in-out infinite alternate}
+.sa-orb2{width:300px;height:300px;background:#7c3aed;bottom:-80px;inset-inline-end:-60px;animation:saOrb 9s ease-in-out infinite alternate-reverse}
+@keyframes saOrb{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.15)}}
+.sa-speeds i{position:absolute;left:-140px;height:2px;width:110px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(125,211,252,.6),transparent);animation:bzLine linear infinite}
+.sa-speeds i:nth-child(1){top:18%;animation-duration:2.8s}
+.sa-speeds i:nth-child(2){top:42%;width:70px;animation-duration:4s;animation-delay:.6s}
+.sa-speeds i:nth-child(3){top:64%;width:150px;animation-duration:2.4s;animation-delay:1.2s}
+.sa-speeds i:nth-child(4){top:82%;width:60px;animation-duration:3.6s;animation-delay:.3s}
+.sa-label{position:absolute;top:14px;inset-inline-start:14px;background:rgba(0,0,0,.45);color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.5px;z-index:3}
+.sa-skip{position:absolute;top:12px;inset-inline-end:12px;z-index:3;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);font-size:12.5px;font-weight:800;padding:7px 15px;border-radius:999px;cursor:pointer;backdrop-filter:blur(6px)}
+.sa-skip b{font-weight:900;color:#7dd3fc}
+.sa-skip:hover{background:rgba(255,255,255,.22)}
+.sa-bar{position:absolute;top:0;inset-inline-start:0;width:100%;height:3px;background:rgba(255,255,255,.12);z-index:3}
+.sa-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#818cf8);animation:saBar 4s linear forwards}
+@keyframes saBar{from{width:0}to{width:100%}}
+.sa-card{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;max-width:560px;width:100%;padding:28px 22px;border-radius:24px;background:rgba(15,23,42,.55);border:1px solid rgba(125,211,252,.22);backdrop-filter:blur(14px);box-shadow:0 30px 80px -20px rgba(0,0,0,.7);opacity:0;transform:scale(.9) translateY(24px)}
+.sa-overlay.show .sa-card{animation:saIn .7s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes saIn{to{opacity:1;transform:scale(1) translateY(0)}}
+.sa-logo{position:relative;width:86px;height:86px;border-radius:50%;display:grid;place-items:center;font-size:40px;background:linear-gradient(135deg,#0ea5e9,#22d3ee);box-shadow:0 0 40px rgba(34,211,238,.5)}
+.sa-logo::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(103,232,249,.55);animation:bzRing 2.2s ease-out infinite}
+.sa-logo em{position:absolute;bottom:-4px;inset-inline-end:-4px;font-style:normal;font-size:22px;animation:bounce 1.5s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(250,204,21,.9))}
+.sa-brand{font-size:34px;font-weight:900;line-height:1.2;background:linear-gradient(90deg,#fff 25%,#7dd3fc 50%,#fff 75%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:bzShine 3s linear infinite}
+.sa-tag{font-size:14.5px;font-weight:800;color:#bae6fd}
+.sa-pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sa-pills span{font-size:12.5px;font-weight:900;color:#fff;background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.4);padding:6px 16px;border-radius:999px}
+.sa-overlay .bz-stats{justify-content:center;gap:26px}
+.sa-overlay .bz-stat b{font-size:26px}
+.sa-overlay .bz-stat span{font-size:11px}
+.sa-cta{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,#06b6d4,#3b82f6);color:#fff;font-size:16px;font-weight:900;padding:13px 34px;border-radius:999px;text-decoration:none;margin-top:4px;animation:bzPulse 2s infinite}
+.sa-cta:hover{background:linear-gradient(90deg,#22d3ee,#60a5fa)}
+.sa-foot{font-size:12px;font-weight:700;color:rgba(255,255,255,.75);margin-top:2px}
+@media(max-width:600px){
+  .sa-card{padding:20px 14px;gap:8px;border-radius:18px}
+  .sa-brand{font-size:26px}
+  .sa-logo{width:66px;height:66px;font-size:31px}
+  .sa-tag{font-size:12.5px;padding:0 8px}
+  .sa-overlay .bz-stats{gap:16px}
+  .sa-overlay .bz-stat b{font-size:20px}
+  .sa-cta{font-size:14px;padding:11px 26px}
+  .sa-foot{font-size:10.5px;padding:0 10px}
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-overlay *,.sa-overlay{animation:none!important;transition:none!important}
+  .sa-overlay .sa-card{opacity:1;transform:none}
+  .sa-bar i{width:100%}
+  .bzs-banner *,.bzs-banner{animation:none!important}
+  .bzs-msg{display:none}
+  .bzs-msg:first-child{display:flex;opacity:1;transform:none}
+}

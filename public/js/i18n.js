@@ -233,6 +233,19 @@ const STR = {
   bz_cars:       { ar:"سيارة مُبيعة", en:"cars sold" },
   bz_showrooms:  { ar:"معارض", en:"showrooms" },
   bz_loc:        { ar:"📍 معرضنا داخل المنطقة الحرة الزرقاء — هاتف 05 3824545", en:"📍 Our showroom inside Zarqa Free Zone — Tel 05 3824545" },
+
+  /* ===== إعلان البستنجي المربع (لوحة ذهبية فاخرة) ===== */
+  bzs_msg1:   { ar:"⚡ ZEEKR — كهربائية بالكامل", en:"⚡ ZEEKR — Fully electric" },
+  bzs_msg2:   { ar:"🚙 Lynk & Co — هجينة بمدى +1200 كم", en:"🚙 Lynk & Co — Hybrid, 1,200+ km" },
+  bzs_msg3:   { ar:"📍 معرضنا داخل المنطقة الحرة الزرقاء", en:"📍 Showroom inside Zarqa Free Zone" },
+  bzs_cta:    { ar:"اكتشف المجموعة ←", en:"Discover →" },
+
+  /* ===== إعلان الافتتاح (Splash) ===== */
+  sa_skip:    { ar:"تخطي", en:"Skip" },
+  sa_pills:   { ar:"ZEEKR ⚡ كهربائية", en:"ZEEKR ⚡ Electric" },
+  sa_pills2:  { ar:"Lynk & Co 🚙 هجينة", en:"Lynk & Co 🚙 Hybrid" },
+  admin_banner_splash: { ar:"إعلان الافتتاح (Splash) — شاشة كاملة عند الفتح", en:"Opening ad (Splash) — full screen on open" },
+  splash_note: { ar:"يظهر مرة واحدة لكل زيارة لمدة 4 ثوانٍ — تصميم إعلان مجموعة البستنجي", en:"Shows once per visit for 4s — Bustanji Group ad creative" },
   powered_by: { ar:"© جميع الحقوق محفوظة: شبكة نشوان للتسويق", en:"© All rights reserved: Nashwan Marketing Network" },
 
   /* المحادثات */

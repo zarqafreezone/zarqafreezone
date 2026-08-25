@@ -267,8 +267,73 @@ function bannerLong(){
 }
 function bannerSquare(){
   const b=getBanner("square"); if(!b||!b.active) return "";
-  const txt = LANG==="en"? b.text_en : b.text_ar;
-  return `<a class="ad-banner ad-square" onclick="go('browse')"><span class="ad-label">${t("paid_ad")}</span><div class="ad-pulse">📢</div><p>${esc(txt)}</p></a>`;
+  setTimeout(bzCountUp,80);
+  return `<a class="bzs-banner" href="https://bustanjimotors.com" target="_blank" rel="sponsored noopener">
+    <span class="ad-label">${t("paid_ad")}</span>
+    <div class="bzs-bg"></div>
+    <div class="bz-speeds"><i></i><i></i><i></i></div>
+    <div class="bz-parts"><i></i><i></i><i></i><i></i></div>
+    <div class="bzs-inner">
+      <div class="bzs-logo">🚘<em>⚡</em></div>
+      <div class="bzs-name">${t("bz_brand")}</div>
+      <div class="bzs-pills"><span class="bzs-pill">ZEEKR</span><span class="bzs-pill">Lynk &amp; Co</span></div>
+      <div class="bzs-msgs">
+        <div class="bzs-msg">${t("bzs_msg1")}</div>
+        <div class="bzs-msg">${t("bzs_msg2")}</div>
+        <div class="bzs-msg">${t("bzs_msg3")}</div>
+      </div>
+      <div class="bz-stats">
+        <div class="bz-stat"><b class="bz-num" data-n="48">48+</b><span>${t("bz_years")}</span></div>
+        <div class="bz-stat"><b class="bz-num" data-n="15000">15K+</b><span>${t("bz_cars")}</span></div>
+        <div class="bz-stat"><b class="bz-num" data-n="8">8</b><span>${t("bz_showrooms")}</span></div>
+      </div>
+      <span class="bzs-cta">${t("bzs_cta")}</span>
+    </div>
+  </a>`;
+}
+
+/* إعلان الافتتاح (Splash) — شاشة كاملة 4 ثوانٍ، مرة واحدة لكل زيارة */
+let _splashT1=null,_splashT2=null;
+function showSplashAd(){
+  try{
+    if(sessionStorage.getItem("fz_splash_ad")==="1") return;
+    const b=getBanner("splash"); if(!b||!b.active) return;
+    sessionStorage.setItem("fz_splash_ad","1");
+    const link=b.link||"https://bustanjimotors.com";
+    const ov=document.createElement("div"); ov.id="splashAd"; ov.className="sa-overlay";
+    ov.innerHTML=`
+      <div class="sa-speeds"><i></i><i></i><i></i><i></i></div>
+      <div class="sa-orb sa-orb1"></div><div class="sa-orb sa-orb2"></div>
+      <span class="sa-label">${t("paid_ad")}</span>
+      <button class="sa-skip" aria-label="skip">${t("sa_skip")} ⏭ <b>4</b></button>
+      <div class="sa-bar"><i></i></div>
+      <div class="sa-card">
+        <div class="sa-logo">🚘<em>⚡</em></div>
+        <div class="sa-brand">${t("bz_brand")}</div>
+        <div class="sa-tag">${t("bz_tagline")}</div>
+        <div class="sa-pills"><span>${t("sa_pills")}</span><span>${t("sa_pills2")}</span></div>
+        <div class="bz-stats">
+          <div class="bz-stat"><b class="bz-num" data-n="48">48+</b><span>${t("bz_years")}</span></div>
+          <div class="bz-stat"><b class="bz-num" data-n="15000">15K+</b><span>${t("bz_cars")}</span></div>
+          <div class="bz-stat"><b class="bz-num" data-n="8">8</b><span>${t("bz_showrooms")}</span></div>
+        </div>
+        <a class="sa-cta" href="${esc(link)}" target="_blank" rel="sponsored noopener" onclick="closeSplashAd()">${t("bz_cta")}</a>
+        <div class="sa-foot">${t("bz_loc")}</div>
+      </div>`;
+    document.body.appendChild(ov);
+    setTimeout(bzCountUp,200);
+    requestAnimationFrame(()=>ov.classList.add("show"));
+    let left=4; const cnt=ov.querySelector(".sa-skip b");
+    _splashT1=setInterval(()=>{ left--; if(cnt)cnt.textContent=left; if(left<=0) closeSplashAd(); },1000);
+    ov.querySelector(".sa-skip").addEventListener("click",closeSplashAd);
+    _splashT2=setTimeout(closeSplashAd,4600);
+  }catch(e){}
+}
+function closeSplashAd(){
+  clearInterval(_splashT1); clearTimeout(_splashT2);
+  const ov=document.getElementById("splashAd"); if(!ov) return;
+  ov.classList.remove("show");
+  setTimeout(()=>{ const o=document.getElementById("splashAd"); if(o)o.remove(); },500);
 }
 
 /* =========================================================================
@@ -673,7 +738,7 @@ function adminUsers(){
         <button class="btn btn-ghost btn-sm" onclick="doToggleVerified('${u.id}')">${u.verified?t("admin_inactive"):t("admin_active")}</button><button class="btn btn-ghost btn-sm danger" onclick="doDelUser('${u.id}')">🗑</button></div></div>`).join("")}</div>`;
 }
 function adminBanners(){
-  const L=getBanner("long"), S=getBanner("square");
+  const L=getBanner("long"), S=getBanner("square"), SP=getBanner("splash")||{active:false,link:""};
   return `<div class="form-grid">
     <div class="info-card"><h3 style="margin-bottom:12px">${t("admin_banner_long")}</h3>
       <div class="field"><label>${LANG==="en"?"Text (AR)":"النص (عربي)"}</label><input id="bn_long_ar" value="${esc(L.text_ar)}"></div>
@@ -687,6 +752,11 @@ function adminBanners(){
       <div class="field"><label>${t("admin_link")}</label><input id="bn_square_link" value="${esc(S.link)}"></div>
       <button class="btn btn-primary" onclick="doSaveBanner('square')">${t("admin_save")}</button>
       <button class="btn btn-ghost" style="margin-inline-start:8px" onclick="doToggleBanner('square')">${S.active?t("admin_inactive"):t("admin_active")}</button></div>
+    <div class="info-card"><h3 style="margin-bottom:12px">${t("admin_banner_splash")}</h3>
+      <p class="muted" style="font-size:12.5px;margin-bottom:10px">${t("splash_note")}</p>
+      <div class="field"><label>${t("admin_link")}</label><input id="bn_splash_link" value="${esc(SP.link)}"></div>
+      <button class="btn btn-primary" onclick="doSaveBanner('splash')">${t("admin_save")}</button>
+      <button class="btn btn-ghost" style="margin-inline-start:8px" onclick="doToggleBanner('splash')">${SP.active?t("admin_inactive"):t("admin_active")}</button></div>
   </div>`;
 }
 /* ---- الشريط الإخباري (إدارة المدير) ---- */
@@ -717,7 +787,11 @@ async function doDelListing(id){ try{ await store.deleteListing(id); render(); n
 async function doSetStars(id,n){ try{ await store.setUserStars(id,n); const u=state.users.find(x=>x.id===id); if(u) u.stars=n; render(); }catch(e){} }
 async function doToggleVerified(id){ try{ const v=await store.toggleVerified(id); const u=state.users.find(x=>x.id===id); if(u) u.verified=v; render(); }catch(e){} }
 async function doDelUser(id){ try{ await store.deleteUser(id); render(); notify(LANG==="en"?"Deleted":"تم الحذف"); }catch(e){} }
-async function doSaveBanner(id){ try{ await store.updateBanner(id,{text_ar:document.getElementById("bn_"+id+"_ar").value,text_en:document.getElementById("bn_"+id+"_en").value,link:document.getElementById("bn_"+id+"_link").value}); notify(LANG==="en"?"Saved ✓":"تم الحفظ ✓"); render(); }catch(e){} }
+async function doSaveBanner(id){
+  const cur=getBanner(id)||{};
+  const val=k=>{ const el=document.getElementById("bn_"+id+"_"+k); return el?el.value:(cur[k]||""); };
+  try{ await store.updateBanner(id,{text_ar:val("ar"),text_en:val("en"),link:val("link")}); notify(LANG==="en"?"Saved ✓":"تم الحفظ ✓"); render(); }catch(e){}
+}
 async function doToggleBanner(id){ const b=getBanner(id); try{ await store.updateBanner(id,{active:!(b&&b.active)}); render(); }catch(e){} }
 
 /* =========================================================================
@@ -862,6 +936,8 @@ overlay.addEventListener("click",e=>{ if(e.target===overlay){ closeAuth(); close
   let _rzT; window.addEventListener("resize", ()=>{ clearTimeout(_rzT); _rzT=setTimeout(()=>{ _tickerSig=""; renderTicker(); }, 250); });
   // ضمان إضافي: إن بقي الشريط فارغاً (بيانات مفقودة)، أعد الجلب بعد لحظات
   setTimeout(async ()=>{ if(!(state.news||[]).length){ try{ await store.refreshNews(); }catch(e){} _tickerSig=""; renderTicker(); } }, 2500);
+  // إعلان الافتتاح (Splash) — مرة واحدة لكل زيارة، بعد اختفاء شاشة التحميل
+  setTimeout(showSplashAd, 900);
 })();
 function hideSplash(){ const sp=document.getElementById("splash"); if(!sp) return; setTimeout(()=>{ sp.classList.add("hide"); setTimeout(()=>sp.remove(),600); }, 650); }
 
