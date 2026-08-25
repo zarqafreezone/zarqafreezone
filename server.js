@@ -253,6 +253,7 @@ const server = http.createServer(async (req,res)=>{
     if("type" in b && ["individual","dealer"].includes(b.type)) u.type=b.type;
     if(b.storeName!==undefined) u.storeName=String(b.storeName).slice(0,80);
     if(b.storeDesc!==undefined) u.storeDesc=String(b.storeDesc).slice(0,400);
+    if(b.storeLogo!==undefined) u.storeLogo=String(b.storeLogo).slice(0,300);
     if(b.name!==undefined) u.name=String(b.name).slice(0,80);
     if(b.bio!==undefined) u.bio=String(b.bio).slice(0,400);
     if(u.type==="dealer" && !u.storeName) u.storeName=u.name;

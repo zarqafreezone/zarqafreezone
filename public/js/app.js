@@ -1101,7 +1101,7 @@ async function viewStore(id){
   const u=data.user; const listings=data.listings||[]; const me=currentUser();
   app.innerHTML=`<section class="section"><div class="wrap"><span class="back" onclick="go('home')">← ${t("back")}</span>
     <div class="store-head">
-      <div class="store-logo">${esc(userInitials(u.storeName||u.name))}</div>
+      <div class="store-logo">${u.storeLogo?`<img src="${esc(u.storeLogo)}" alt="${esc(u.storeName||u.name)}" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`:esc(userInitials(u.storeName||u.name))}</div>
       <div style="flex:1;min-width:0">
         <h1>${esc(u.storeName||u.name)} ${u.verified?'<i class="verified">✔</i>':""}</h1>
         <div class="muted" style="margin-top:4px">${u.type==="dealer"?'<span class="dealer-pill">🏛️ '+t("dealer")+'</span> ':""}🌐 ${esc(showCountry(u.country))} • ${t("store_since")} ${u.joined}</div>
