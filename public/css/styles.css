@@ -770,20 +770,23 @@ html[dir="rtl"] .chat-msg.mine .cm-bubble-img{border-bottom-inline-start-radius:
 /* =========================================================================
    الشريط الإخباري المتحرك (News Ticker) — يديره المدير
    ========================================================================= */
-.news-ticker{display:none;align-items:stretch;background:linear-gradient(90deg,#1e3a8a,#2563eb);color:#fff;overflow:hidden;font-size:14px;font-weight:700;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
-.ticker-label{background:#ef4444;color:#fff;padding:0 14px;display:flex;align-items:center;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:.3px;position:relative;z-index:2}
-.ticker-label::after{content:"";position:absolute;inset-inline-start:100%;top:0;bottom:0;width:0;border-style:solid;border-width:0 0 26px 12px;border-color:transparent transparent transparent #ef4444}
+.news-ticker{display:none;align-items:stretch;background:linear-gradient(90deg,#1e3a8a,#2563eb);color:#fff;overflow:hidden;font-size:16.5px;font-weight:700;position:sticky;top:0;z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.ticker-label{background:#ef4444;color:#fff;padding:0 16px;display:flex;align-items:center;font-weight:800;white-space:nowrap;flex-shrink:0;letter-spacing:.3px;position:relative;z-index:2;font-size:15.5px}
+.ticker-label::after{content:"";position:absolute;inset-inline-start:100%;top:0;bottom:0;width:13px;background:#ef4444;clip-path:polygon(0 0,0 100%,100% 100%)}
 .ticker-viewport{flex:1;overflow:hidden;position:relative}
-.ticker-track{display:inline-flex;white-space:nowrap;will-change:transform;direction:ltr;animation:tickerScroll 50s linear infinite}
-.ticker-items{display:inline-flex;align-items:center;padding:8px 0}
-.ticker-item{padding:0 6px}
+.ticker-track{display:inline-flex;white-space:nowrap;will-change:transform}
+[dir="rtl"] .ticker-track{animation:tickerRtl var(--ticker-dur,70s) linear infinite}
+[dir="ltr"] .ticker-track{animation:tickerLtr var(--ticker-dur,70s) linear infinite}
+.ticker-items{display:inline-flex;align-items:center;padding:13px 0}
+.ticker-item{padding:0 8px}
 .ticker-item a{color:#fff;text-decoration:none}
 .ticker-item a:hover{text-decoration:underline}
-.ticker-time{opacity:.7;font-weight:600;font-size:.82em;padding-inline-start:6px;white-space:nowrap}
-.ticker-sep{opacity:.45;padding:0 10px;font-size:9px}
-@keyframes tickerScroll{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.ticker-time{opacity:.75;font-weight:600;font-size:.84em;padding-inline-start:7px;white-space:nowrap}
+.ticker-sep{opacity:.5;padding:0 12px;font-size:10px}
+@keyframes tickerRtl{from{transform:translateX(0)}to{transform:translateX(50%)}}
+@keyframes tickerLtr{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .news-ticker:hover .ticker-track{animation-play-state:paused}
-@media(max-width:600px){.news-ticker{font-size:12.5px}.ticker-label{padding:0 10px;font-size:12px}}
+@media(max-width:600px){.news-ticker{font-size:14px}.ticker-label{padding:0 11px;font-size:13.5px}.ticker-items{padding:10px 0}}
 [data-theme="dark"] .news-ticker{background:linear-gradient(90deg,#0b1220,#111c33);box-shadow:0 2px 10px rgba(0,0,0,.5)}
 
 /* ===== إعلان البستنجي المربع — لوحة ذهبية فاخرة (مختلفة عن الطويل الأزرق) ===== */
