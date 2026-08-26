@@ -826,10 +826,18 @@ async function submitEdit(id){
 }
 /* معرض متعدد الصور */
 let _galImgs=[], _galIdx=0;
+/* فيديو: يوتيوب → iframe embed، ملف مباشر → <video> */
+function ytId(u){ const m=String(u||"").match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/i); return m?m[1].split(/[?&#]/)[0]:""; }
+function videoBlock(url, story){
+  if(ytId(url)){ const q=story?"autoplay=1&mute=1&playsinline=1&rel=0":"rel=0";
+    return `<iframe src="https://www.youtube.com/embed/${ytId(url)}?${q}" title="video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen frameborder="0" style="width:100%;height:100%;border:0;background:#000;display:block"></iframe>`; }
+  return story?`<video src="${url}" autoplay muted playsinline onended="storyNext()"></video>`
+    :`<video src="${url}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;background:#000"></video>`;
+}
 function galleryHTML(l){
   const imgs=(l.images&&l.images.length)?l.images.slice():(l.img?[l.img]:[]);
   window._galImgs=imgs; window._galIdx=0;
-  if(l.video){ return `<div class="gallery"><div class="main"><video src="${l.video}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;background:#000"></video></div>${imgs.length?`<div class="gal-thumbs">${imgs.map((s,i)=>`<img class="gal-thumb" src="${s}" onclick="galSelect(${i})">`).join("")}</div>`:""}</div>`; }
+  if(l.video){ return `<div class="gallery"><div class="main">${videoBlock(l.video)}</div>${imgs.length?`<div class="gal-thumbs">${imgs.map((s,i)=>`<img class="gal-thumb" src="${s}" onclick="galSelect(${i})">`).join("")}</div>`:""}</div>`; }
   if(!imgs.length){ return `<div class="gallery"><div class="main"><img src="${thumbURL(l)}" alt=""></div></div>`; }
   return `<div class="gallery"><div class="main"><img id="galMain" src="${imgs[0]}" alt="">${imgs.length>1?`<span class="gal-count">1/${imgs.length}</span><button class="gal-arrow prev" onclick="galStep(-1)">‹</button><button class="gal-arrow next" onclick="galStep(1)">›</button>`:""}</div>${imgs.length>1?`<div class="gal-thumbs">${imgs.map((s,i)=>`<img class="gal-thumb ${i===0?"active":""}" src="${s}" onclick="galSelect(${i})">`).join("")}</div>`:""}</div>`;
 }
@@ -1265,7 +1273,7 @@ function drawStory(){
   overlay.innerHTML=`<div class="story-viewer" onclick="storyNext()">
     <button class="story-close" onclick="event.stopPropagation();closeStory()">×</button>
     <div class="story-progress"><i></i></div>
-    <div class="story-media">${l.video?`<video src="${l.video}" autoplay muted playsinline onended="storyNext()">`:`<img src="${thumbURL(l)}">`}</div>
+    <div class="story-media">${l.video?videoBlock(l.video,true):`<img src="${thumbURL(l)}">`}</div>
     <div class="story-foot" onclick="event.stopPropagation();closeStory();go('detail',{id:'${l.id}'})">
       <div style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.title)}</b><span style="opacity:.95">${esc(fmtPrice(l))}</span></div>
       <button class="btn btn-primary btn-sm">${t("story_tap")}</button></div>

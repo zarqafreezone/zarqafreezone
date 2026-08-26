@@ -143,6 +143,13 @@ function migrateDB(db){
     let n2=0; db.listings.forEach(l=>{ const p=REAL2[l.id]; if(p){ l.images=[p]; l.img=p; n2++; } });
     db._realImgs2=1; if(n2) console.log("🖼️ مرحلة 2: استبدال "+n2+" صورة إضافية");
   }
+  // المرحلة الثالثة: إصلاح فيديوهات يوتيوب المحذوفة — v52
+  if(!db._vidFix){
+    const VID={ "l1787650650551":"https://www.youtube.com/watch?v=gxkzeI6ltpg",
+                "l1787650650520":"https://www.youtube.com/watch?v=QQ71boj54AU" };
+    let n3=0; db.listings.forEach(l=>{ const v=VID[l.id]; if(v && /6fT-A_c_Ic8|I-g1GSKwI0c/.test(l.video||"")){ l.video=v; n3++; } });
+    db._vidFix=1; if(n3) console.log("🎬 تم إصلاح "+n3+" فيديو محذوف");
+  }
   return db;
 }
 
