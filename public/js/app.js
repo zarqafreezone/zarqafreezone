@@ -438,7 +438,7 @@ function viewAdvertise(){
         :"اوصل إعلانك إلى المستوردين والتجّار والمشترين في المنطقة الحرة الزرقاء — مركز التجارة الحرة في الأردن — عبر موقعنا وتطبيقنا معاً."}</p>
       <div class="adv-hero-cta">
         <a class="btn adv-wa" href="${ADV_WA}" target="_blank" rel="noopener">✅ ${LANG==="en"?"Get a quote on WhatsApp":"اطلب عرض سعر عبر واتساب"}</a>
-        <a class="btn btn-ghost adv-call" href="tel:00962795501100">📞 ${LANG==="en"?"Call us":"اتصل بنا"} <span dir="ltr">00962795501100</span></a>
+        <a class="btn btn-ghost adv-call" href="tel:+962795501100">📞 ${LANG==="en"?"Call us":"اتصل بنا"} <span dir="ltr">+962795501100</span></a>
       </div>
       <div class="adv-chips">
         <span>🏭 ${LANG==="en"?"Specialized B2B audience":"جمهور تجاري متخصص"}</span>
@@ -544,7 +544,7 @@ function viewAdvertise(){
       <p>${LANG==="en"?"Our ads team at Nashwan Marketing Network will build the right package for your budget.":"فريق الإعلانات في شبكة نشوان للتسويق يجهّز لك الباقة الأنسب لميزانيتك."}</p>
       <div class="adv-hero-cta" style="justify-content:center">
         <a class="btn adv-wa" href="${ADV_WA}" target="_blank" rel="noopener">✅ ${LANG==="en"?"WhatsApp now":"تواصل واتساب الآن"}</a>
-        <a class="btn btn-ghost adv-call" href="tel:00962795501100">📞 <span dir="ltr">00962795501100</span></a>
+        <a class="btn btn-ghost adv-call" href="tel:+962795501100">📞 <span dir="ltr">+962795501100</span></a>
       </div>
       <p class="muted" style="margin:14px 0 0;font-size:12.5px;color:#94a3b8">📍 ${LANG==="en"?"Zarqa Free Zone — Jordan":"المنطقة الحرة الزرقاء — الأردن"} • © شبكة نشوان للتسويق</p>
     </div>
