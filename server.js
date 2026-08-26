@@ -96,7 +96,7 @@ async function initDB(){
   DB.meta = DB.meta || {};
   if ((DB.meta.schemaVer||0) !== DB_SCHEMA_VERSION) {
     console.log("🔄 إعادة ضبط الإعلانات لمطابقة هيكل التصنيف الجديد (نسخة "+DB_SCHEMA_VERSION+") — تم مسح الإعلانات وإعادة بذرها");
-    DB.listings = migrateDB({users:[], listings:SEED_LISTINGS.map(s=>({...s}))}).listings;
+    DB.listings = migrateDB({users:DB.users, listings:SEED_LISTINGS.map(s=>({...s}))}).listings;
     DB.meta.schemaVer = DB_SCHEMA_VERSION;
     saveDB(DB);
   }
@@ -149,6 +149,30 @@ function migrateDB(db){
                 "l1787650650520":"https://www.youtube.com/watch?v=QQ71boj54AU" };
     let n3=0; db.listings.forEach(l=>{ const v=VID[l.id]; if(v && /6fT-A_c_Ic8|I-g1GSKwI0c/.test(l.video||"")){ l.video=v; n3++; } });
     db._vidFix=1; if(n3) console.log("🎬 تم إصلاح "+n3+" فيديو محذوف");
+  }
+  // المرحلة الرابعة: استيراد إعلانات منتقاة من السوق الأردني (كل التصنيفات) — v53
+  if(!db._osMarket){
+    let n4=0;
+    try{
+      const OS = JSON.parse(fs.readFileSync(path.join(__dirname,"os-market.json"),"utf8"));
+      if(Array.isArray(OS) && OS.length){
+        let su = db.users.find(u=>u.id==="u_osm");
+        if(!su){
+          su = { id:"u_osm", name:"السوق الأردني المفتوح", phone:"", country:"الأردن", joined:"2026-08-16",
+                 verified:true, stars:4, deals:86, bio:"تشكيلة منتقاة من إعلانات السوق الأردني المفتوح لخدمة زوار المنصة",
+                 type:"dealer", storeName:"السوق الأردني المفتوح", storeDesc:"إعلانات منتقاة من السوق الأردني — سيارات وعقارات وسلع وخدمات", storeLogo:"",
+                 token:"", favorites:[] };
+          db.users.push(su);
+        }
+        for(const l of OS){
+          if(!db.listings.find(x=>x.id===l.id)){
+            db.listings.push(Object.assign({deal:"sell", type:"", brand:"", model:"", featured:false, user:"u_osm"}, l));
+            n4++;
+          }
+        }
+      }
+    }catch(e){ console.log("⚠️ تعذر تحميل os-market.json:", e.message); }
+    db._osMarket=1; if(n4) console.log("🛒 السوق الأردني المفتوح: أُضيف "+n4+" إعلاناً جديداً");
   }
   return db;
 }

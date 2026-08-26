@@ -722,9 +722,9 @@ function viewDetail(id){
         <p class="muted" style="font-size:13px;margin-top:10px">🌐 ${esc(showCountry(owner.country))}</p>
         <a class="btn btn-ghost btn-sm" style="margin-top:8px;display:inline-flex" onclick="go('store',{id:'${owner.id}'})">🏪 ${t("view_store")}</a>
         <div class="detail-cta">
-          <button class="btn btn-primary" style="flex:1" onclick="openChatFromListing('${esc(owner.phone)}','${esc(owner.name).replace(/'/g,"")}')">${t("chat_now")}</button>
+          ${owner.phone?`<button class="btn btn-primary" style="flex:1" onclick="openChatFromListing('${esc(owner.phone)}','${esc(owner.name).replace(/'/g,"")}')">${t("chat_now")}</button>
           <a class="btn btn-ghost" href="tel:${esc(owner.phone)}">📞 ${t("call")}</a>
-          <a class="btn wa-btn" href="${waLink(owner.phone,l.title)}" target="_blank" rel="noopener">✅ ${t("whatsapp")}</a>
+          <a class="btn wa-btn" href="${waLink(owner.phone,l.title)}" target="_blank" rel="noopener">✅ ${t("whatsapp")}</a>`:`<span class="muted" style="font-size:12.5px;align-self:center;text-align:center;flex:1">${LANG==="en"?"📞 Contact details not available for this listing":"📞 بيانات التواصل غير متاحة لهذا الإعلان"}</span>`}
           <button class="btn btn-ghost" onclick="openShare('${l.id}')">🔗 ${t("share_btn")}</button>
         </div>
         ${currentUser()&&owner&&owner.id===currentUser().id?`<button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="go('edit',{id:'${l.id}'})">${t("edit_btn")}</button><button class="btn btn-primary btn-block" style="margin-top:8px" onclick="openPromote('${l.id}')">${t("promote_btn")}${promoActive(l)?" • "+t("promo_active"):""}</button>`:`<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;color:var(--muted)" onclick="openReport('${l.id}')">${t("report_ad")}</button>`}</div>`:""}
