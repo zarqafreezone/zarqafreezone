@@ -35,7 +35,8 @@ function locDeal(l){ return l.deal==="sell"? t("for_sale"): t("wanted"); }
 
 /* ---------- واتساب + إبلاغ ---------- */
 function waLink(phone, title){
-  const digits = String(phone||"").replace(/\D/g,"");
+  let digits = String(phone||"").replace(/\D/g,"");
+  if(digits.length===10 && digits.startsWith("0")) digits = "962"+digits.slice(1); // 07XXXXXXXX → 9627XXXXXXXX
   const msg = encodeURIComponent((LANG=="en"?"Hello, I'm interested in: ":"مرحباً، أنا مهتم بـ: ") + (title||""));
   return "https://wa.me/"+digits+"?text="+msg;
 }

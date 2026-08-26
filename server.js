@@ -158,9 +158,9 @@ function migrateDB(db){
       if(Array.isArray(OS) && OS.length){
         let su = db.users.find(u=>u.id==="u_osm");
         if(!su){
-          su = { id:"u_osm", name:"السوق الأردني المفتوح", phone:"", country:"الأردن", joined:"2026-08-16",
-                 verified:true, stars:4, deals:86, bio:"تشكيلة منتقاة من إعلانات السوق الأردني المفتوح لخدمة زوار المنصة",
-                 type:"dealer", storeName:"السوق الأردني المفتوح", storeDesc:"إعلانات منتقاة من السوق الأردني — سيارات وعقارات وسلع وخدمات", storeLogo:"",
+          su = { id:"u_osm", name:"حساب مستخدم تجريبي", phone:"0775501100", country:"الأردن", joined:"2026-08-16",
+                 verified:true, stars:4, deals:86, bio:"حساب تجريبي — إعلانات منتقاة من السوق الأردني",
+                 type:"dealer", storeName:"حساب مستخدم تجريبي", storeDesc:"إعلانات منتقاة من السوق الأردني — سيارات وعقارات وسلع وخدمات", storeLogo:"",
                  token:"", favorites:[] };
           db.users.push(su);
         }
@@ -173,6 +173,17 @@ function migrateDB(db){
       }
     }catch(e){ console.log("⚠️ تعذر تحميل os-market.json:", e.message); }
     db._osMarket=1; if(n4) console.log("🛒 السوق الأردني المفتوح: أُضيف "+n4+" إعلاناً جديداً");
+  }
+  // المرحلة الخامسة: تحويل حساب الإعلانات المستوردة إلى حساب تجريبي — v54
+  if(!db._osMarket2){
+    let n5=0;
+    const su = db.users.find(u=>u.id==="u_osm");
+    if(su){
+      if(su.name!=="حساب مستخدم تجريبي"){ su.name="حساب مستخدم تجريبي"; su.storeName="حساب مستخدم تجريبي"; n5++; }
+      if(su.phone!=="0775501100"){ su.phone="0775501100"; n5++; }
+      if(su.type!=="dealer"){ su.type="dealer"; n5++; }
+    }
+    db._osMarket2=1; if(n5) console.log("👤 تم تحويل حساب الإعلانات المستوردة إلى حساب تجريبي ("+n5+" حقل)");
   }
   return db;
 }
